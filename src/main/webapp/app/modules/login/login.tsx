@@ -30,7 +30,16 @@ export const Login = () => {
   if (isAuthenticated) {
     return <Navigate to={from} replace />;
   }
-  return <LoginModal showModal={showModal} handleLogin={handleLogin} handleClose={handleClose} loginError={loginError} />;
+  const redirectAfterLogin = from?.pathname ?? '/';
+  return (
+    <LoginModal
+      showModal={showModal}
+      handleLogin={handleLogin}
+      handleClose={handleClose}
+      loginError={loginError}
+      redirectAfterLogin={redirectAfterLogin}
+    />
+  );
 };
 
 export default Login;

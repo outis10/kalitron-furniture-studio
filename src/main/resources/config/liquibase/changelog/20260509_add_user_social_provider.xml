@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20260509-1" author="kalitron">
+        <createSequence sequenceName="user_social_provider_id_seq" startValue="1" incrementBy="1"/>
+
+        <createTable tableName="user_social_provider">
+            <column name="id" type="bigint" defaultValueSequenceNext="user_social_provider_id_seq">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)"/>
+            <column name="image_url" type="varchar(256)"/>
+            <column name="created_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            baseTableName="user_social_provider"
+            baseColumnNames="user_id"
+            constraintName="fk_user_social_provider_user"
+            referencedTableName="jhi_user"
+            referencedColumnNames="id"/>
+
+        <createIndex indexName="idx_user_social_provider_provider"
+                     tableName="user_social_provider">
+            <column name="provider"/>
+            <column name="provider_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

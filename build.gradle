@@ -110,5 +110,6 @@ dependencies {
     annotationProcessor "org.glassfish.jaxb:jaxb-runtime"
     annotationProcessor "org.hibernate.orm:hibernate-processor"
     developmentOnly "org.springframework.boot:spring-boot-docker-compose"
+    implementation "com.google.api-client:google-api-client:2.7.0"
     // jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
 }
