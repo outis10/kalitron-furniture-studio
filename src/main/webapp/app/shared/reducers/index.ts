@@ -13,11 +13,13 @@ import userManagement from 'app/modules/administration/user-management/user-mana
 import applicationProfile from './application-profile';
 import authentication from './authentication';
 import locale from './locale';
+import theme from './theme';
 /* jhipster-needle-add-reducer-import - JHipster will add reducer here */
 
 const rootReducer: ReducersMapObject = {
   authentication,
   locale,
+  theme,
   applicationProfile,
   administration,
   userManagement,
