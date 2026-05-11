@@ -1,0 +1,35 @@
+name: Feature / User Story
+description: User-facing behavior that should be specified before implementation
+title: "[E?] user-story: "
+labels: ["user-story"]
+body:
+  - type: textarea
+    id: user-story
+    attributes:
+      label: User Story
+      description: Describe the user, goal, and value.
+      value: |
+        As a ...
+        I want to ...
+        So that ...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: Observable behavior required for completion.
+      value: |
+        - [ ] ...
+    validations:
+      required: true
+  - type: input
+    id: spec
+    attributes:
+      label: Spec Path
+      description: docs/specs/... path once created.
+      placeholder: docs/specs/eN-feature-name/NN-issue-name.md
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes

@@ -240,6 +240,40 @@ git push origin feat/eN-short-description
 gh pr create --title "feat(eN): short description" --body "Closes #N"
 ```
 
+---
+
+## Spec-Driven Development
+
+Use SDD for every feature, user story, task, or integration change before
+implementation. Specs live in `docs/specs/` and are the source of truth for
+scope, contracts, acceptance criteria, and verification.
+
+### Required flow
+
+1. Create or update the issue spec in `docs/specs/eN-feature-name/`.
+2. Mark the spec status as `Draft` while requirements are still moving.
+3. Confirm API contracts, data model impact, UX states, failure cases, and tests.
+4. Move the spec to `Reviewed` before implementation starts.
+5. Implement only the behavior covered by the spec.
+6. Update the spec if implementation discovers a necessary contract or scope change.
+7. In the PR, link both the GitHub issue and the spec file.
+
+### Spec status values
+
+```
+Draft -> Reviewed -> Implementing -> Implemented
+```
+
+### SDD rules
+
+- Do not start implementation for a new issue without a matching spec file.
+- Keep specs small and testable; one issue should usually map to one spec.
+- Acceptance criteria must be observable, not aspirational.
+- API contracts must include request, response, auth, validation, and failure cases.
+- Frontend specs must include loading, empty, error, success, and mobile states.
+- Backend specs must include persistence rules, transaction boundaries, security, and tests.
+- AI specs must define what is deterministic in Studio versus delegated to the AI Gateway.
+
 ### Commit message format
 
 ```
