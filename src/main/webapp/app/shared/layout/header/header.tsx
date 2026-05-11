@@ -31,8 +31,8 @@ const Header = (props: IHeaderProps) => {
     dispatch(setLocale(langKey));
   };
 
-  const handleThemeChange = event => {
-    dispatch(setTheme(event.target.value));
+  const handleThemeChange = (theme: import('app/shared/reducers/theme').ThemeType) => {
+    dispatch(setTheme(theme));
   };
 
   const renderDevRibbon = () =>

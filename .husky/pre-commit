@@ -1,10 +1,13 @@
+set +e
+unset npm_config_prefix
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -f ".nvmrc" ] && nvm use
 
-if [ -z "$(which lint-staged)" ]; then
+if [ ! -f "node_modules/.bin/lint-staged" ]; then
     echo 'Running package manager install'
-    ./npmw install
+    npm install
 fi
 
-lint-staged
+node_modules/.bin/lint-staged

@@ -99,6 +99,7 @@ module.exports = async options => {
         new ESLintPlugin({
           configType: 'flat',
           extensions: ['ts', 'tsx'],
+          overrideConfig: { rules: { 'prettier/prettier': 'off' } },
         }),
         new ForkTsCheckerWebpackPlugin(),
         new CopyWebpackPlugin({

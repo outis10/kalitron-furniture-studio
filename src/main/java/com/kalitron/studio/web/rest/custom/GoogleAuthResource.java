@@ -44,7 +44,7 @@ public class GoogleAuthResource {
     private static final Logger LOG = LoggerFactory.getLogger(GoogleAuthResource.class);
     private static final String PROVIDER_GOOGLE = "GOOGLE";
 
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    @Value("${spring.security.oauth2.client.registration.google.client-id:}")
     private String googleClientId;
 
     @Value("${jhipster.security.authentication.jwt.token-validity-in-seconds:86400}")
@@ -73,6 +73,13 @@ public class GoogleAuthResource {
     public record GoogleLoginRequest(String credential) {}
 
     public record JwtResponse(String token) {}
+
+    public record GoogleClientConfig(String clientId) {}
+
+    @GetMapping("/google/client-id")
+    public ResponseEntity<GoogleClientConfig> getGoogleClientId() {
+        return ResponseEntity.ok(new GoogleClientConfig(googleClientId));
+    }
 
     @PostMapping("/google")
     @Transactional

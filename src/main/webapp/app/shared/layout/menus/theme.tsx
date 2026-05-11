@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { DropdownItem, Dropdown, DropdownToggle, DropdownMenu } from 'reactstrap';
+import React from 'react';
+import { Dropdown, DropdownMenu, DropdownToggle, Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ThemeType } from 'app/shared/reducers/theme';
 
 export interface IThemeMenuProps {
   currentTheme: ThemeType;
-  onClick: (event: any) => void;
+  onClick: (theme: ThemeType) => void;
 }
 
 export const themes: Record<ThemeType, { name: string }> = {
@@ -37,31 +37,18 @@ export const themes: Record<ThemeType, { name: string }> = {
   zephyr: { name: 'Zephyr' },
 };
 
-export const ThemeMenu = ({ currentTheme, onClick }: IThemeMenuProps) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-
-  const handleThemeClick = (event: any) => {
-    setDropdownOpen(false);
-    Promise.resolve().then(() => {
-      onClick(event);
-    });
-  };
-
-  return (
-    <Dropdown nav inNavbar isOpen={dropdownOpen} toggle={toggleDropdown} id="theme-menu">
-      <DropdownToggle nav caret className="d-flex align-items-center">
-        <FontAwesomeIcon icon="paint-brush" />
-        <span>{currentTheme ? themes[currentTheme].name : 'Theme'}</span>
-      </DropdownToggle>
-      <DropdownMenu end role="menu">
-        {(Object.keys(themes) as ThemeType[]).map(theme => (
-          <DropdownItem key={theme} value={theme} onClick={handleThemeClick} active={theme === currentTheme} role="menuitem">
-            {themes[theme].name}
-          </DropdownItem>
-        ))}
-      </DropdownMenu>
-    </Dropdown>
-  );
-};
+export const ThemeMenu = ({ currentTheme, onClick }: IThemeMenuProps) => (
+  <Dropdown as={Nav.Item} id="theme-menu">
+    <DropdownToggle as={Nav.Link} className="d-flex align-items-center">
+      <FontAwesomeIcon icon="paint-brush" />
+      <span>{themes[currentTheme]?.name ?? 'Theme'}</span>
+    </DropdownToggle>
+    <DropdownMenu renderOnMount align="end" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+      {(Object.keys(themes) as ThemeType[]).map(theme => (
+        <Dropdown.Item key={theme} active={theme === currentTheme} onClick={() => onClick(theme)}>
+          {themes[theme].name}
+        </Dropdown.Item>
+      ))}
+    </DropdownMenu>
+  </Dropdown>
+);

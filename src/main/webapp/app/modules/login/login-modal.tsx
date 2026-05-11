@@ -8,7 +8,6 @@ import { type FieldError, useForm } from 'react-hook-form';
 import GoogleAuthButton from 'app/shared/components/GoogleAuthButton';
 
 const AUTH_TOKEN_KEY = 'jhi-authenticationToken';
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
 
 export interface ILoginModalProps {
   showModal: boolean;
@@ -16,6 +15,7 @@ export interface ILoginModalProps {
   handleLogin: (username: string, password: string, rememberMe: boolean) => void;
   handleClose: () => void;
   redirectAfterLogin?: string;
+  googleClientId?: string;
 }
 
 const LoginModal = (props: ILoginModalProps) => {
@@ -40,7 +40,7 @@ const LoginModal = (props: ILoginModalProps) => {
     formState: { errors, touchedFields },
   } = useForm({ mode: 'onTouched' });
 
-  const { loginError, handleClose } = props;
+  const { loginError, handleClose, googleClientId } = props;
 
   const handleLoginSubmit = e => {
     handleSubmit(login)(e);
@@ -122,7 +122,7 @@ const LoginModal = (props: ILoginModalProps) => {
               <Translate contentKey="login.form.button">Sign in</Translate>
             </Button>
           </div>
-          {GOOGLE_CLIENT_ID && (
+          {googleClientId && (
             <>
               <div className="w-100 text-center my-2">
                 <span className="text-muted small">
@@ -131,7 +131,7 @@ const LoginModal = (props: ILoginModalProps) => {
               </div>
               <div className="w-100 d-flex justify-content-center" data-cy="googleLogin">
                 <GoogleAuthButton
-                  clientId={GOOGLE_CLIENT_ID}
+                  clientId={googleClientId}
                   label={translate('login.google', undefined, 'Continue with Google')}
                   onCredential={handleGoogleSuccess}
                   onUnavailable={() => undefined}

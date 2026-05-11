@@ -106,8 +106,12 @@ const loadTheme = (theme: ThemeType) => {
       .jh-navbar .dropdown-toggle {
         color: ${colors.text} !important;
       }
+      .jh-navbar .dropdown-menu {
+        background-color: #fff !important;
+      }
       .jh-navbar .dropdown-item {
         color: #333 !important;
+        background-color: transparent !important;
       }
       .jh-navbar .dropdown-item.active,
       .jh-navbar .dropdown-item.active:focus,
