@@ -1,0 +1,102 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184137"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "quoteNumber",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "QuoteStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "DRAFT (Borrador),SENT (Enviada),APPROVED (Aprobada),REJECTED (Rechazada),EXPIRED (Expirada)"
+    },
+    {
+      "fieldName": "subtotalMxn",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "taxMxn",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "totalMxn",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "laborMxn",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "validUntil",
+      "fieldType": "LocalDate"
+    },
+    {
+      "fieldName": "publicToken",
+      "fieldType": "String",
+      "fieldValidateRules": ["unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "80"
+    },
+    {
+      "fieldName": "notes",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "1000"
+    },
+    {
+      "fieldName": "createdAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "sentAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Quote",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityName": "quoteItem",
+      "otherEntityRelationshipName": "quote",
+      "relationshipName": "items",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityField": "fileName",
+      "otherEntityName": "designImage",
+      "relationshipName": "renderImage",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "fileName",
+      "otherEntityName": "designArtifact",
+      "relationshipName": "pdfArtifact",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "sessionCode",
+      "otherEntityName": "designSession",
+      "otherEntityRelationshipName": "quotes",
+      "relationshipName": "session",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

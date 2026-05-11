@@ -1,0 +1,12 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "QuoteStatus": {
+      "null": "",
+      "DRAFT": "Borrador",
+      "SENT": "Enviada",
+      "APPROVED": "Aprobada",
+      "REJECTED": "Rechazada",
+      "EXPIRED": "Expirada"
+    }
+  }
+}

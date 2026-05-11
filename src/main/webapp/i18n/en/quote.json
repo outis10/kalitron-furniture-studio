@@ -1,0 +1,38 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "quote": {
+      "home": {
+        "title": "Quotes",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Quote",
+        "createOrEditLabel": "Create or edit a Quote",
+        "notFound": "No Quotes found"
+      },
+      "created": "A new Quote is created with identifier {{ param }}",
+      "updated": "A Quote is updated with identifier {{ param }}",
+      "deleted": "A Quote is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Quote {{ id }}?"
+      },
+      "detail": {
+        "title": "Quote"
+      },
+      "id": "ID",
+      "quoteNumber": "Quote Number",
+      "status": "Status",
+      "subtotalMxn": "Subtotal Mxn",
+      "taxMxn": "Tax Mxn",
+      "totalMxn": "Total Mxn",
+      "laborMxn": "Labor Mxn",
+      "validUntil": "Valid Until",
+      "publicToken": "Public Token",
+      "notes": "Notes",
+      "createdAt": "Created At",
+      "sentAt": "Sent At",
+      "items": "Items",
+      "renderImage": "Render Image",
+      "pdfArtifact": "Pdf Artifact",
+      "session": "Session"
+    }
+  }
+}

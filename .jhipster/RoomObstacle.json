@@ -1,0 +1,66 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184127"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "obstacleType",
+      "fieldType": "RoomObstacleType",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "WINDOW (Ventana),DOOR (Puerta),COLUMN (Columna),OUTLET (Contacto eléctrico),WATER (Toma de agua),GAS (Toma de gas),DRAIN (Drenaje),RANGE_HOOD (Campana),APPLIANCE (Electrodoméstico),OTHER (Otro)"
+    },
+    {
+      "fieldName": "label",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "100"
+    },
+    {
+      "fieldName": "xMm",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "yMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "zMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "widthMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "heightMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "depthMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "notes",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "300"
+    }
+  ],
+  "name": "RoomObstacle",
+  "relationships": [
+    {
+      "otherEntityField": "sessionCode",
+      "otherEntityName": "designSession",
+      "otherEntityRelationshipName": "obstacles",
+      "relationshipName": "session",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

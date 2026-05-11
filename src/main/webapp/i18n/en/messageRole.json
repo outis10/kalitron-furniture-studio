@@ -1,0 +1,10 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "MessageRole": {
+      "null": "",
+      "USER": "Usuario",
+      "ASSISTANT": "Asistente",
+      "SYSTEM": "Sistema"
+    }
+  }
+}

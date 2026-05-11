@@ -1,0 +1,86 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184134"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "40"
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "category",
+      "fieldType": "CabinetCategory",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "UPPER (Gabinete superior),LOWER (Gabinete inferior),CORNER (Esquinero),TALL (Torre),SINK (Tarja),ISLAND (Isla),DRAWER_BASE (Base con cajones),APPLIANCE (Módulo de electrodoméstico),FILLER (Relleno),PANEL (Panel)"
+    },
+    {
+      "fieldName": "defaultWidthMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "defaultHeightMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "defaultDepthMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "minWidthMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "maxWidthMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "supportsDoors",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "supportsDrawers",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "supportsShelves",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "fusionTemplateName",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "csvProfileJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "isActive",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "sortOrder",
+      "fieldType": "Integer"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "CabinetTemplate",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

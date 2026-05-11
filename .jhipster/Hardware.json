@@ -1,0 +1,54 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184133"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "40"
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "hardwareType",
+      "fieldType": "HardwareType",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "HINGE (Bisagra),SLIDE (Corredera),HANDLE (Jaladera),PULL (Tirador),LEG (Pata),SCREW (Tornillo),BRACKET (Escuadra),OTHER (Otro)"
+    },
+    {
+      "fieldName": "unitCostMxn",
+      "fieldType": "BigDecimal",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "supplierName",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "isActive",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "notes",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "300"
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "Hardware",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

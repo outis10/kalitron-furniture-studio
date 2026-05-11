@@ -1,0 +1,31 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "catalogStyle": {
+      "home": {
+        "title": "Catalog Styles",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Catalog Style",
+        "createOrEditLabel": "Crear o editar Catalog Style",
+        "notFound": "Ningún Catalog Styles encontrado"
+      },
+      "created": "Un nuevo Catalog Style ha sido creado con el identificador {{ param }}",
+      "updated": "Un Catalog Style ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Catalog Style ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Catalog Style {{ id }}?"
+      },
+      "detail": {
+        "title": "Catalog Style"
+      },
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "thumbnailPath": "Thumbnail Path",
+      "style": "Style",
+      "primaryFinish": "Primary Finish",
+      "priceRange": "Price Range",
+      "isActive": "Is Active",
+      "sortOrder": "Sort Order"
+    }
+  }
+}

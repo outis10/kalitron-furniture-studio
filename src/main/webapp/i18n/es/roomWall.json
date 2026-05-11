@@ -1,0 +1,31 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "roomWall": {
+      "home": {
+        "title": "Room Walls",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Room Wall",
+        "createOrEditLabel": "Crear o editar Room Wall",
+        "notFound": "Ningún Room Walls encontrado"
+      },
+      "created": "Un nuevo Room Wall ha sido creado con el identificador {{ param }}",
+      "updated": "Un Room Wall ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Room Wall ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Room Wall {{ id }}?"
+      },
+      "detail": {
+        "title": "Room Wall"
+      },
+      "id": "ID",
+      "name": "Name",
+      "lengthMm": "Length Mm",
+      "heightMm": "Height Mm",
+      "angleDeg": "Angle Deg",
+      "positionX": "Position X",
+      "positionY": "Position Y",
+      "sortOrder": "Sort Order",
+      "session": "Session"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "designImage": {
+      "home": {
+        "title": "Design Images",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Design Image",
+        "createOrEditLabel": "Crear o editar Design Image",
+        "notFound": "Ningún Design Images encontrado"
+      },
+      "created": "Un nuevo Design Image ha sido creado con el identificador {{ param }}",
+      "updated": "Un Design Image ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Design Image ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Design Image {{ id }}?"
+      },
+      "detail": {
+        "title": "Design Image"
+      },
+      "id": "ID",
+      "imageType": "Image Type",
+      "fileName": "File Name",
+      "filePath": "File Path",
+      "mimeType": "Mime Type",
+      "fileSizeKb": "File Size Kb",
+      "widthPx": "Width Px",
+      "heightPx": "Height Px",
+      "isActive": "Is Active",
+      "uploadedAt": "Uploaded At",
+      "description": "Description",
+      "session": "Session"
+    }
+  }
+}

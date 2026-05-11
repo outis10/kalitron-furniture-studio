@@ -1,0 +1,38 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "kitchenSpec": {
+      "home": {
+        "title": "Kitchen Specs",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Kitchen Spec",
+        "createOrEditLabel": "Crear o editar Kitchen Spec",
+        "notFound": "Ningún Kitchen Specs encontrado"
+      },
+      "created": "Un nuevo Kitchen Spec ha sido creado con el identificador {{ param }}",
+      "updated": "Un Kitchen Spec ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Kitchen Spec ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Kitchen Spec {{ id }}?"
+      },
+      "detail": {
+        "title": "Kitchen Spec"
+      },
+      "id": "ID",
+      "layout": "Layout",
+      "totalWidthMm": "Total Width Mm",
+      "totalHeightMm": "Total Height Mm",
+      "totalDepthMm": "Total Depth Mm",
+      "style": "Style",
+      "primaryFinish": "Primary Finish",
+      "handleType": "Handle Type",
+      "countertopMaterial": "Countertop Material",
+      "sinkPosition": "Sink Position",
+      "confirmedByClient": "Confirmed By Client",
+      "extractedJson": "Extracted Json",
+      "confirmedAt": "Confirmed At",
+      "cabinets": "Cabinets",
+      "primaryMaterial": "Primary Material",
+      "session": "Session"
+    }
+  }
+}

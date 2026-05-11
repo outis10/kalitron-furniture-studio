@@ -1,0 +1,11 @@
+id;cabinet_code;category;label;width_mm;height_mm;depth_mm;doors;drawers;shelves;finish;position_x;position_y;position_z;rotation_deg;position_seq;csv_row_json;notes;material_id;spec_id
+1;refine aw;CORNER;militate;18388;18229;27574;0;7;2;MATTE_BLACK;12599;31690;14751;29959;8453;../fake-data/blob/hipster.txt;advancement though;1;1
+2;mismatch appliance i;FILLER;with;9124;17657;22015;0;2;2;CUSTOM;27996;2277;339;21888;21653;../fake-data/blob/hipster.txt;fondly declaration;2;2
+3;simple mindless;SINK;geez below heating;30902;12043;2310;5;5;4;MATTE_WHITE;10642;30638;26502;924;6000;../fake-data/blob/hipster.txt;mortar;3;3
+4;expensive given even;PANEL;throughout viability;15843;6087;25729;0;3;11;CUSTOM;8165;2074;14954;14405;555;../fake-data/blob/hipster.txt;till;4;4
+5;between trusting;ISLAND;unnaturally tomatillo apologise;30877;10776;28635;3;6;2;CUSTOM;7075;11301;12784;16995;10116;../fake-data/blob/hipster.txt;object impish supposing;5;5
+6;bowler up yuck;LOWER;skeleton till;30317;25688;28381;4;4;2;MATTE_GRAY;12628;19631;28538;2431;15423;../fake-data/blob/hipster.txt;yippee wrathful;6;6
+7;astonishing honored;APPLIANCE;reiterate fully deeply;2617;6789;5902;1;1;6;MATTE_GRAY;20369;4413;20224;32233;21256;../fake-data/blob/hipster.txt;alarmed ah;7;7
+8;lone;LOWER;rue;3847;11617;2367;1;4;5;MATTE_GRAY;7044;18905;5523;23417;401;../fake-data/blob/hipster.txt;aboard;8;8
+9;excepting;DRAWER_BASE;option;11907;11718;30078;4;2;12;MATTE_BLACK;8840;10452;30979;17203;25887;../fake-data/blob/hipster.txt;of provided;9;9
+10;for;APPLIANCE;flickering whoa;26320;21647;29702;1;2;3;WOOD_OAK;5005;13600;14229;20499;29173;../fake-data/blob/hipster.txt;delightfully retool;10;10

@@ -1,0 +1,35 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "cabinetPart": {
+      "home": {
+        "title": "Cabinet Parts",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Cabinet Part",
+        "createOrEditLabel": "Create or edit a Cabinet Part",
+        "notFound": "No Cabinet Parts found"
+      },
+      "created": "A new Cabinet Part is created with identifier {{ param }}",
+      "updated": "A Cabinet Part is updated with identifier {{ param }}",
+      "deleted": "A Cabinet Part is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Cabinet Part {{ id }}?"
+      },
+      "detail": {
+        "title": "Cabinet Part"
+      },
+      "id": "ID",
+      "partCode": "Part Code",
+      "name": "Name",
+      "widthMm": "Width Mm",
+      "heightMm": "Height Mm",
+      "thicknessMm": "Thickness Mm",
+      "quantity": "Quantity",
+      "edgeBanding": "Edge Banding",
+      "grainDirection": "Grain Direction",
+      "cncOperation": "Cnc Operation",
+      "notes": "Notes",
+      "material": "Material",
+      "cabinet": "Cabinet"
+    }
+  }
+}

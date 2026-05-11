@@ -1,0 +1,426 @@
+/*
+ * ============================================================
+ * Kalitron Furniture Studio JDL
+ * AI design -> validated specs/layout -> BOM/quote -> Fusion 360 artifacts
+ * Stack: JHipster 9, Spring Boot 4, React, JWT, PostgreSQL
+ * ============================================================
+ *
+ * Usage from the already generated JHipster app:
+ *   jhipster jdl kitchen.jdl
+ *
+ * The application config lives in .yo-rc.json. This JDL intentionally contains
+ * only domain entities/options so importing it does not regenerate the whole app.
+ *
+ * Notes:
+ * - AI renders are client-facing concepts, not fabrication truth.
+ * - Manufacturing data comes from validated specs, room geometry,
+ *   cabinet modules, cabinet parts, and exported artifacts.
+ * - File contents live in external storage; entities only keep metadata/paths.
+ */
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum SessionStatus {
+  DRAFT ("Borrador"),
+  CHATTING ("En conversación"),
+  SPECS_READY ("Especificaciones listas"),
+  VISUAL_GENERATED ("Visual generado"),
+  LAYOUT_CONFIRMED ("Layout confirmado"),
+  BOM_GENERATED ("BOM generado"),
+  QUOTE_GENERATED ("Cotización generada"),
+  FUSION_GENERATED ("Fusion 360 generado"),
+  COMPLETED ("Completado"),
+  ARCHIVED ("Archivado")
+}
+
+enum ProjectType {
+  KITCHEN ("Cocina"),
+  CLOSET ("Closet"),
+  BOTH ("Cocina y closet")
+}
+
+enum KitchenLayout {
+  LINEAR ("Lineal"),
+  L_SHAPE ("En L"),
+  U_SHAPE ("En U"),
+  ISLAND ("Con isla"),
+  PENINSULA ("Con península"),
+  GALLEY ("Pasillo"),
+  CUSTOM ("Personalizado")
+}
+
+enum RoomObstacleType {
+  WINDOW ("Ventana"),
+  DOOR ("Puerta"),
+  COLUMN ("Columna"),
+  OUTLET ("Contacto eléctrico"),
+  WATER ("Toma de agua"),
+  GAS ("Toma de gas"),
+  DRAIN ("Drenaje"),
+  RANGE_HOOD ("Campana"),
+  APPLIANCE ("Electrodoméstico"),
+  OTHER ("Otro")
+}
+
+enum CabinetCategory {
+  UPPER ("Gabinete superior"),
+  LOWER ("Gabinete inferior"),
+  CORNER ("Esquinero"),
+  TALL ("Torre"),
+  SINK ("Tarja"),
+  ISLAND ("Isla"),
+  DRAWER_BASE ("Base con cajones"),
+  APPLIANCE ("Módulo de electrodoméstico"),
+  FILLER ("Relleno"),
+  PANEL ("Panel")
+}
+
+enum FinishType {
+  MATTE_WHITE ("Blanco mate"),
+  MATTE_GRAY ("Gris mate"),
+  MATTE_BLACK ("Negro mate"),
+  WOOD_OAK ("Madera roble"),
+  WOOD_WALNUT ("Madera nogal"),
+  WOOD_PINE ("Madera pino"),
+  HIGH_GLOSS_WHITE ("Blanco alto brillo"),
+  CUSTOM ("Personalizado")
+}
+
+enum MaterialKind {
+  MDF ("MDF"),
+  MELAMINE ("Melamina"),
+  PLYWOOD ("Triplay"),
+  SOLID_WOOD ("Madera sólida"),
+  LAMINATE ("Laminado"),
+  COUNTERTOP ("Cubierta"),
+  OTHER ("Otro")
+}
+
+enum HardwareType {
+  HINGE ("Bisagra"),
+  SLIDE ("Corredera"),
+  HANDLE ("Jaladera"),
+  PULL ("Tirador"),
+  LEG ("Pata"),
+  SCREW ("Tornillo"),
+  BRACKET ("Escuadra"),
+  OTHER ("Otro")
+}
+
+enum MessageRole {
+  USER ("Usuario"),
+  ASSISTANT ("Asistente"),
+  SYSTEM ("Sistema")
+}
+
+enum ImageType {
+  REFERENCE ("Referencia"),
+  CATALOG ("Catálogo"),
+  AI_RENDER ("Render IA"),
+  FUSION_RENDER ("Render Fusion 360"),
+  SKETCH ("Boceto")
+}
+
+enum ArtifactType {
+  CSV ("CSV"),
+  FUSION_SCRIPT ("Script Fusion 360"),
+  FUSION_MODEL ("Modelo Fusion 360"),
+  STEP ("STEP"),
+  DXF ("DXF"),
+  PDF ("PDF"),
+  BOM_JSON ("BOM JSON"),
+  QUOTE_PDF ("PDF de cotización"),
+  OTHER ("Otro")
+}
+
+enum GenerationJobType {
+  AI_CHAT ("Chat IA"),
+  AI_SPEC_EXTRACTION ("Extracción de especificaciones"),
+  AI_RENDER ("Render IA"),
+  BOM ("BOM"),
+  QUOTE ("Cotización"),
+  FUSION_MODEL ("Modelo Fusion 360"),
+  EXPORT ("Exportación")
+}
+
+enum GenerationJobStatus {
+  PENDING ("Pendiente"),
+  RUNNING ("En ejecución"),
+  DONE ("Terminado"),
+  FAILED ("Fallido"),
+  CANCELLED ("Cancelado")
+}
+
+enum QuoteStatus {
+  DRAFT ("Borrador"),
+  SENT ("Enviada"),
+  APPROVED ("Aprobada"),
+  REJECTED ("Rechazada"),
+  EXPIRED ("Expirada")
+}
+
+// ---------------------------------------------------------------------------
+// Design aggregate
+// ---------------------------------------------------------------------------
+
+entity DesignSession {
+  sessionCode String required unique maxlength(20)
+  projectType ProjectType required
+  status SessionStatus required
+  clientName String required maxlength(120)
+  clientEmail String maxlength(120)
+  clientPhone String maxlength(20)
+  selectedStyle String maxlength(80)
+  notes String maxlength(2000)
+  createdAt Instant required
+  updatedAt Instant required
+}
+
+entity ChatMessage {
+  role MessageRole required
+  content TextBlob required
+  tokenCount Integer
+  createdAt Instant required
+}
+
+entity KitchenSpec {
+  layout KitchenLayout required
+  totalWidthMm Integer
+  totalHeightMm Integer
+  totalDepthMm Integer
+  style String required maxlength(60)
+  primaryFinish FinishType required
+  handleType String maxlength(80)
+  countertopMaterial String maxlength(80)
+  sinkPosition String maxlength(80)
+  confirmedByClient Boolean required
+  extractedJson TextBlob
+  confirmedAt Instant
+}
+
+entity RoomWall {
+  name String required maxlength(20)
+  lengthMm Integer required
+  heightMm Integer
+  angleDeg Integer
+  positionX Integer
+  positionY Integer
+  sortOrder Integer
+}
+
+entity RoomObstacle {
+  obstacleType RoomObstacleType required
+  label String maxlength(100)
+  xMm Integer required
+  yMm Integer
+  zMm Integer
+  widthMm Integer
+  heightMm Integer
+  depthMm Integer
+  notes String maxlength(300)
+}
+
+entity DesignImage {
+  imageType ImageType required
+  fileName String required maxlength(255)
+  filePath String required maxlength(500)
+  mimeType String maxlength(80)
+  fileSizeKb Long
+  widthPx Integer
+  heightPx Integer
+  isActive Boolean required
+  uploadedAt Instant required
+  description String maxlength(300)
+}
+
+entity DesignArtifact {
+  artifactType ArtifactType required
+  fileName String required maxlength(255)
+  filePath String required maxlength(500)
+  mimeType String maxlength(80)
+  fileSizeKb Long
+  checksum String maxlength(128)
+  metadataJson TextBlob
+  createdAt Instant required
+}
+
+entity GenerationJob {
+  jobType GenerationJobType required
+  status GenerationJobStatus required
+  inputJson TextBlob
+  outputJson TextBlob
+  errorMessage TextBlob
+  createdAt Instant required
+  startedAt Instant
+  finishedAt Instant
+}
+
+// ---------------------------------------------------------------------------
+// Catalogs
+// ---------------------------------------------------------------------------
+
+entity CatalogStyle {
+  name String required maxlength(100)
+  description String maxlength(500)
+  thumbnailPath String required maxlength(500)
+  style String maxlength(60)
+  primaryFinish FinishType
+  priceRange String maxlength(30)
+  isActive Boolean required
+  sortOrder Integer
+}
+
+entity Material {
+  code String required unique maxlength(40)
+  name String required maxlength(120)
+  materialKind MaterialKind required
+  thicknessMm Integer
+  sheetWidthMm Integer
+  sheetHeightMm Integer
+  costPerSheetMxn BigDecimal
+  costPerSquareMeterMxn BigDecimal
+  supplierName String maxlength(120)
+  isActive Boolean required
+  notes String maxlength(300)
+}
+
+entity Hardware {
+  code String required unique maxlength(40)
+  name String required maxlength(120)
+  hardwareType HardwareType required
+  unitCostMxn BigDecimal required
+  supplierName String maxlength(120)
+  isActive Boolean required
+  notes String maxlength(300)
+}
+
+entity CabinetTemplate {
+  code String required unique maxlength(40)
+  name String required maxlength(120)
+  category CabinetCategory required
+  defaultWidthMm Integer
+  defaultHeightMm Integer
+  defaultDepthMm Integer
+  minWidthMm Integer
+  maxWidthMm Integer
+  supportsDoors Boolean required
+  supportsDrawers Boolean required
+  supportsShelves Boolean required
+  fusionTemplateName String maxlength(120)
+  csvProfileJson TextBlob
+  isActive Boolean required
+  sortOrder Integer
+}
+
+// ---------------------------------------------------------------------------
+// Fabrication model
+// ---------------------------------------------------------------------------
+
+entity Cabinet {
+  cabinetCode String required maxlength(20)
+  category CabinetCategory required
+  label String required maxlength(120)
+  widthMm Integer required
+  heightMm Integer required
+  depthMm Integer required
+  doors Integer required min(0) max(6)
+  drawers Integer required min(0) max(8)
+  shelves Integer min(0) max(12)
+  finish FinishType required
+  positionX Integer
+  positionY Integer
+  positionZ Integer
+  rotationDeg Integer
+  positionSeq Integer
+  csvRowJson TextBlob
+  notes String maxlength(300)
+}
+
+entity CabinetPart {
+  partCode String required maxlength(40)
+  name String required maxlength(100)
+  widthMm Integer required
+  heightMm Integer required
+  thicknessMm Integer required
+  quantity Integer required min(1)
+  edgeBanding String maxlength(100)
+  grainDirection String maxlength(30)
+  cncOperation String maxlength(120)
+  notes String maxlength(300)
+}
+
+// ---------------------------------------------------------------------------
+// Proposal and pricing
+// ---------------------------------------------------------------------------
+
+entity Quote {
+  quoteNumber String required unique maxlength(20)
+  status QuoteStatus required
+  subtotalMxn BigDecimal required
+  taxMxn BigDecimal required
+  totalMxn BigDecimal required
+  laborMxn BigDecimal
+  validUntil LocalDate
+  publicToken String unique maxlength(80)
+  notes String maxlength(1000)
+  createdAt Instant required
+  sentAt Instant
+}
+
+entity QuoteItem {
+  description String required maxlength(200)
+  quantity Integer required min(1)
+  unitPriceMxn BigDecimal required
+  totalMxn BigDecimal required
+  category String maxlength(60)
+  notes String maxlength(200)
+}
+
+// ---------------------------------------------------------------------------
+// Relationships
+// ---------------------------------------------------------------------------
+
+relationship OneToMany {
+  DesignSession{messages} to ChatMessage{session(sessionCode) required}
+  DesignSession{images} to DesignImage{session(sessionCode) required}
+  DesignSession{artifacts} to DesignArtifact{session(sessionCode) required}
+  DesignSession{jobs} to GenerationJob{session(sessionCode) required}
+  DesignSession{quotes} to Quote{session(sessionCode) required}
+  DesignSession{walls} to RoomWall{session(sessionCode) required}
+  DesignSession{obstacles} to RoomObstacle{session(sessionCode) required}
+}
+
+relationship OneToOne {
+  DesignSession{spec(style)} to KitchenSpec{session(sessionCode) required}
+}
+
+relationship OneToMany {
+  KitchenSpec{cabinets} to Cabinet{spec(style) required}
+  Cabinet{parts} to CabinetPart{cabinet(cabinetCode) required}
+  Quote{items} to QuoteItem{quote(quoteNumber) required}
+}
+
+relationship ManyToOne {
+  DesignSession{catalogStyle(name)} to CatalogStyle
+  KitchenSpec{primaryMaterial(name) required} to Material
+  Cabinet{template(code)} to CabinetTemplate
+  Cabinet{material(name) required} to Material
+  CabinetPart{material(name) required} to Material
+  QuoteItem{cabinet(cabinetCode)} to Cabinet
+  QuoteItem{hardware(name)} to Hardware
+  Quote{renderImage(fileName)} to DesignImage
+  Quote{pdfArtifact(fileName)} to DesignArtifact
+  GenerationJob{artifact(fileName)} to DesignArtifact
+}
+
+// ---------------------------------------------------------------------------
+// JHipster options
+// ---------------------------------------------------------------------------
+
+paginate DesignSession, Quote with pagination
+paginate Cabinet, CabinetPart, ChatMessage, QuoteItem, GenerationJob, DesignArtifact with pagination
+filter DesignSession, KitchenSpec, Cabinet, CabinetPart, Quote, Material, Hardware, CabinetTemplate
+dto * with mapstruct
+service * with serviceImpl

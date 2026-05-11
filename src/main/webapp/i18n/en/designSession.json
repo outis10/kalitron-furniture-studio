@@ -1,0 +1,42 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "designSession": {
+      "home": {
+        "title": "Design Sessions",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Design Session",
+        "createOrEditLabel": "Create or edit a Design Session",
+        "notFound": "No Design Sessions found"
+      },
+      "created": "A new Design Session is created with identifier {{ param }}",
+      "updated": "A Design Session is updated with identifier {{ param }}",
+      "deleted": "A Design Session is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Design Session {{ id }}?"
+      },
+      "detail": {
+        "title": "Design Session"
+      },
+      "id": "ID",
+      "sessionCode": "Session Code",
+      "projectType": "Project Type",
+      "status": "Status",
+      "clientName": "Client Name",
+      "clientEmail": "Client Email",
+      "clientPhone": "Client Phone",
+      "selectedStyle": "Selected Style",
+      "notes": "Notes",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "spec": "Spec",
+      "messages": "Messages",
+      "images": "Images",
+      "artifacts": "Artifacts",
+      "jobs": "Jobs",
+      "quotes": "Quotes",
+      "walls": "Walls",
+      "obstacles": "Obstacles",
+      "catalogStyle": "Catalog Style"
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184128"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "imageType",
+      "fieldType": "ImageType",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "REFERENCE (Referencia),CATALOG (Catálogo),AI_RENDER (Render IA),FUSION_RENDER (Render Fusion 360),SKETCH (Boceto)"
+    },
+    {
+      "fieldName": "fileName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "255"
+    },
+    {
+      "fieldName": "filePath",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "500"
+    },
+    {
+      "fieldName": "mimeType",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "80"
+    },
+    {
+      "fieldName": "fileSizeKb",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "widthPx",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "heightPx",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "isActive",
+      "fieldType": "Boolean",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "uploadedAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "300"
+    }
+  ],
+  "name": "DesignImage",
+  "relationships": [
+    {
+      "otherEntityField": "sessionCode",
+      "otherEntityName": "designSession",
+      "otherEntityRelationshipName": "images",
+      "relationshipName": "session",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

@@ -1,0 +1,44 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184124"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "role",
+      "fieldType": "MessageRole",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "USER (Usuario),ASSISTANT (Asistente),SYSTEM (Sistema)"
+    },
+    {
+      "fieldName": "content",
+      "fieldType": "TextBlob",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "tokenCount",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "createdAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "name": "ChatMessage",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "sessionCode",
+      "otherEntityName": "designSession",
+      "otherEntityRelationshipName": "messages",
+      "relationshipName": "session",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

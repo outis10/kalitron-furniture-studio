@@ -1,0 +1,44 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "cabinet": {
+      "home": {
+        "title": "Cabinets",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Cabinet",
+        "createOrEditLabel": "Create or edit a Cabinet",
+        "notFound": "No Cabinets found"
+      },
+      "created": "A new Cabinet is created with identifier {{ param }}",
+      "updated": "A Cabinet is updated with identifier {{ param }}",
+      "deleted": "A Cabinet is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Cabinet {{ id }}?"
+      },
+      "detail": {
+        "title": "Cabinet"
+      },
+      "id": "ID",
+      "cabinetCode": "Cabinet Code",
+      "category": "Category",
+      "label": "Label",
+      "widthMm": "Width Mm",
+      "heightMm": "Height Mm",
+      "depthMm": "Depth Mm",
+      "doors": "Doors",
+      "drawers": "Drawers",
+      "shelves": "Shelves",
+      "finish": "Finish",
+      "positionX": "Position X",
+      "positionY": "Position Y",
+      "positionZ": "Position Z",
+      "rotationDeg": "Rotation Deg",
+      "positionSeq": "Position Seq",
+      "csvRowJson": "Csv Row Json",
+      "notes": "Notes",
+      "parts": "Parts",
+      "template": "Template",
+      "material": "Material",
+      "spec": "Spec"
+    }
+  }
+}

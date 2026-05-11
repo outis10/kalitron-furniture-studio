@@ -1,0 +1,32 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "designArtifact": {
+      "home": {
+        "title": "Design Artifacts",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Design Artifact",
+        "createOrEditLabel": "Create or edit a Design Artifact",
+        "notFound": "No Design Artifacts found"
+      },
+      "created": "A new Design Artifact is created with identifier {{ param }}",
+      "updated": "A Design Artifact is updated with identifier {{ param }}",
+      "deleted": "A Design Artifact is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Design Artifact {{ id }}?"
+      },
+      "detail": {
+        "title": "Design Artifact"
+      },
+      "id": "ID",
+      "artifactType": "Artifact Type",
+      "fileName": "File Name",
+      "filePath": "File Path",
+      "mimeType": "Mime Type",
+      "fileSizeKb": "File Size Kb",
+      "checksum": "Checksum",
+      "metadataJson": "Metadata Json",
+      "createdAt": "Created At",
+      "session": "Session"
+    }
+  }
+}

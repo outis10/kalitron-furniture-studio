@@ -1,0 +1,15 @@
+export enum GenerationJobType {
+  AI_CHAT = 'Chat IA',
+
+  AI_SPEC_EXTRACTION = 'Extracción de especificaciones',
+
+  AI_RENDER = 'Render IA',
+
+  BOM = 'BOM',
+
+  QUOTE = 'Cotización',
+
+  FUSION_MODEL = 'Modelo Fusion 360',
+
+  EXPORT = 'Exportación',
+}

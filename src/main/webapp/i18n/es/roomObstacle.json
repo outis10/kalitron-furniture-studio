@@ -1,0 +1,33 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "roomObstacle": {
+      "home": {
+        "title": "Room Obstacles",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Room Obstacle",
+        "createOrEditLabel": "Crear o editar Room Obstacle",
+        "notFound": "Ningún Room Obstacles encontrado"
+      },
+      "created": "Un nuevo Room Obstacle ha sido creado con el identificador {{ param }}",
+      "updated": "Un Room Obstacle ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Room Obstacle ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Room Obstacle {{ id }}?"
+      },
+      "detail": {
+        "title": "Room Obstacle"
+      },
+      "id": "ID",
+      "obstacleType": "Obstacle Type",
+      "label": "Label",
+      "xMm": "X Mm",
+      "yMm": "Y Mm",
+      "zMm": "Z Mm",
+      "widthMm": "Width Mm",
+      "heightMm": "Height Mm",
+      "depthMm": "Depth Mm",
+      "notes": "Notes",
+      "session": "Session"
+    }
+  }
+}

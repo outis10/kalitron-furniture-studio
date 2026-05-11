@@ -1,0 +1,10 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "ProjectType": {
+      "null": "",
+      "KITCHEN": "Cocina",
+      "CLOSET": "Closet",
+      "BOTH": "Cocina y closet"
+    }
+  }
+}
