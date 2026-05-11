@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <!--
+        Added the constraints for entity DesignSession.
+    -->
+    <changeSet id="20260511184123-2" author="jhipster">
+
+        <addForeignKeyConstraint baseColumnNames="spec_id"
+                                 baseTableName="design_session"
+                                 constraintName="fk_design_session__spec_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="kitchen_spec"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="catalog_style_id"
+                                 baseTableName="design_session"
+                                 constraintName="fk_design_session__catalog_style_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="catalog_style"
+                                 />
+    </changeSet>
+</databaseChangeLog>

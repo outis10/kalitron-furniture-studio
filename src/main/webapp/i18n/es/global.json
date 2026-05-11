@@ -7,7 +7,23 @@
       "jhipster-needle-menu-add-element": "JHipster will add additional menu entries here (do not translate!)",
       "entities": {
         "main": "Entidades",
-        "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
+        "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)",
+        "designSession": "Design Session",
+        "chatMessage": "Chat Message",
+        "kitchenSpec": "Kitchen Spec",
+        "roomWall": "Room Wall",
+        "roomObstacle": "Room Obstacle",
+        "designImage": "Design Image",
+        "designArtifact": "Design Artifact",
+        "generationJob": "Generation Job",
+        "catalogStyle": "Catalog Style",
+        "material": "Material",
+        "hardware": "Hardware",
+        "cabinetTemplate": "Cabinet Template",
+        "cabinet": "Cabinet",
+        "cabinetPart": "Cabinet Part",
+        "quote": "Quote",
+        "quoteItem": "Quote Item"
       },
       "account": {
         "main": "Cuenta",

@@ -1,0 +1,38 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "cabinetTemplate": {
+      "home": {
+        "title": "Cabinet Templates",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Cabinet Template",
+        "createOrEditLabel": "Crear o editar Cabinet Template",
+        "notFound": "Ningún Cabinet Templates encontrado"
+      },
+      "created": "Un nuevo Cabinet Template ha sido creado con el identificador {{ param }}",
+      "updated": "Un Cabinet Template ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Cabinet Template ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Cabinet Template {{ id }}?"
+      },
+      "detail": {
+        "title": "Cabinet Template"
+      },
+      "id": "ID",
+      "code": "Code",
+      "name": "Name",
+      "category": "Category",
+      "defaultWidthMm": "Default Width Mm",
+      "defaultHeightMm": "Default Height Mm",
+      "defaultDepthMm": "Default Depth Mm",
+      "minWidthMm": "Min Width Mm",
+      "maxWidthMm": "Max Width Mm",
+      "supportsDoors": "Supports Doors",
+      "supportsDrawers": "Supports Drawers",
+      "supportsShelves": "Supports Shelves",
+      "fusionTemplateName": "Fusion Template Name",
+      "csvProfileJson": "Csv Profile Json",
+      "isActive": "Is Active",
+      "sortOrder": "Sort Order"
+    }
+  }
+}

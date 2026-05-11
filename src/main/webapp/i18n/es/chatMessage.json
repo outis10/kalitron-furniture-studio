@@ -1,0 +1,28 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "chatMessage": {
+      "home": {
+        "title": "Chat Messages",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Chat Message",
+        "createOrEditLabel": "Crear o editar Chat Message",
+        "notFound": "Ningún Chat Messages encontrado"
+      },
+      "created": "Un nuevo Chat Message ha sido creado con el identificador {{ param }}",
+      "updated": "Un Chat Message ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Chat Message ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Chat Message {{ id }}?"
+      },
+      "detail": {
+        "title": "Chat Message"
+      },
+      "id": "ID",
+      "role": "Role",
+      "content": "Content",
+      "tokenCount": "Token Count",
+      "createdAt": "Created At",
+      "session": "Session"
+    }
+  }
+}

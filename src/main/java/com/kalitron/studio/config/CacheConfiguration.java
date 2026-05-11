@@ -40,6 +40,32 @@ public class CacheConfiguration {
             createCache(cm, com.kalitron.studio.domain.User.class.getName());
             createCache(cm, com.kalitron.studio.domain.Authority.class.getName());
             createCache(cm, com.kalitron.studio.domain.User.class.getName() + ".authorities");
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName());
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName() + ".messageses");
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName() + ".imageses");
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName() + ".artifactses");
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName() + ".jobses");
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName() + ".quoteses");
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName() + ".wallses");
+            createCache(cm, com.kalitron.studio.domain.DesignSession.class.getName() + ".obstacleses");
+            createCache(cm, com.kalitron.studio.domain.ChatMessage.class.getName());
+            createCache(cm, com.kalitron.studio.domain.KitchenSpec.class.getName());
+            createCache(cm, com.kalitron.studio.domain.KitchenSpec.class.getName() + ".cabinetses");
+            createCache(cm, com.kalitron.studio.domain.RoomWall.class.getName());
+            createCache(cm, com.kalitron.studio.domain.RoomObstacle.class.getName());
+            createCache(cm, com.kalitron.studio.domain.DesignImage.class.getName());
+            createCache(cm, com.kalitron.studio.domain.DesignArtifact.class.getName());
+            createCache(cm, com.kalitron.studio.domain.GenerationJob.class.getName());
+            createCache(cm, com.kalitron.studio.domain.CatalogStyle.class.getName());
+            createCache(cm, com.kalitron.studio.domain.Material.class.getName());
+            createCache(cm, com.kalitron.studio.domain.Hardware.class.getName());
+            createCache(cm, com.kalitron.studio.domain.CabinetTemplate.class.getName());
+            createCache(cm, com.kalitron.studio.domain.Cabinet.class.getName());
+            createCache(cm, com.kalitron.studio.domain.Cabinet.class.getName() + ".partses");
+            createCache(cm, com.kalitron.studio.domain.CabinetPart.class.getName());
+            createCache(cm, com.kalitron.studio.domain.Quote.class.getName());
+            createCache(cm, com.kalitron.studio.domain.Quote.class.getName() + ".itemses");
+            createCache(cm, com.kalitron.studio.domain.QuoteItem.class.getName());
             // jhipster-needle-caffeine-add-entry
         };
     }

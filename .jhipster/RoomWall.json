@@ -1,0 +1,54 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184126"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "lengthMm",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "heightMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "angleDeg",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "positionX",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "positionY",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "sortOrder",
+      "fieldType": "Integer"
+    }
+  ],
+  "name": "RoomWall",
+  "relationships": [
+    {
+      "otherEntityField": "sessionCode",
+      "otherEntityName": "designSession",
+      "otherEntityRelationshipName": "walls",
+      "relationshipName": "session",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

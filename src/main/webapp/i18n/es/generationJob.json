@@ -1,0 +1,33 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "generationJob": {
+      "home": {
+        "title": "Generation Jobs",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Generation Job",
+        "createOrEditLabel": "Crear o editar Generation Job",
+        "notFound": "Ningún Generation Jobs encontrado"
+      },
+      "created": "Un nuevo Generation Job ha sido creado con el identificador {{ param }}",
+      "updated": "Un Generation Job ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Generation Job ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Generation Job {{ id }}?"
+      },
+      "detail": {
+        "title": "Generation Job"
+      },
+      "id": "ID",
+      "jobType": "Job Type",
+      "status": "Status",
+      "inputJson": "Input Json",
+      "outputJson": "Output Json",
+      "errorMessage": "Error Message",
+      "createdAt": "Created At",
+      "startedAt": "Started At",
+      "finishedAt": "Finished At",
+      "artifact": "Artifact",
+      "session": "Session"
+    }
+  }
+}

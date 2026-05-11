@@ -1,0 +1,21 @@
+export enum CabinetCategory {
+  UPPER = 'Gabinete superior',
+
+  LOWER = 'Gabinete inferior',
+
+  CORNER = 'Esquinero',
+
+  TALL = 'Torre',
+
+  SINK = 'Tarja',
+
+  ISLAND = 'Isla',
+
+  DRAWER_BASE = 'Base con cajones',
+
+  APPLIANCE = 'Módulo de electrodoméstico',
+
+  FILLER = 'Relleno',
+
+  PANEL = 'Panel',
+}

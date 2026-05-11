@@ -1,0 +1,30 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "hardware": {
+      "home": {
+        "title": "Hardware",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Hardware",
+        "createOrEditLabel": "Crear o editar Hardware",
+        "notFound": "Ningún Hardware encontrado"
+      },
+      "created": "Un nuevo Hardware ha sido creado con el identificador {{ param }}",
+      "updated": "Un Hardware ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Hardware ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Hardware {{ id }}?"
+      },
+      "detail": {
+        "title": "Hardware"
+      },
+      "id": "ID",
+      "code": "Code",
+      "name": "Name",
+      "hardwareType": "Hardware Type",
+      "unitCostMxn": "Unit Cost Mxn",
+      "supplierName": "Supplier Name",
+      "isActive": "Is Active",
+      "notes": "Notes"
+    }
+  }
+}

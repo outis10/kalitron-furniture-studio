@@ -1,0 +1,34 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "material": {
+      "home": {
+        "title": "Materials",
+        "refreshListLabel": "Refresh list",
+        "createLabel": "Create a new Material",
+        "createOrEditLabel": "Create or edit a Material",
+        "notFound": "No Materials found"
+      },
+      "created": "A new Material is created with identifier {{ param }}",
+      "updated": "A Material is updated with identifier {{ param }}",
+      "deleted": "A Material is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Material {{ id }}?"
+      },
+      "detail": {
+        "title": "Material"
+      },
+      "id": "ID",
+      "code": "Code",
+      "name": "Name",
+      "materialKind": "Material Kind",
+      "thicknessMm": "Thickness Mm",
+      "sheetWidthMm": "Sheet Width Mm",
+      "sheetHeightMm": "Sheet Height Mm",
+      "costPerSheetMxn": "Cost Per Sheet Mxn",
+      "costPerSquareMeterMxn": "Cost Per Square Meter Mxn",
+      "supplierName": "Supplier Name",
+      "isActive": "Is Active",
+      "notes": "Notes"
+    }
+  }
+}

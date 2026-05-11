@@ -1,0 +1,11 @@
+id;code;name;category;default_width_mm;default_height_mm;default_depth_mm;min_width_mm;max_width_mm;supports_doors;supports_drawers;supports_shelves;fusion_template_name;csv_profile_json;is_active;sort_order
+1;when;hmph;ISLAND;3540;31554;30000;31497;5587;false;false;false;because;../fake-data/blob/hipster.txt;true;15406
+2;inure hamburger zany;bemuse log;CORNER;17483;16462;3490;22039;32377;false;false;false;knotty yet along;../fake-data/blob/hipster.txt;false;18007
+3;tarry how calmly;how arraign;FILLER;29588;4123;27045;14719;3744;false;false;true;yahoo circa;../fake-data/blob/hipster.txt;false;18825
+4;whoa truthfully kit;fat but yearly;UPPER;5013;636;20358;16502;11054;false;true;false;blah thoroughly;../fake-data/blob/hipster.txt;true;27268
+5;engender leading irk;on aha spirited;PANEL;7378;18005;7382;2851;17674;true;false;true;hm supposing;../fake-data/blob/hipster.txt;false;5539
+6;deceivingly trustworthy babyish;oof beyond tiny;APPLIANCE;9318;3500;28782;7826;12692;true;true;true;jungle;../fake-data/blob/hipster.txt;true;14392
+7;deflate however;scowl;UPPER;13203;1178;8420;7488;9272;true;true;false;catalog ah pasta;../fake-data/blob/hipster.txt;true;11862
+8;besides official;onset;APPLIANCE;12424;20801;17284;24829;5597;false;true;true;sequester best pike;../fake-data/blob/hipster.txt;true;19860
+9;flimsy;yippee;UPPER;14966;16353;18182;16016;1079;true;true;true;flimsy tabletop weatherize;../fake-data/blob/hipster.txt;false;16894
+10;blah than;oxygenate;ISLAND;19706;3558;19876;1617;13237;false;true;true;fort yahoo;../fake-data/blob/hipster.txt;true;72

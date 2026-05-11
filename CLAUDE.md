@@ -1,6 +1,7 @@
 # Kalitron Furniture Studio — Claude Code Context
 
 ## Project Overview
+
 AI-powered kitchen and closet design platform. Clients chat with an AI designer,
 upload reference photos, select styles, and receive photorealistic concepts generated
 by Stable Diffusion XL. Built as a JHipster monolith.
@@ -12,27 +13,26 @@ by Stable Diffusion XL. Built as a JHipster monolith.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | Spring Boot 4 · Java 21 · Gradle 9.4 |
-| Frontend | React 19 · TypeScript |
-| Auth | JWT stateless |
-| DB | PostgreSQL 16 (prod) · H2 (dev) |
-| Migrations | Liquibase |
-| API docs | OpenAPI / Swagger |
-| Tests | JUnit 5 · Cypress |
-| Base package | mx.kalitron.studio |
-| AI Gateway | FastAPI Python — localhost:8000 (separate repo) |
+| Layer        | Technology                                           |
+| ------------ | ---------------------------------------------------- |
+| Backend      | Spring Boot 4 · Java 21 · Gradle 9.4                 |
+| Frontend     | React 19 · TypeScript                                |
+| Auth         | JWT stateless                                        |
+| DB           | PostgreSQL 16 (prod/dev per generated `.yo-rc.json`) |
+| Migrations   | Liquibase                                            |
+| API docs     | OpenAPI / Swagger                                    |
+| Tests        | JUnit 5 · Cypress                                    |
+| Base package | com.kalitron.studio                                  |
+| AI Gateway   | FastAPI Python — localhost:8000 (separate repo)      |
 
-https://www.jhipster.tech/2026/03/10/jhipster-release-9.0.0.html
----
+## https://www.jhipster.tech/2026/03/10/jhipster-release-9.0.0.html
 
 ## Project Structure
 
 ```
 src/
 ├── main/
-│   ├── java/mx/kalitron/studio/
+│   ├── java/com/kalitron/studio/
 │   │   ├── domain/              ← JPA entities (never edit directly)
 │   │   ├── repository/          ← Spring Data repos
 │   │   ├── service/             ← Interfaces + Impl
@@ -64,24 +64,80 @@ src/
 
 ---
 
+## Product Flow
+
+The product is designed as:
+
+```
+Client conversation
+  → AI-assisted design discovery
+  → structured room/layout/specs
+  → visual concept generation
+  → cabinet modules and BOM
+  → quote/proposal
+  → Fusion 360 CSV/artifacts
+  → parametric manufacturing layout
+```
+
+Do not treat the AI render as the source of manufacturing truth. The render is a
+client-facing concept. Fabrication data must come from validated `KitchenSpec`,
+room geometry, `Cabinet`, `CabinetPart`, and exported artifacts.
+
+---
+
 ## Domain Entities
 
-| Entity | Purpose |
-|--------|---------|
-| `DesignSession` | Core aggregate — one per client project |
-| `ChatMessage` | Full conversation history per session |
-| `KitchenSpec` | Confirmed kitchen specifications |
-| `Cabinet` | Individual furniture piece — maps to CSV row for Fusion 360 |
-| `Quote` | Pricing document |
-| `QuoteItem` | Individual line item in a quote |
-| `DesignImage` | Reference photos, renders, sketches |
-| `CatalogStyle` | Pre-loaded design inspirations (public, no auth) |
+| Entity            | Purpose                                                  |
+| ----------------- | -------------------------------------------------------- |
+| `DesignSession`   | Core aggregate — one per client project                  |
+| `ChatMessage`     | Full conversation history per session                    |
+| `KitchenSpec`     | Confirmed kitchen/closet specifications                  |
+| `RoomWall`        | Wall segment geometry for real room layout               |
+| `RoomObstacle`    | Windows, doors, columns, outlets, water/gas points       |
+| `CabinetTemplate` | Parametric module template that can produce cabinets     |
+| `Cabinet`         | Individual furniture module — maps toward CSV/Fusion 360 |
+| `CabinetPart`     | BOM/cut-list part belonging to a cabinet                 |
+| `Material`        | Sheet/material catalog with costs and dimensions         |
+| `Hardware`        | Hinges, slides, handles, and other priced hardware       |
+| `Quote`           | Pricing document                                         |
+| `QuoteItem`       | Individual line item in a quote                          |
+| `DesignImage`     | Reference photos, renders, sketches                      |
+| `DesignArtifact`  | CSV, Fusion script, PDF, STEP, DXF, BOM JSON outputs     |
+| `GenerationJob`   | Async job tracking for AI render, BOM, quote, Fusion     |
+| `CatalogStyle`    | Pre-loaded design inspirations (public, no auth)         |
+
+---
+
+## Domain Modeling Rules
+
+- Keep uploaded/generated binary data out of `ChatMessage`; store files externally
+  and reference them through `DesignImage` or `DesignArtifact`.
+- Keep Fusion/CSV outputs out of `DesignSession`; model them as `DesignArtifact`
+  records so a session can have multiple generated files.
+- Use `RoomWall` and `RoomObstacle` for real room constraints instead of relying
+  only on total width/height/depth fields.
+- Use `CabinetTemplate` for reusable parametric modules and `Cabinet` for the
+  placed/generated module instance.
+- Use `CabinetPart` for BOM and cut-list details instead of fixed fields such as
+  `panelTop`, `panelBottom`, etc.
+- Use catalog entities (`Material`, `Hardware`) for pricing inputs that change
+  over time. Avoid hardcoding real commercial prices in enums.
+- Track long-running or failure-prone operations through `GenerationJob`.
+
+Recommended `SessionStatus` progression:
+
+```
+DRAFT → CHATTING → SPECS_READY → VISUAL_GENERATED → LAYOUT_CONFIRMED
+      → BOM_GENERATED → QUOTE_GENERATED → FUSION_GENERATED
+      → COMPLETED / ARCHIVED
+```
 
 ---
 
 ## Critical Rules
 
 ### NEVER touch these generated files
+
 - `src/main/resources/config/liquibase/master.xml`
 - Any file in `src/main/java/.../domain/` — entities are JHipster-generated
 - Any file in `src/main/webapp/app/entities/` — CRUD is JHipster-generated
@@ -90,6 +146,7 @@ src/
 ### ALWAYS follow these patterns
 
 **Backend layer order:**
+
 ```
 Custom Resource → Service Interface → ServiceImpl → Repository → Entity
                                    ↓
@@ -103,6 +160,7 @@ Custom Resource → Service Interface → ServiceImpl → Repository → Entity
 - Custom endpoints go in `web/rest/custom/` — never modify JHipster-generated resources
 
 **Frontend:**
+
 - New components go in `modules/` not `entities/`
 - API calls via axios in `shared/api/`
 - Custom hooks in `shared/hooks/`
@@ -111,24 +169,25 @@ Custom Resource → Service Interface → ServiceImpl → Repository → Entity
 
 ## Naming Conventions
 
-| Element | Convention | Example |
-|---------|-----------|---------|
-| Entity | PascalCase | `DesignSession` |
-| DTO | `EntityDTO` | `DesignSessionDTO` |
-| Mapper | `EntityMapper` | `DesignSessionMapper` |
-| ServiceImpl | `EntityServiceImpl` | `DesignSessionServiceImpl` |
-| Custom Resource | descriptive | `ChatResource`, `DesignConceptResource` |
-| React component | PascalCase | `DesignChat.tsx` |
-| React hook | camelCase + use | `useImageGeneration.ts` |
-| API endpoint | kebab-case | `/api/chat/message` |
-| DB table | snake_case | `design_session` |
-| Branch | `feat/eN-short-description` | `feat/e2-chat-endpoint` |
+| Element         | Convention                  | Example                                 |
+| --------------- | --------------------------- | --------------------------------------- |
+| Entity          | PascalCase                  | `DesignSession`                         |
+| DTO             | `EntityDTO`                 | `DesignSessionDTO`                      |
+| Mapper          | `EntityMapper`              | `DesignSessionMapper`                   |
+| ServiceImpl     | `EntityServiceImpl`         | `DesignSessionServiceImpl`              |
+| Custom Resource | descriptive                 | `ChatResource`, `DesignConceptResource` |
+| React component | PascalCase                  | `DesignChat.tsx`                        |
+| React hook      | camelCase + use             | `useImageGeneration.ts`                 |
+| API endpoint    | kebab-case                  | `/api/chat/message`                     |
+| DB table        | snake_case                  | `design_session`                        |
+| Branch          | `feat/eN-short-description` | `feat/e2-chat-endpoint`                 |
 
 ---
 
 ## Key Configuration
 
 ### application.yml custom properties
+
 ```yaml
 app:
   fastapi:
@@ -142,6 +201,7 @@ app:
 ```
 
 ### Security — public endpoints
+
 ```java
 // In SecurityConfiguration.java
 .requestMatchers("/api/catalog-styles").permitAll()
@@ -151,15 +211,16 @@ app:
 ```
 
 ### FastAPI Gateway service pattern
+
 ```java
 @Service
 public class FastApiGateway {
-    private final RestClient restClient;
 
-    public FastApiGateway(RestClient.Builder builder,
-                          @Value("${app.fastapi.base-url}") String baseUrl) {
-        this.restClient = builder.baseUrl(baseUrl).build();
-    }
+  private final RestClient restClient;
+
+  public FastApiGateway(RestClient.Builder builder, @Value("${app.fastapi.base-url}") String baseUrl) {
+    this.restClient = builder.baseUrl(baseUrl).build();
+  }
 }
 ```
 
@@ -180,6 +241,7 @@ gh pr create --title "feat(eN): short description" --body "Closes #N"
 ```
 
 ### Commit message format
+
 ```
 type(scope): description - closes #N
 
@@ -222,6 +284,7 @@ open http://localhost:8080/swagger-ui/index.html
 ## Liquibase — Adding a changelog
 
 Always create new files in `src/main/resources/config/liquibase/changelog/`:
+
 ```xml
 <!-- YYYYMMDD_description.xml -->
 <databaseChangeLog>
@@ -234,6 +297,7 @@ Always create new files in `src/main/resources/config/liquibase/changelog/`:
 ```
 
 Then include it in `master.xml`:
+
 ```xml
 <include file="config/liquibase/changelog/20250601_add_render_url.xml"
          relativeToChangelogFile="false"/>
@@ -243,20 +307,21 @@ Then include it in `master.xml`:
 
 ## Frequent Errors
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| `Could not find or load main class` | Gradle cache corrupt | `./gradlew clean build` |
-| `Liquibase: relation already exists` | Changelog out of sync | `./gradlew liquibaseDiff` |
-| `401 on /api/chat` | Missing SecurityConfig rule | Add `.requestMatchers("/api/chat/**").authenticated()` |
-| `MapStruct: no property found` | DTO out of sync with entity | Regenerate entity or update DTO manually |
-| `CORS error` | FastAPI missing origin | Add `localhost:8080` to FastAPI `CORSMiddleware` |
-| `N+1 queries` | Missing `@EntityGraph` | Add `@EntityGraph(attributePaths = {...})` in Repository |
+| Error                                | Cause                       | Fix                                                      |
+| ------------------------------------ | --------------------------- | -------------------------------------------------------- |
+| `Could not find or load main class`  | Gradle cache corrupt        | `./gradlew clean build`                                  |
+| `Liquibase: relation already exists` | Changelog out of sync       | `./gradlew liquibaseDiff`                                |
+| `401 on /api/chat`                   | Missing SecurityConfig rule | Add `.requestMatchers("/api/chat/**").authenticated()`   |
+| `MapStruct: no property found`       | DTO out of sync with entity | Regenerate entity or update DTO manually                 |
+| `CORS error`                         | FastAPI missing origin      | Add `localhost:8080` to FastAPI `CORSMiddleware`         |
+| `N+1 queries`                        | Missing `@EntityGraph`      | Add `@EntityGraph(attributePaths = {...})` in Repository |
 
 ---
 
 ## Issue Resolution Checklist
 
 When resolving a GitHub issue, always:
+
 - [ ] Create branch `feat/eN-issue-short-name`
 - [ ] Implement following layer conventions above
 - [ ] Add or update tests (JUnit for backend, Cypress for E2E)

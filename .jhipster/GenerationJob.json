@@ -1,0 +1,68 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184130"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "jobType",
+      "fieldType": "GenerationJobType",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "AI_CHAT (Chat IA),AI_SPEC_EXTRACTION (Extracción de especificaciones),AI_RENDER (Render IA),BOM (BOM),QUOTE (Cotización),FUSION_MODEL (Modelo Fusion 360),EXPORT (Exportación)"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "GenerationJobStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "PENDING (Pendiente),RUNNING (En ejecución),DONE (Terminado),FAILED (Fallido),CANCELLED (Cancelado)"
+    },
+    {
+      "fieldName": "inputJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "outputJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "errorMessage",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "createdAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "startedAt",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "finishedAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "name": "GenerationJob",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "fileName",
+      "otherEntityName": "designArtifact",
+      "relationshipName": "artifact",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "sessionCode",
+      "otherEntityName": "designSession",
+      "otherEntityRelationshipName": "jobs",
+      "relationshipName": "session",
+      "relationshipSide": "right",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

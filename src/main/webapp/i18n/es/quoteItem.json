@@ -1,0 +1,32 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "quoteItem": {
+      "home": {
+        "title": "Quote Items",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Quote Item",
+        "createOrEditLabel": "Crear o editar Quote Item",
+        "notFound": "Ningún Quote Items encontrado"
+      },
+      "created": "Un nuevo Quote Item ha sido creado con el identificador {{ param }}",
+      "updated": "Un Quote Item ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Quote Item ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Quote Item {{ id }}?"
+      },
+      "detail": {
+        "title": "Quote Item"
+      },
+      "id": "ID",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPriceMxn": "Unit Price Mxn",
+      "totalMxn": "Total Mxn",
+      "category": "Category",
+      "notes": "Notes",
+      "cabinet": "Cabinet",
+      "hardware": "Hardware",
+      "quote": "Quote"
+    }
+  }
+}

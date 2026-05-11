@@ -1,0 +1,138 @@
+{
+  "annotations": {
+    "changelogDate": "20260511184123"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "sessionCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "projectType",
+      "fieldType": "ProjectType",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "KITCHEN (Cocina),CLOSET (Closet),BOTH (Cocina y closet)"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "SessionStatus",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "DRAFT (Borrador),CHATTING (En conversación),SPECS_READY (Especificaciones listas),VISUAL_GENERATED (Visual generado),LAYOUT_CONFIRMED (Layout confirmado),BOM_GENERATED (BOM generado),QUOTE_GENERATED (Cotización generada),FUSION_GENERATED (Fusion 360 generado),COMPLETED (Completado),ARCHIVED (Archivado)"
+    },
+    {
+      "fieldName": "clientName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "clientEmail",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "120"
+    },
+    {
+      "fieldName": "clientPhone",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "selectedStyle",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "80"
+    },
+    {
+      "fieldName": "notes",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "2000"
+    },
+    {
+      "fieldName": "createdAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "updatedAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "jpaMetamodelFiltering": true,
+  "name": "DesignSession",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "style",
+      "otherEntityName": "kitchenSpec",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "spec",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-one"
+    },
+    {
+      "otherEntityName": "chatMessage",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "messages",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "designImage",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "images",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "designArtifact",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "artifacts",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "generationJob",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "jobs",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "quote",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "quotes",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "roomWall",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "walls",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityName": "roomObstacle",
+      "otherEntityRelationshipName": "session",
+      "relationshipName": "obstacles",
+      "relationshipSide": "left",
+      "relationshipType": "one-to-many"
+    },
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "catalogStyle",
+      "relationshipName": "catalogStyle",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}
