@@ -1,238 +1,180 @@
-# kalitron-furniture-studio
+# Kalitron Furniture Studio
 
-This application was generated using JHipster 9.0.0, you can find documentation and help at [https://www.jhipster.tech/documentation-archive/v9.0.0](https://www.jhipster.tech/documentation-archive/v9.0.0).
+AI-powered kitchen and closet design studio that turns a client conversation into structured specs, visual concepts, quotes, and Fusion 360-ready fabrication artifacts.
 
-## Project Structure
+[![JHipster](https://img.shields.io/badge/JHipster-9.0.0-3E8ACC?logo=jhipster)](https://www.jhipster.tech/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Node is required for generation and recommended for development. `package.json` is always generated for a better development experience with prettier, commit hooks, scripts and so on.
+## Demo Preview
 
-In the project root, JHipster generates configuration files for tools like git, prettier, eslint, husky, and others that are well known and you can find references in the web.
+The planned demo flow is:
 
-`/src/*` structure follows default Java structure.
+```text
+Login -> New design session -> AI chat -> Reference photo -> Style selection
+      -> Visual concept -> Proposal -> Fusion 360 CSV/artifacts
+```
 
-- `.yo-rc.json` - Yeoman configuration file
-  JHipster configuration is stored in this file at `generator-jhipster` key. You may find `generator-jhipster-*` for specific blueprints configuration.
-- `.yo-resolve` (optional) - Yeoman conflict resolver
-  Allows to use a specific action when conflicts are found skipping prompts for files that matches a pattern. Each line should match `[pattern] [action]` with pattern been a [Minimatch](https://github.com/isaacs/minimatch#minimatch) pattern and action been one of skip (default if omitted) or force. Lines starting with `#` are considered comments and are ignored.
-- `.jhipster/*.json` - JHipster entity configuration files
+Demo screenshot is pending until the E2/E3 chat and visual concept screens are complete.
 
-- `npmw` - wrapper to use locally installed npm.
-  JHipster installs Node and npm locally using the build tool by default. This wrapper makes sure npm is installed locally and uses it avoiding some differences different versions can cause. By using `./npmw` instead of the traditional `npm` you can configure a Node-less environment to develop or test your application.
-- `/src/main/docker` - Docker configurations for the application and services that the application depends on
+## Architecture
 
-## Development
+```mermaid
+flowchart LR
+  Client[Client / Designer] --> React[React 19 + TypeScript]
+  React --> Spring[Spring Boot 4 JHipster Monolith]
+  Spring --> Auth[JWT Auth]
+  Spring --> Postgres[(PostgreSQL)]
+  Spring --> Liquibase[Liquibase Migrations]
+  Spring --> Storage[Object Storage: Cloudflare R2]
+  Spring --> FastAPI[FastAPI AI Gateway]
+  FastAPI --> LLM[AI Designer / LLM]
+  FastAPI --> SDXL[SDXL + ControlNet]
+  Spring --> Artifacts[DesignArtifact: CSV, PDF, STEP, DXF, BOM JSON]
+  Artifacts --> Fusion[Fusion 360 Scripts]
+  Fusion --> Layout[Parametric Manufacturing Layout]
+```
 
-The build system will install automatically the recommended version of Node and npm.
+The Spring Boot monolith owns authentication, sessions, domain data, quotes, proposals, and generated CRUD. The FastAPI gateway owns AI/model execution. Fusion 360 integration is artifact-based: the app exports structured CSV/artifacts from validated specs rather than treating AI renders as fabrication truth.
 
-We provide a wrapper to launch npm.
-You will only need to run this command when dependencies change in [package.json](package.json).
+## Features
+
+- JWT-secured JHipster monolith with React frontend.
+- AI-guided design sessions for kitchens and closets.
+- Persistent chat history and structured design specifications.
+- Reference image and render metadata through `DesignImage`.
+- txt2img concept generation path for prompt-only designs.
+- img2img concept generation path for uploaded client photos.
+- SDXL + ControlNet Canny strategy for preserving room structure.
+- Catalog styles for visual design inspiration.
+- Room geometry modeling with walls and obstacles.
+- Cabinet templates, cabinet instances, and cabinet parts for BOM/cut-list workflows.
+- Materials and hardware catalogs for quote inputs.
+- Quote and quote item model for proposal workflows.
+- `GenerationJob` tracking for long-running AI, BOM, quote, and Fusion export operations.
+- `DesignArtifact` model for CSV, PDF, STEP, DXF, Fusion scripts, and BOM JSON outputs.
+- PostgreSQL in development and production to support PostgreSQL-specific features such as fuzzy search, full-text search, `pg_trgm`, and future `pgvector`.
+
+## Tech Stack
+
+| Layer            | Technology                                           |
+| ---------------- | ---------------------------------------------------- |
+| Backend          | Spring Boot 4, Java 21, Gradle                       |
+| Frontend         | React 19, TypeScript, Webpack                        |
+| Platform         | JHipster 9.0.0 monolith                              |
+| Auth             | JWT stateless authentication                         |
+| Database         | PostgreSQL for development and production            |
+| Migrations       | Liquibase                                            |
+| API Docs         | OpenAPI / Swagger UI                                 |
+| Mapping          | MapStruct DTO mappers                                |
+| Tests            | JUnit 5, Jest, Cypress-ready JHipster structure      |
+| AI Gateway       | FastAPI Python service on `localhost:8000`           |
+| Image Generation | SDXL, ControlNet Canny, txt2img, img2img             |
+| Object Storage   | Cloudflare R2 strategy                               |
+| Fabrication      | Fusion 360 scripts consuming generated CSV/artifacts |
+
+## Domain Model
+
+The core workflow is:
+
+```text
+DesignSession
+  -> ChatMessage
+  -> KitchenSpec
+  -> RoomWall / RoomObstacle
+  -> CabinetTemplate / Cabinet / CabinetPart
+  -> DesignImage / DesignArtifact / GenerationJob
+  -> Quote / QuoteItem
+```
+
+The source JDL is in [`kitchen.jdl`](kitchen.jdl).
+
+## Getting Started
+
+Prerequisites:
+
+- Java 21
+- Node.js 22.22.2
+- Docker with Compose
+- PostgreSQL through the provided Docker Compose service
+- Optional: FastAPI AI gateway running at `http://localhost:8000`
+
+Run locally:
 
 ```bash
-./npmw install
+nvm use
+npm install
+docker compose -f src/main/docker/postgresql.yml up -d
+rm -rf build/webpack
+./gradlew
+npm run start
 ```
 
-We use npm scripts and Webpack as our build system.
+Open:
 
-Run the following commands in two separate terminals to create a blissful development experience where your browser
-auto-refreshes when files change on your hard drive.
+- App: http://localhost:9000
+- Backend: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui/index.html
+
+Useful validation commands:
 
 ```bash
-./npmw run backend:start
-./npmw run start
+./gradlew test integrationTest jacocoTestReport
+rm -rf build/webpack && npm run webapp:build:dev -- --env stats=minimal
 ```
 
-Npm is also used to manage CSS and JavaScript dependencies used in this application. You can upgrade dependencies by
-specifying a newer version in [package.json](package.json). You can also run `./npmw update` and `./npmw install` to manage dependencies.
-Add the `help` flag on any command to see how you can use it. For example, `./npmw help update`.
-
-The `./npmw run` command will list all the scripts available to run for this project.
-
-### PWA Support
-
-JHipster ships with PWA (Progressive Web App) support, and it's turned off by default. One of the main components of a PWA is a service worker.
-
-The service worker initialization code is commented out by default. To enable it, uncomment the following code in `src/main/webapp/index.html`:
-
-```html
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').then(function () {
-      console.log('Service Worker Registered');
-    });
-  }
-</script>
-```
-
-Note: [Workbox](https://developer.chrome.com/docs/workbox) powers JHipster's service worker. It dynamically generates the `service-worker.js` file.
-
-### Managing dependencies
-
-For example, to add [Leaflet](https://leafletjs.com/) library as a runtime dependency of your application, you would run the following command:
-
-```bash
-./npmw install --save --save-exact leaflet
-```
-
-To benefit from TypeScript type definitions from [DefinitelyTyped](https://definitelytyped.org/) repository in development, you would run the following command:
-
-```bash
-./npmw install --save-dev --save-exact @types/leaflet
-```
-
-Then you would import the JS and CSS files specified in library's installation instructions so that [Webpack][] knows about them:
-Note: There are still a few other things remaining to do for Leaflet that we won't detail here.
-
-For further instructions on how to develop with JHipster, have a look at [Using JHipster in development](https://www.jhipster.tech/development/).
-
-## Building for production
-
-### Packaging as jar
-
-To build the final jar and optimize the kalitron-furniture-studio application for production, run:
+Production build:
 
 ```bash
 ./gradlew -Pprod clean bootJar
 ```
 
-This will concatenate and minify the client CSS and JavaScript files. It will also modify `index.html` so it references these new files.
-To ensure everything worked, run:
+## Configuration
+
+Key environment variables:
 
 ```bash
-java -jar build/libs/*.jar
+DATABASE_URL=jdbc:postgresql://localhost:5432/kalitron
+DATABASE_USERNAME=kalitron_user
+DATABASE_PASSWORD=<secret>
+FASTAPI_URL=http://localhost:8000
+FUSION_SCRIPTS_DIR=C:/AI/FusionScripts
+OUTPUT_DIR=./outputs
 ```
 
-Then navigate to [http://localhost:8080](http://localhost:8080) in your browser.
+Production credentials must be supplied through environment variables or deployment secrets. They should never be committed to git.
 
-Refer to [Using JHipster in production][] for more details.
+## Roadmap
 
-### Packaging as war
+| Milestone                                                                                               | Goal                                                                           | Status      |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------- |
+| [v0.1 Project Setup & Infrastructure](https://github.com/outis10/kalitron-furniture-studio/milestone/1) | JHipster foundation, PostgreSQL, CI, ADRs, README                              | In progress |
+| [v0.2 Design Chat & Conversation](https://github.com/outis10/kalitron-furniture-studio/milestone/2)     | Multi-turn AI chat, session management, reference photo upload, catalog styles | Planned     |
+| [v0.3 Visual Concept Generation](https://github.com/outis10/kalitron-furniture-studio/milestone/3)      | SDXL txt2img/img2img, ControlNet, persisted generated images, resume sessions  | Planned     |
+| [v0.4 End-to-End Demo](https://github.com/outis10/kalitron-furniture-studio/milestone/4)                | Login -> chat -> concept -> proposal, Cypress E2E, portfolio-ready demo        | Planned     |
 
-To package your application as a war in order to deploy it to an application server, run:
+## Architecture Decisions
 
-```bash
-./gradlew -Pprod -Pwar clean bootWar
-```
+ADRs live in [`docs/adr`](docs/adr):
 
-### JHipster Control Center
+- [ADR-001: Use a JHipster Monolith Instead of Microservices](docs/adr/ADR-001-monolith-vs-microservices.md)
+- [ADR-002: Separate the AI Gateway as FastAPI Instead of Implementing AI Runtime in Java](docs/adr/ADR-002-ai-gateway-fastapi-vs-java.md)
+- [ADR-003: Use Local ComfyUI/SDXL First, Keep Cloud GPU APIs as an Escape Hatch](docs/adr/ADR-003-comfyui-vs-cloud-apis.md)
+- [ADR-004: Use Cloudflare R2 for Object Storage Instead of AWS S3](docs/adr/ADR-004-cloudflare-r2-vs-s3.md)
+- [ADR-005: Integrate Fusion 360 Through Generated CSV and Artifacts](docs/adr/ADR-005-fusion-360-integration-strategy.md)
 
-JHipster Control Center can help you manage and control your application(s). You can start a local control center server (accessible on http://localhost:7419) with:
+## Development Notes
 
-```bash
-docker compose -f src/main/docker/jhipster-control-center.yml up
-```
+- Custom backend endpoints should go under `web/rest/custom/`.
+- Generated JHipster CRUD under `src/main/webapp/app/entities/` should not be hand-edited except for regeneration fixes.
+- Business logic belongs in services, not REST resources.
+- Do not return JPA entities directly from custom APIs; use DTOs.
+- Uploaded files and generated binaries should be stored externally and referenced through `DesignImage` or `DesignArtifact`.
 
-## Testing
+## License
 
-### Spring Boot tests
-
-To launch your application's tests, run:
-
-```bash
-./gradlew test integrationTest jacocoTestReport
-```
-
-### Client tests
-
-Unit tests are run by Jest. They're located near components and can be run with:
-
-```bash
-./npmw test
-```
-
-## Others
-
-### Code quality using Sonar
-
-Sonar is used to analyse code quality. You can start a local Sonar server (accessible on http://localhost:9001) with:
-
-```bash
-docker compose -f src/main/docker/sonar.yml up -d
-```
-
-Note: we have turned off forced authentication redirect for UI in [src/main/docker/sonar.yml](src/main/docker/sonar.yml) for out of the box experience while trying out SonarQube, for real use cases turn it back on.
-
-You can run a Sonar analysis with using the [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner) or by using the gradle plugin.
-
-Then, run a Sonar analysis:
-
-```bash
-./gradlew -Pprod clean check jacocoTestReport sonarqube -Dsonar.login=admin -Dsonar.password=admin
-```
-
-Additionally, Instead of passing `sonar.password` and `sonar.login` as CLI arguments, these parameters can be configured from [sonar-project.properties](sonar-project.properties) as shown below:
-
-```bash
-sonar.login=admin
-sonar.password=admin
-```
-
-For more information, refer to the [Code quality page][].
-
-### Docker Compose support
-
-JHipster generates a number of Docker Compose configuration files in the [src/main/docker/](src/main/docker/) folder to launch required third party services.
-
-For example, to start required services in Docker containers, run:
-
-```bash
-docker compose -f src/main/docker/services.yml up -d
-```
-
-To stop and remove the containers, run:
-
-```bash
-docker compose -f src/main/docker/services.yml down
-```
-
-[Spring Docker Compose Integration](https://docs.spring.io/spring-boot/reference/features/dev-services.html) is enabled by default. It's possible to disable it in `application.yml`:
-
-```yaml
-spring:
-  ...
-  docker:
-    compose:
-      enabled: false
-```
-
-You can also fully dockerize your application and all the services that it depends on.
-To achieve this, first build a Docker image of your app by running:
-
-```bash
-npm run java:docker
-```
-
-Or build an arm64 Docker image when using an arm64 processor OS, i.e., Apple Silicon chips (M\*), running:
-
-```bash
-npm run java:docker:arm64
-```
-
-Then run:
-
-```bash
-docker compose -f src/main/docker/app.yml up -d
-```
-
-For more information refer to [Docker and Docker-Compose](https://www.jhipster.tech/documentation-archive/v9.0.0/docker-compose/), this page also contains information on the Docker Compose sub-generator (`jhipster docker-compose`), which is able to generate Docker configurations for one or several JHipster applications.
-
-## Continuous Integration (optional)
-
-To configure CI for your project, run the ci-cd sub-generator (`jhipster ci-cd`), this will let you generate configuration files for a number of Continuous Integration systems. Consult the [Setting up Continuous Integration](https://www.jhipster.tech/documentation-archive/v9.0.0/setting-up-ci/) page for more information.
-
-## References
-
-- [JHipster Homepage and latest documentation](https://www.jhipster.tech/)
-- [JHipster 9.0.0 archive](https://www.jhipster.tech/documentation-archive/v9.0.0)
-- [Using JHipster in development](https://www.jhipster.tech/documentation-archive/v9.0.0/development/)
-- [Using Docker and Docker-Compose](https://www.jhipster.tech/documentation-archive/v9.0.0/docker-compose)
-- [Using JHipster in production](https://www.jhipster.tech/documentation-archive/v9.0.0/production/)
-- [Running tests page](https://www.jhipster.tech/documentation-archive/v9.0.0/running-tests/)
-- [Code quality page](https://www.jhipster.tech/documentation-archive/v9.0.0/code-quality/)
-- [Setting up Continuous Integration](https://www.jhipster.tech/documentation-archive/v9.0.0/setting-up-ci/)
-- [Node.js](https://nodejs.org/)
-- [NPM](https://www.npmjs.com/)
-- [Webpack](https://webpack.js.org/)
-- [BrowserSync](https://www.browsersync.io/)
-- [Jest](https://jestjs.io)
-- [Leaflet](https://leafletjs.com/)
-- [DefinitelyTyped](https://definitelytyped.org/)
+This project is licensed under the MIT License. See [`LICENSE`](LICENSE).
