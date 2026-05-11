@@ -41,6 +41,8 @@ flowchart LR
 
 The Spring Boot monolith owns authentication, sessions, domain data, quotes, proposals, and generated CRUD. The FastAPI gateway owns AI/model execution. Fusion 360 integration is artifact-based: the app exports structured CSV/artifacts from validated specs rather than treating AI renders as fabrication truth.
 
+AI Gateway repository: [outis10/kalitron-furniture-ai-gateway](https://github.com/outis10/kalitron-furniture-ai-gateway)
+
 ## Features
 
 - JWT-secured JHipster monolith with React frontend.
@@ -61,21 +63,21 @@ The Spring Boot monolith owns authentication, sessions, domain data, quotes, pro
 
 ## Tech Stack
 
-| Layer            | Technology                                           |
-| ---------------- | ---------------------------------------------------- |
-| Backend          | Spring Boot 4, Java 21, Gradle                       |
-| Frontend         | React 19, TypeScript, Webpack                        |
-| Platform         | JHipster 9.0.0 monolith                              |
-| Auth             | JWT stateless authentication                         |
-| Database         | PostgreSQL for development and production            |
-| Migrations       | Liquibase                                            |
-| API Docs         | OpenAPI / Swagger UI                                 |
-| Mapping          | MapStruct DTO mappers                                |
-| Tests            | JUnit 5, Jest, Cypress-ready JHipster structure      |
-| AI Gateway       | FastAPI Python service on `localhost:8000`           |
-| Image Generation | SDXL, ControlNet Canny, txt2img, img2img             |
-| Object Storage   | Cloudflare R2 strategy                               |
-| Fabrication      | Fusion 360 scripts consuming generated CSV/artifacts |
+| Layer            | Technology                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------ |
+| Backend          | Spring Boot 4, Java 21, Gradle                                                                         |
+| Frontend         | React 19, TypeScript, Webpack                                                                          |
+| Platform         | JHipster 9.0.0 monolith                                                                                |
+| Auth             | JWT stateless authentication                                                                           |
+| Database         | PostgreSQL for development and production                                                              |
+| Migrations       | Liquibase                                                                                              |
+| API Docs         | OpenAPI / Swagger UI                                                                                   |
+| Mapping          | MapStruct DTO mappers                                                                                  |
+| Tests            | JUnit 5, Jest, Cypress-ready JHipster structure                                                        |
+| AI Gateway       | [FastAPI Python service](https://github.com/outis10/kalitron-furniture-ai-gateway) on `localhost:8000` |
+| Image Generation | SDXL, ControlNet Canny, txt2img, img2img                                                               |
+| Object Storage   | Cloudflare R2 strategy                                                                                 |
+| Fabrication      | Fusion 360 scripts consuming generated CSV/artifacts                                                   |
 
 ## Domain Model
 
@@ -101,7 +103,7 @@ Prerequisites:
 - Node.js 22.22.2
 - Docker with Compose
 - PostgreSQL through the provided Docker Compose service
-- Optional: FastAPI AI gateway running at `http://localhost:8000`
+- Optional: [FastAPI AI gateway](https://github.com/outis10/kalitron-furniture-ai-gateway) running at `http://localhost:8000`
 
 Run locally:
 
