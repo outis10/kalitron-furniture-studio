@@ -65,18 +65,24 @@ class ChatResourceIT {
             .perform(
                 post("/api/chat/sessions")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(Map.of("clientName", "Ana Lopez", "clientEmail", "ana@example.com")))
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of("clientName", "Ana Lopez", "clientEmail", "ana@example.com", "selectedStyle", "Moderno Blanco")
+                        )
+                    )
             )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.sessionId").isNumber())
             .andExpect(jsonPath("$.sessionCode").value(startsWith("KD-")))
             .andExpect(jsonPath("$.clientName").value("Ana Lopez"))
             .andExpect(jsonPath("$.clientEmail").value("ana@example.com"))
+            .andExpect(jsonPath("$.selectedStyle").value("Moderno Blanco"))
             .andExpect(jsonPath("$.status").value("CHATTING"))
             .andExpect(jsonPath("$.messages", hasSize(1)))
             .andExpect(jsonPath("$.messages[0].role").value("ASSISTANT"));
 
         assertThat(designSessionRepository.findAll()).hasSize(1);
+        assertThat(designSessionRepository.findAll().getFirst().getSelectedStyle()).isEqualTo("Moderno Blanco");
         assertThat(chatMessageRepository.findAll()).hasSize(1);
     }
 
@@ -105,7 +111,18 @@ class ChatResourceIT {
             .perform(
                 post("/api/chat/message")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "message", "Mi proyecto es cocina moderna")))
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of(
+                                "sessionId",
+                                session.getId(),
+                                "message",
+                                "Mi proyecto es cocina moderna",
+                                "selectedStyle",
+                                "Moderno Gris"
+                            )
+                        )
+                    )
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.sessionId").value(session.getId()))
@@ -116,6 +133,7 @@ class ChatResourceIT {
         assertThat(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(session.getId()))
             .extracting(ChatMessage::getRole)
             .containsExactly(MessageRole.USER, MessageRole.ASSISTANT);
+        assertThat(designSessionRepository.findById(session.getId()).orElseThrow().getSelectedStyle()).isEqualTo("Moderno Gris");
     }
 
     private DesignSession saveSession(String sessionCode) {

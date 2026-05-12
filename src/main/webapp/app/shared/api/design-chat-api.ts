@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
+
 export type ChatRole = 'USER' | 'ASSISTANT' | 'SYSTEM';
 
 export interface ChatMessageView {
@@ -13,6 +15,7 @@ export interface ChatSession {
   sessionCode: string;
   clientName: string;
   clientEmail: string;
+  selectedStyle?: string | null;
   projectType: string;
   status: string;
   messages: ChatMessageView[];
@@ -29,6 +32,7 @@ export interface ChatResponse {
 export interface StartChatSessionRequest {
   clientName: string;
   clientEmail: string;
+  selectedStyle?: string | null;
 }
 
 export const startChatSession = async (request: StartChatSessionRequest): Promise<ChatSession> => {
@@ -41,7 +45,12 @@ export const resumeChatSession = async (sessionCode: string): Promise<ChatSessio
   return response.data;
 };
 
-export const sendChatMessage = async (sessionId: number, message: string): Promise<ChatResponse> => {
-  const response = await axios.post<ChatResponse>('/api/chat/message', { sessionId, message });
+export const sendChatMessage = async (sessionId: number, message: string, selectedStyle?: string | null): Promise<ChatResponse> => {
+  const response = await axios.post<ChatResponse>('/api/chat/message', { sessionId, message, selectedStyle });
+  return response.data;
+};
+
+export const getCatalogStyles = async (): Promise<ICatalogStyle[]> => {
+  const response = await axios.get<ICatalogStyle[]>('/api/catalog-styles');
   return response.data;
 };

@@ -138,7 +138,8 @@ DRAFT → CHATTING → SPECS_READY → VISUAL_GENERATED → LAYOUT_CONFIRMED
 
 ### NEVER touch these generated files
 
-- `src/main/resources/config/liquibase/master.xml`
+- `src/main/resources/config/liquibase/master.xml`, except to add a new explicit
+  `<include>` for a hand-written changelog.
 - Any file in `src/main/java/.../domain/` — entities are JHipster-generated
 - Any file in `src/main/webapp/app/entities/` — CRUD is JHipster-generated
 - Files annotated with `@Generated`
@@ -336,6 +337,16 @@ Then include it in `master.xml`:
 <include file="config/liquibase/changelog/20250601_add_render_url.xml"
          relativeToChangelogFile="false"/>
 ```
+
+### Liquibase immutability
+
+- Treat every committed Liquibase changeset as immutable.
+- Never edit a changeset that may have already run in any local, CI, staging, or
+  production database.
+- To fix schema or seed data, add a new incremental changeset with a new id.
+- Do not use `clearCheckSums` as a normal fix; it hides migration history drift.
+- Hand-written changelogs must be explicitly included in `master.xml` because this
+  project does not use `includeAll`.
 
 ---
 

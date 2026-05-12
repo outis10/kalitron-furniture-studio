@@ -1,6 +1,6 @@
 # E2 Issue 10: Browse Catalog Styles
 
-Status: Draft
+Status: Implementing
 Issue: #10
 Epic: #7
 
@@ -15,12 +15,12 @@ style can guide the AI conversation.
 
 ## Acceptance Criteria
 
-- [ ] Style cards appear at session start before the first message.
-- [ ] Each card shows thumbnail, style name, price range badge, and description.
-- [ ] Client can select one style or skip.
-- [ ] Selected style is sent as context to the AI in every message.
-- [ ] Styles load from a public endpoint with no JWT required.
-- [ ] At least 6 styles are preloaded: Moderno, Minimalista, Rustico, Clasico, Industrial, Escandinavo.
+- [x] Style cards appear at session start before the first message.
+- [x] Each card shows thumbnail, style name, price range badge, and description.
+- [x] Client can select one style or skip.
+- [x] Selected style is sent as context to the AI in every message.
+- [x] Styles load from a public endpoint with no JWT required.
+- [x] At least 6 styles are preloaded: Moderno, Minimalista, Rustico, Clasico, Industrial, Escandinavo.
 
 ## API Contract
 
@@ -34,6 +34,7 @@ Response: paginated or array response using the generated JHipster DTO shape.
 
 - Uses existing `CatalogStyle`.
 - Only active styles should be shown to clients.
+- Selected style is stored on `DesignSession.selectedStyle` as the selected catalog style name.
 
 ## Frontend Behavior
 
@@ -46,6 +47,8 @@ Response: paginated or array response using the generated JHipster DTO shape.
 
 - Endpoint must be public in security configuration.
 - Avoid returning inactive styles in the public experience.
+- Chat session start accepts optional `selectedStyle`.
+- Chat message send accepts optional `selectedStyle` so the later AI Gateway proxy can forward style context.
 
 ## Test Plan
 
@@ -53,7 +56,8 @@ Response: paginated or array response using the generated JHipster DTO shape.
 - Frontend test for select and skip.
 - Manual responsive check at 375px.
 
-## Open Questions
+## Decisions
 
-- [ ] Should the public endpoint return all generated fields or a smaller public DTO?
-- [ ] Should selected style be stored on `DesignSession`?
+- The MVP uses the generated `CatalogStyleDTO` shape from `GET /api/catalog-styles`.
+- The frontend filters inactive styles defensively.
+- Selected style is persisted on `DesignSession.selectedStyle`; a future relationship can be added if analytics or catalog integrity require it.

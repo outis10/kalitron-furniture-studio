@@ -24,12 +24,12 @@ built before code changes start.
 
 ## Status Values
 
-| Status | Meaning |
-| --- | --- |
-| Draft | Requirements are being shaped. Do not implement yet. |
-| Reviewed | Scope and contracts are stable enough to build. |
-| Implementing | Code is in progress against this spec. |
-| Implemented | Code and verification are complete. |
+| Status       | Meaning                                              |
+| ------------ | ---------------------------------------------------- |
+| Draft        | Requirements are being shaped. Do not implement yet. |
+| Reviewed     | Scope and contracts are stable enough to build.      |
+| Implementing | Code is in progress against this spec.               |
+| Implemented  | Code and verification are complete.                  |
 
 ## Directory Layout
 
@@ -54,6 +54,9 @@ docs/specs/
 - Specs must describe observable behavior, not implementation wishes.
 - API contracts must include auth, request, response, validation, and errors.
 - Data model changes must name affected entities and persistence rules.
+- Database changes must state whether the migration is new or corrective.
+- Corrective database changes require a new Liquibase changeset; never edit a
+  changeset that may already have run in any local, CI, staging, or production database.
 - Frontend specs must cover loading, empty, error, success, and mobile states.
 - AI-related specs must separate deterministic Studio behavior from AI Gateway behavior.
 - Pull requests must link the spec file and the GitHub issue.

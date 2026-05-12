@@ -16,6 +16,9 @@ public class ChatSessionStartRequestDTO implements Serializable {
     @Size(max = 120)
     private String clientEmail;
 
+    @Size(max = 80)
+    private String selectedStyle;
+
     public String getClientName() {
         return clientName;
     }
@@ -30,5 +33,13 @@ public class ChatSessionStartRequestDTO implements Serializable {
 
     public void setClientEmail(String clientEmail) {
         this.clientEmail = clientEmail;
+    }
+
+    public String getSelectedStyle() {
+        return selectedStyle;
+    }
+
+    public void setSelectedStyle(String selectedStyle) {
+        this.selectedStyle = selectedStyle;
     }
 }
