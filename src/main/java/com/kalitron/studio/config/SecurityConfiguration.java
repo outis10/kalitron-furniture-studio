@@ -65,6 +65,7 @@ public class SecurityConfiguration {
                     .requestMatchers(HttpMethod.GET, "/api/authenticate").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/auth/google/client-id").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/catalog-styles").permitAll()
                     .requestMatchers("/api/register").permitAll()
                     .requestMatchers("/api/activate").permitAll()
                     .requestMatchers("/api/account/reset-password/init").permitAll()

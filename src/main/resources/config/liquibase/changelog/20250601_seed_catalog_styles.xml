@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250601-1-seed-catalog-styles" author="kalitron">
+        <delete tableName="catalog_style">
+            <where>id between 1 and 10</where>
+        </delete>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="201"/>
+            <column name="name" value="Moderno Blanco"/>
+            <column name="description" value="Frentes blancos limpios, superficies lisas y herrajes discretos para una cocina luminosa y actual."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/moderno-blanco.webp"/>
+            <column name="style" value="moderno"/>
+            <column name="primary_finish" value="HIGH_GLOSS_WHITE"/>
+            <column name="price_range" value="medio"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="10"/>
+        </insert>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="202"/>
+            <column name="name" value="Moderno Gris"/>
+            <column name="description" value="Paleta gris neutra con líneas rectas y contraste sobrio para espacios contemporáneos."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/moderno-gris.webp"/>
+            <column name="style" value="moderno"/>
+            <column name="primary_finish" value="MATTE_GRAY"/>
+            <column name="price_range" value="medio"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="20"/>
+        </insert>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="203"/>
+            <column name="name" value="Minimalista Negro"/>
+            <column name="description" value="Acabado negro mate, composición limpia y detalles premium para una presencia elegante."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/minimalista-negro.webp"/>
+            <column name="style" value="minimalista"/>
+            <column name="primary_finish" value="MATTE_BLACK"/>
+            <column name="price_range" value="premium"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="30"/>
+        </insert>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="204"/>
+            <column name="name" value="Madera Natural"/>
+            <column name="description" value="Texturas de madera clara y calidez visual para un ambiente natural sin perder orden."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/madera-natural.webp"/>
+            <column name="style" value="rustico"/>
+            <column name="primary_finish" value="WOOD_OAK"/>
+            <column name="price_range" value="medio"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="40"/>
+        </insert>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="205"/>
+            <column name="name" value="Rustico Pino"/>
+            <column name="description" value="Acabado pino y carácter artesanal para proyectos cálidos con presupuesto controlado."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/rustico-pino.webp"/>
+            <column name="style" value="rustico"/>
+            <column name="primary_finish" value="WOOD_PINE"/>
+            <column name="price_range" value="economico"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="50"/>
+        </insert>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="206"/>
+            <column name="name" value="Clasico Crema"/>
+            <column name="description" value="Tonos crema, molduras suaves y una composición tradicional para un resultado refinado."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/clasico-crema.webp"/>
+            <column name="style" value="clasico"/>
+            <column name="primary_finish" value="MATTE_WHITE"/>
+            <column name="price_range" value="premium"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="60"/>
+        </insert>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="207"/>
+            <column name="name" value="Industrial"/>
+            <column name="description" value="Contrastes oscuros, materiales aparentes y una estética práctica de inspiración urbana."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/industrial.webp"/>
+            <column name="style" value="industrial"/>
+            <column name="primary_finish" value="MATTE_BLACK"/>
+            <column name="price_range" value="medio"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="70"/>
+        </insert>
+        <insert tableName="catalog_style">
+            <column name="id" valueNumeric="208"/>
+            <column name="name" value="Escandinavo"/>
+            <column name="description" value="Blancos suaves, madera clara y funcionalidad simple para una cocina ligera y acogedora."/>
+            <column name="thumbnail_path" value="/content/images/catalog-styles/escandinavo.webp"/>
+            <column name="style" value="minimalista"/>
+            <column name="primary_finish" value="WOOD_OAK"/>
+            <column name="price_range" value="medio"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="sort_order" valueNumeric="80"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

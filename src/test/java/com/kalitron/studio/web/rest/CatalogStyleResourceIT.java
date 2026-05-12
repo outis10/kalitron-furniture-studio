@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -246,6 +247,26 @@ class CatalogStyleResourceIT {
             .andExpect(jsonPath("$.[*].priceRange").value(hasItem(DEFAULT_PRICE_RANGE)))
             .andExpect(jsonPath("$.[*].isActive").value(hasItem(DEFAULT_IS_ACTIVE)))
             .andExpect(jsonPath("$.[*].sortOrder").value(hasItem(DEFAULT_SORT_ORDER)));
+    }
+
+    @Test
+    @WithAnonymousUser
+    void getAllCatalogStylesIsPublicAndReturnsSeedData() throws Exception {
+        restCatalogStyleMockMvc
+            .perform(get(ENTITY_API_URL))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$.length()").value(8))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Moderno Blanco")))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Moderno Gris")))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Minimalista Negro")))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Madera Natural")))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Rustico Pino")))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Clasico Crema")))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Industrial")))
+            .andExpect(jsonPath("$.[*].name").value(hasItem("Escandinavo")))
+            .andExpect(jsonPath("$.[*].isActive").value(org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is(true))));
     }
 
     @Test
