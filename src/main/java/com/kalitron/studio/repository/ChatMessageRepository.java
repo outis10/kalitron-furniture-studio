@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+    List<ChatMessage> findBySessionIdOrderByCreatedAtAsc(Long sessionId);
+
     default Optional<ChatMessage> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }
