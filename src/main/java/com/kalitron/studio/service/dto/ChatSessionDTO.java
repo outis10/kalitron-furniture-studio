@@ -16,6 +16,8 @@ public class ChatSessionDTO implements Serializable {
 
     private String clientEmail;
 
+    private String selectedStyle;
+
     private ProjectType projectType;
 
     private SessionStatus status;
@@ -52,6 +54,14 @@ public class ChatSessionDTO implements Serializable {
 
     public void setClientEmail(String clientEmail) {
         this.clientEmail = clientEmail;
+    }
+
+    public String getSelectedStyle() {
+        return selectedStyle;
+    }
+
+    public void setSelectedStyle(String selectedStyle) {
+        this.selectedStyle = selectedStyle;
     }
 
     public ProjectType getProjectType() {

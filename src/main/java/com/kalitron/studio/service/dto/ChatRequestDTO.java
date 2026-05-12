@@ -16,6 +16,9 @@ public class ChatRequestDTO implements Serializable {
 
     private String imageBase64;
 
+    @Size(max = 80)
+    private String selectedStyle;
+
     public Long getSessionId() {
         return sessionId;
     }
@@ -38,5 +41,13 @@ public class ChatRequestDTO implements Serializable {
 
     public void setImageBase64(String imageBase64) {
         this.imageBase64 = imageBase64;
+    }
+
+    public String getSelectedStyle() {
+        return selectedStyle;
+    }
+
+    public void setSelectedStyle(String selectedStyle) {
+        this.selectedStyle = selectedStyle;
     }
 }

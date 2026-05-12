@@ -3,11 +3,38 @@ import './design-chat.scss';
 import React, { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Form, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faRotateRight } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faPaperPlane, faRotateRight } from '@fortawesome/free-solid-svg-icons';
 
-import { ChatMessageView, ChatSession, resumeChatSession, sendChatMessage, startChatSession } from 'app/shared/api/design-chat-api';
+import {
+  ChatMessageView,
+  ChatSession,
+  getCatalogStyles,
+  resumeChatSession,
+  sendChatMessage,
+  startChatSession,
+} from 'app/shared/api/design-chat-api';
+import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
 
 const STORAGE_KEY = 'kalitron.designChat.sessionCode';
+
+const formatPriceRange = (priceRange?: string | null) => {
+  if (!priceRange) {
+    return 'Precio por definir';
+  }
+
+  const normalizedPriceRange = priceRange.toLowerCase();
+  if (normalizedPriceRange === 'economico') {
+    return 'Precio economico';
+  }
+  if (normalizedPriceRange === 'medio') {
+    return 'Precio medio';
+  }
+  if (normalizedPriceRange === 'premium') {
+    return 'Precio premium';
+  }
+
+  return `Precio ${priceRange}`;
+};
 
 const DesignChat = () => {
   const [clientName, setClientName] = useState('');
@@ -15,10 +42,31 @@ const DesignChat = () => {
   const [session, setSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessageView[]>([]);
   const [draft, setDraft] = useState('');
+  const [catalogStyles, setCatalogStyles] = useState<ICatalogStyle[]>([]);
+  const [selectedStyle, setSelectedStyle] = useState<ICatalogStyle | null>(null);
+  const [expandedStyleId, setExpandedStyleId] = useState<string | number | null>(null);
+  const [styleSkipped, setStyleSkipped] = useState(false);
+  const [isLoadingStyles, setIsLoadingStyles] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsLoadingStyles(true);
+    getCatalogStyles()
+      .then(styles => {
+        setCatalogStyles(
+          styles
+            .filter(style => style.isActive)
+            .sort((left, right) => (left.sortOrder ?? Number.MAX_SAFE_INTEGER) - (right.sortOrder ?? Number.MAX_SAFE_INTEGER)),
+        );
+      })
+      .catch(() => {
+        setError('No se pudieron cargar los estilos de catálogo.');
+      })
+      .finally(() => setIsLoadingStyles(false));
+  }, []);
 
   useEffect(() => {
     const storedSessionCode = window.localStorage.getItem(STORAGE_KEY);
@@ -31,6 +79,10 @@ const DesignChat = () => {
       .then(resumedSession => {
         setSession(resumedSession);
         setMessages(resumedSession.messages ?? []);
+        if (resumedSession.selectedStyle) {
+          setSelectedStyle({ name: resumedSession.selectedStyle, isActive: true });
+          setStyleSkipped(false);
+        }
       })
       .catch(() => {
         window.localStorage.removeItem(STORAGE_KEY);
@@ -38,7 +90,10 @@ const DesignChat = () => {
       .finally(() => setIsResuming(false));
   }, []);
 
-  const canStart = useMemo(() => clientName.trim().length > 0 && clientEmail.trim().length > 0, [clientEmail, clientName]);
+  const canStart = useMemo(
+    () => clientName.trim().length > 0 && clientEmail.trim().length > 0 && (!!selectedStyle || styleSkipped),
+    [clientEmail, clientName, selectedStyle, styleSkipped],
+  );
   const canSend = useMemo(() => draft.trim().length > 0 && !!session && !isSending, [draft, isSending, session]);
 
   const handleStart = async (event: FormEvent) => {
@@ -50,7 +105,11 @@ const DesignChat = () => {
     setError(null);
     setIsStarting(true);
     try {
-      const startedSession = await startChatSession({ clientName: clientName.trim(), clientEmail: clientEmail.trim() });
+      const startedSession = await startChatSession({
+        clientName: clientName.trim(),
+        clientEmail: clientEmail.trim(),
+        selectedStyle: selectedStyle?.name ?? null,
+      });
       setSession(startedSession);
       setMessages(startedSession.messages ?? []);
       window.localStorage.setItem(STORAGE_KEY, startedSession.sessionCode);
@@ -80,7 +139,7 @@ const DesignChat = () => {
     setMessages(currentMessages => [...currentMessages, optimisticMessage]);
 
     try {
-      const response = await sendChatMessage(session.sessionId, messageText);
+      const response = await sendChatMessage(session.sessionId, messageText, selectedStyle?.name ?? session.selectedStyle ?? null);
       setMessages(currentMessages => [
         ...currentMessages,
         {
@@ -102,8 +161,29 @@ const DesignChat = () => {
     setSession(null);
     setMessages([]);
     setDraft('');
+    setSelectedStyle(null);
+    setStyleSkipped(false);
     setError(null);
   };
+
+  const handleSelectStyle = (style: ICatalogStyle) => {
+    setSelectedStyle(style);
+    setStyleSkipped(false);
+  };
+
+  const handleStyleCardKeyDown = (event: React.KeyboardEvent<HTMLElement>, style: ICatalogStyle) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleSelectStyle(style);
+    }
+  };
+
+  const handleSkipStyle = () => {
+    setSelectedStyle(null);
+    setStyleSkipped(true);
+  };
+
+  const getStyleKey = (style: ICatalogStyle) => style.id ?? style.name ?? 'style';
 
   return (
     <main className="design-chat">
@@ -122,12 +202,81 @@ const DesignChat = () => {
                 <div className="design-chat__meta">Cliente</div>
                 <strong>{session.clientName}</strong>
               </div>
+              <div className="mb-3">
+                <div className="design-chat__meta">Estilo</div>
+                <strong>{selectedStyle?.name ?? session.selectedStyle ?? 'Sin estilo seleccionado'}</strong>
+              </div>
               <Button type="button" variant="outline-secondary" size="sm" onClick={handleRestart}>
                 <FontAwesomeIcon icon={faRotateRight} /> Nueva sesión
               </Button>
             </>
           ) : (
             <Form onSubmit={handleStart}>
+              <section className="design-chat__styles" aria-label="Seleccionar estilo">
+                <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+                  <h2 className="h6 mb-0">Estilo visual</h2>
+                  <Button type="button" variant={styleSkipped ? 'secondary' : 'outline-secondary'} size="sm" onClick={handleSkipStyle}>
+                    Saltar
+                  </Button>
+                </div>
+                {isLoadingStyles ? (
+                  <div className="design-chat__meta mb-3">
+                    <Spinner size="sm" /> Cargando estilos...
+                  </div>
+                ) : (
+                  <div className="design-chat__style-grid">
+                    {catalogStyles.map(style => (
+                      <article
+                        aria-label={`Seleccionar estilo ${style.name}`}
+                        aria-pressed={selectedStyle?.id === style.id}
+                        className={`design-chat__style-card ${selectedStyle?.id === style.id ? 'design-chat__style-card--selected' : ''}`}
+                        key={getStyleKey(style)}
+                        onClick={() => handleSelectStyle(style)}
+                        onKeyDown={event => handleStyleCardKeyDown(event, style)}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {selectedStyle?.id === style.id ? (
+                          <span className="design-chat__style-selected-indicator" aria-label="Estilo seleccionado">
+                            <FontAwesomeIcon icon={faCheck} />
+                          </span>
+                        ) : null}
+                        <span
+                          className={`design-chat__style-thumb design-chat__style-thumb--${style.style ?? 'default'}`}
+                          style={{
+                            backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.34), rgba(0,0,0,0.16)), url(${style.thumbnailPath})`,
+                          }}
+                        />
+                        <span className="design-chat__style-body">
+                          <span className="design-chat__style-title">{style.name}</span>
+                          <span className="design-chat__style-price">{formatPriceRange(style.priceRange)}</span>
+                          <span
+                            className={`design-chat__style-description ${
+                              expandedStyleId === getStyleKey(style) ? 'design-chat__style-description--expanded' : ''
+                            }`}
+                            title={style.description ?? undefined}
+                          >
+                            {style.description}
+                          </span>
+                          <span className="design-chat__style-actions">
+                            <Button
+                              onClick={event => {
+                                event.stopPropagation();
+                                setExpandedStyleId(currentStyleId => (currentStyleId === getStyleKey(style) ? null : getStyleKey(style)));
+                              }}
+                              size="sm"
+                              type="button"
+                              variant="link"
+                            >
+                              {expandedStyleId === getStyleKey(style) ? 'Menos' : 'Ver más'}
+                            </Button>
+                          </span>
+                        </span>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
               <Form.Group className="mb-3" controlId="clientName">
                 <Form.Label>Nombre</Form.Label>
                 <Form.Control value={clientName} onChange={event => setClientName(event.target.value)} maxLength={120} required />

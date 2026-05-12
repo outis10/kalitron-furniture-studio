@@ -43,6 +43,7 @@ public class DesignChatServiceImpl implements DesignChatService {
             .status(SessionStatus.CHATTING)
             .clientName(request.getClientName().trim())
             .clientEmail(request.getClientEmail().trim())
+            .selectedStyle(normalizeSelectedStyle(request.getSelectedStyle()))
             .createdAt(now)
             .updatedAt(now);
 
@@ -75,6 +76,9 @@ public class DesignChatServiceImpl implements DesignChatService {
 
         saveMessage(session, MessageRole.USER, message);
         updateProjectTypeFromMessage(session, message);
+        if (normalizeSelectedStyle(request.getSelectedStyle()) != null) {
+            session.setSelectedStyle(normalizeSelectedStyle(request.getSelectedStyle()));
+        }
         session.setStatus(SessionStatus.CHATTING);
         session.setUpdatedAt(Instant.now());
         DesignSession savedSession = designSessionRepository.save(session);
@@ -121,6 +125,7 @@ public class DesignChatServiceImpl implements DesignChatService {
         dto.setSessionCode(session.getSessionCode());
         dto.setClientName(session.getClientName());
         dto.setClientEmail(session.getClientEmail());
+        dto.setSelectedStyle(session.getSelectedStyle());
         dto.setProjectType(session.getProjectType());
         dto.setStatus(session.getStatus());
         dto.setMessages(messages);
@@ -136,6 +141,13 @@ public class DesignChatServiceImpl implements DesignChatService {
         } else if (normalized.contains("cocina") || normalized.contains("kitchen")) {
             session.setProjectType(ProjectType.KITCHEN);
         }
+    }
+
+    private String normalizeSelectedStyle(String selectedStyle) {
+        if (selectedStyle == null || selectedStyle.isBlank()) {
+            return null;
+        }
+        return selectedStyle.trim();
     }
 
     private String buildTemporaryAssistantReply(String message) {

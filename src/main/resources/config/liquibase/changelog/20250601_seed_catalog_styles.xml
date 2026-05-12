@@ -5,9 +5,6 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <changeSet id="20250601-1-seed-catalog-styles" author="kalitron">
-        <delete tableName="catalog_style">
-            <where>id between 1 and 10</where>
-        </delete>
         <insert tableName="catalog_style">
             <column name="id" valueNumeric="201"/>
             <column name="name" value="Moderno Blanco"/>
@@ -96,5 +93,11 @@
             <column name="is_active" valueBoolean="true"/>
             <column name="sort_order" valueNumeric="80"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="20250601-2-remove-faker-catalog-styles" author="kalitron">
+        <delete tableName="catalog_style">
+            <where>id between 1 and 10</where>
+        </delete>
     </changeSet>
 </databaseChangeLog>
