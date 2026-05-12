@@ -1,6 +1,6 @@
 # E2 Issue 8: Start a Design Session and Chat With the AI Designer
 
-Status: Draft
+Status: Implementing
 Issue: #8
 Epic: #7
 
@@ -17,16 +17,59 @@ refreshing the browser.
 
 ## Acceptance Criteria
 
-- [ ] Client fills name and email to start a session.
-- [ ] AI greets the client and asks whether the project is kitchen, closet, or both.
-- [ ] Messages appear without a full page reload.
-- [ ] AI asks a maximum of 2 questions per message.
-- [ ] Session is saved with a unique code such as `KD-2026-001`.
-- [ ] Client can resume the session after closing the browser.
-- [ ] Loading indicator appears while the AI is thinking.
+- [x] Client fills name and email to start a session.
+- [x] AI greets the client and asks whether the project is kitchen, closet, or both.
+- [x] Messages appear without a full page reload.
+- [x] AI asks a maximum of 2 questions per message.
+- [x] Session is saved with a unique code such as `KD-2026-001`.
+- [x] Client can resume the session after closing the browser.
+- [x] Loading indicator appears while the AI is thinking.
 - [ ] UI works at 375px width.
 
 ## API Contract
+
+### Start session
+
+`POST /api/chat/sessions`
+
+Auth: JWT required.
+
+Request:
+
+```json
+{
+  "clientName": "Ana Lopez",
+  "clientEmail": "ana@example.com"
+}
+```
+
+Response:
+
+```json
+{
+  "sessionId": 1,
+  "sessionCode": "KD-2026-001",
+  "clientName": "Ana Lopez",
+  "clientEmail": "ana@example.com",
+  "projectType": "KITCHEN",
+  "status": "CHATTING",
+  "messages": [
+    {
+      "role": "ASSISTANT",
+      "content": "Hola Ana Lopez, soy tu diseñador IA de Kalitron. ¿Tu proyecto es cocina, closet o ambos?",
+      "createdAt": "2026-05-11T00:00:00Z"
+    }
+  ]
+}
+```
+
+### Resume session
+
+`GET /api/chat/sessions/{sessionCode}`
+
+Auth: JWT required.
+
+Response: same shape as start session.
 
 ### Send message
 
@@ -61,6 +104,9 @@ Response:
 - Persist each user and assistant message in `ChatMessage`.
 - Use `DesignSession.sessionCode` as the resumable business identifier.
 - Do not store image base64 in `ChatMessage`.
+- This issue does not change the generated JDL domain model.
+- Initial session creation uses the required `DesignSession.projectType` field with a temporary operational default.
+- A later message can update `projectType` when the user answers kitchen, closet, or both.
 
 ## Frontend Behavior
 
@@ -77,6 +123,8 @@ Response:
 - Save user message before calling AI Gateway.
 - Save assistant reply after successful gateway response.
 - Return graceful error when the gateway is unavailable.
+- For #8, assistant replies are deterministic Studio placeholders.
+- #11 replaces the placeholder assistant response with the AI Gateway proxy.
 
 ## Test Plan
 
@@ -85,7 +133,8 @@ Response:
 - Frontend test verifies loading and rendered reply.
 - Manual check at 375px viewport.
 
-## Open Questions
+## Decisions
 
-- [ ] How should first-session creation be exposed if `POST /api/chat/message` requires an existing `sessionId`?
-- [ ] Should resume use `sessionCode`, local storage, or both?
+- First-session creation uses `POST /api/chat/sessions`.
+- Resume uses `sessionCode`; the browser stores the latest session code in local storage.
+- `POST /api/chat/message` remains JWT-authenticated and receives a numeric `sessionId`.

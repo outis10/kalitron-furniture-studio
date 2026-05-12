@@ -14,6 +14,12 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DesignSessionRepository extends JpaRepository<DesignSession, Long>, JpaSpecificationExecutor<DesignSession> {
+    long countBySessionCodeStartingWith(String sessionCodePrefix);
+
+    boolean existsBySessionCode(String sessionCode);
+
+    Optional<DesignSession> findBySessionCode(String sessionCode);
+
     default Optional<DesignSession> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }
