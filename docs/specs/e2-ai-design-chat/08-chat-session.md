@@ -24,7 +24,7 @@ refreshing the browser.
 - [x] Session is saved with a unique code such as `KD-2026-001`.
 - [x] Client can resume the session after closing the browser.
 - [x] Loading indicator appears while the AI is thinking.
-- [ ] UI works at 375px width.
+- [x] UI works at 375px width.
 
 ## API Contract
 
@@ -125,6 +125,12 @@ Response:
 - Return graceful error when the gateway is unavailable.
 - For #8, assistant replies are deterministic Studio placeholders.
 - #11 replaces the placeholder assistant response with the AI Gateway proxy.
+
+## Known Follow-Up
+
+- The #8 placeholder assistant confirms the end-to-end chat loop, but it does not
+  manage conversation state deeply. Repeated or generic follow-up questions are
+  expected until #11 connects the AI Gateway and returns context-aware replies.
 
 ## Test Plan
 
