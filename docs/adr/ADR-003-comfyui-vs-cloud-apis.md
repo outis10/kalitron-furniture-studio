@@ -37,6 +37,7 @@ The project is also intended as a portfolio-ready demo that should be runnable l
 | **InvokeAI** | User-friendly SD interface with canvas tools | Oriented toward end-users, not programmatic pipeline control |
 | **Hugging Face Diffusers** | Python library for running SD directly in-process | Requires the model to load inside the gateway process — GPU memory conflict, couples inference and API layers |
 | **Cloud image APIs** (Replicate, Stability AI) | Hosted inference, no local GPU required | Per-image cost, external latency, no ControlNet control, vendor lock-in, not runnable offline |
+| **Comfy.org Cloud** | Hosted ComfyUI with 900+ pre-installed models, RTX 6000 Pro (96 GB VRAM) | API is largely compatible but polling endpoint differs (`GET /api/job/{id}/status` vs local `GET /history/{id}`); custom model uploads (SDXL 1.0 + ControlNet Canny SDXL) require Creator plan ($35/mo); free tier model availability for our specific models is unconfirmed — retained as a testing escape hatch, not primary strategy |
 
 ComfyUI was chosen because:
 - Its node workflow system gives full control over ControlNet application, denoise strength, and sampler parameters
@@ -48,7 +49,9 @@ ComfyUI was chosen because:
 
 Use a local ComfyUI/SDXL-oriented pipeline as the primary image generation strategy during MVP and demo development.
 
-The FastAPI gateway will hide the concrete generation backend behind API endpoints. It may call ComfyUI locally, and it can later route to a cloud GPU provider such as RunPod if local GPU capacity is not available.
+The FastAPI gateway will hide the concrete generation backend behind API endpoints. It may call ComfyUI locally, and it can later route to a cloud GPU provider such as RunPod or Comfy.org Cloud if local GPU capacity is not available.
+
+Comfy.org Cloud is explicitly recognized as a viable escape hatch for testing and demos. Routing to it requires adapting the polling call from `GET /history/{id}` to `GET /api/job/{id}/status` and injecting an `X-API-Key` header. To guarantee SDXL 1.0 + ControlNet Canny SDXL availability, the Creator plan ($35/mo) is required so models can be pulled from HuggingFace.
 
 The application will model generation as jobs and artifacts rather than assuming synchronous image generation is always fast or always local.
 
@@ -66,3 +69,4 @@ The monolith should persist generated outputs through `DesignImage`, `DesignArti
 
 Cloud GPU APIs remain possible later if local GPU setup becomes a barrier for demos or production deployments.
 
+Comfy.org Cloud is the lowest-friction cloud escape hatch: the workflow JSON is identical and only two integration changes are needed (polling endpoint + API key header). The main gate is confirming SDXL 1.0 + ControlNet Canny SDXL are in their pre-installed library; if not, the Creator plan ($35/mo) unlocks custom model uploads from HuggingFace.
