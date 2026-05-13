@@ -8,6 +8,8 @@ export interface ChatMessageView {
   role: ChatRole;
   content: string;
   createdAt: string;
+  imagePreviewUrl?: string;
+  imageFileName?: string;
 }
 
 export interface ChatSession {
@@ -45,8 +47,20 @@ export const resumeChatSession = async (sessionCode: string): Promise<ChatSessio
   return response.data;
 };
 
-export const sendChatMessage = async (sessionId: number, message: string, selectedStyle?: string | null): Promise<ChatResponse> => {
-  const response = await axios.post<ChatResponse>('/api/chat/message', { sessionId, message, selectedStyle });
+export interface SendChatImage {
+  imageBase64: string;
+  imageFileName: string;
+  imageMimeType: string;
+  imageSizeBytes: number;
+}
+
+export const sendChatMessage = async (
+  sessionId: number,
+  message: string,
+  selectedStyle?: string | null,
+  image?: SendChatImage | null,
+): Promise<ChatResponse> => {
+  const response = await axios.post<ChatResponse>('/api/chat/message', { sessionId, message, selectedStyle, ...image });
   return response.data;
 };
 

@@ -1,11 +1,14 @@
 package com.kalitron.studio.service.impl;
 
 import com.kalitron.studio.domain.ChatMessage;
+import com.kalitron.studio.domain.DesignImage;
 import com.kalitron.studio.domain.DesignSession;
+import com.kalitron.studio.domain.enumeration.ImageType;
 import com.kalitron.studio.domain.enumeration.MessageRole;
 import com.kalitron.studio.domain.enumeration.ProjectType;
 import com.kalitron.studio.domain.enumeration.SessionStatus;
 import com.kalitron.studio.repository.ChatMessageRepository;
+import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
 import com.kalitron.studio.service.DesignChatService;
 import com.kalitron.studio.service.dto.ChatMessageViewDTO;
@@ -15,9 +18,11 @@ import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
 import java.time.Instant;
 import java.time.Year;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +30,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class DesignChatServiceImpl implements DesignChatService {
 
+    private static final Set<String> ALLOWED_REFERENCE_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+
+    private static final long MAX_REFERENCE_IMAGE_BYTES = 5L * 1024L * 1024L;
+
     private final DesignSessionRepository designSessionRepository;
 
     private final ChatMessageRepository chatMessageRepository;
 
-    public DesignChatServiceImpl(DesignSessionRepository designSessionRepository, ChatMessageRepository chatMessageRepository) {
+    private final DesignImageRepository designImageRepository;
+
+    public DesignChatServiceImpl(
+        DesignSessionRepository designSessionRepository,
+        ChatMessageRepository chatMessageRepository,
+        DesignImageRepository designImageRepository
+    ) {
         this.designSessionRepository = designSessionRepository;
         this.chatMessageRepository = chatMessageRepository;
+        this.designImageRepository = designImageRepository;
     }
 
     @Override
@@ -69,13 +85,21 @@ public class DesignChatServiceImpl implements DesignChatService {
             .findById(request.getSessionId())
             .orElseThrow(() -> new IllegalArgumentException("Design session not found"));
 
-        String message = request.getMessage().trim();
-        if (message.isEmpty()) {
-            throw new IllegalArgumentException("Message cannot be empty");
+        String message = normalizeMessage(request.getMessage());
+        boolean hasReferenceImage = hasReferenceImage(request);
+        if (message.isEmpty() && !hasReferenceImage) {
+            throw new IllegalArgumentException("Message or reference image is required");
         }
 
-        saveMessage(session, MessageRole.USER, message);
-        updateProjectTypeFromMessage(session, message);
+        if (!message.isEmpty()) {
+            saveMessage(session, MessageRole.USER, message);
+            updateProjectTypeFromMessage(session, message);
+        } else {
+            saveMessage(session, MessageRole.USER, "Imagen de referencia adjunta.");
+        }
+        if (hasReferenceImage) {
+            saveReferenceImage(session, request);
+        }
         if (normalizeSelectedStyle(request.getSelectedStyle()) != null) {
             session.setSelectedStyle(normalizeSelectedStyle(request.getSelectedStyle()));
         }
@@ -83,7 +107,7 @@ public class DesignChatServiceImpl implements DesignChatService {
         session.setUpdatedAt(Instant.now());
         DesignSession savedSession = designSessionRepository.save(session);
 
-        String reply = buildTemporaryAssistantReply(message);
+        String reply = buildTemporaryAssistantReply(message, hasReferenceImage);
         saveMessage(savedSession, MessageRole.ASSISTANT, reply);
 
         ChatResponseDTO response = new ChatResponseDTO();
@@ -150,7 +174,75 @@ public class DesignChatServiceImpl implements DesignChatService {
         return selectedStyle.trim();
     }
 
-    private String buildTemporaryAssistantReply(String message) {
+    private String normalizeMessage(String message) {
+        if (message == null) {
+            return "";
+        }
+        return message.trim();
+    }
+
+    private boolean hasReferenceImage(ChatRequestDTO request) {
+        return request.getImageBase64() != null && !request.getImageBase64().isBlank();
+    }
+
+    private void saveReferenceImage(DesignSession session, ChatRequestDTO request) {
+        String mimeType = normalizeImageMimeType(request.getImageMimeType());
+        if (!ALLOWED_REFERENCE_IMAGE_TYPES.contains(mimeType)) {
+            throw new IllegalArgumentException("Reference image must be JPG, PNG, or WebP");
+        }
+
+        long imageSizeBytes = resolveImageSizeBytes(request);
+        if (imageSizeBytes > MAX_REFERENCE_IMAGE_BYTES) {
+            throw new IllegalArgumentException("Reference image must be 5MB or smaller");
+        }
+
+        String fileName = sanitizeImageFileName(request.getImageFileName());
+        DesignImage image = new DesignImage()
+            .session(session)
+            .imageType(ImageType.REFERENCE)
+            .fileName(fileName)
+            .filePath("reference-images/" + session.getSessionCode() + "/" + Instant.now().toEpochMilli() + "-" + fileName)
+            .mimeType(mimeType)
+            .fileSizeKb(Math.max(1L, (long) Math.ceil(imageSizeBytes / 1024.0)))
+            .isActive(true)
+            .uploadedAt(Instant.now())
+            .description("Reference photo uploaded from design chat");
+
+        designImageRepository.save(image);
+    }
+
+    private String normalizeImageMimeType(String mimeType) {
+        if (mimeType == null || mimeType.isBlank()) {
+            return "";
+        }
+        return mimeType.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private long resolveImageSizeBytes(ChatRequestDTO request) {
+        if (request.getImageSizeBytes() != null && request.getImageSizeBytes() > 0) {
+            return request.getImageSizeBytes();
+        }
+
+        String base64 = request.getImageBase64().trim();
+        int commaIndex = base64.indexOf(',');
+        if (commaIndex >= 0) {
+            base64 = base64.substring(commaIndex + 1);
+        }
+        return Base64.getDecoder().decode(base64).length;
+    }
+
+    private String sanitizeImageFileName(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            return "reference-photo";
+        }
+        return fileName.trim().replaceAll("[^A-Za-z0-9._-]", "-");
+    }
+
+    private String buildTemporaryAssistantReply(String message, boolean hasReferenceImage) {
+        if (hasReferenceImage) {
+            return "Gracias por la foto. La usaré como referencia de distribución, accesos y ubicación general de los elementos. ¿Qué parte quieres conservar sin cambios?";
+        }
+
         String normalized = message.toLowerCase(Locale.ROOT);
         if (normalized.contains("cocina") || normalized.contains("closet") || normalized.contains("ambos") || normalized.contains("both")) {
             return "Perfecto. ¿Qué forma tiene tu espacio: lineal, en L o en U? ¿Tienes medidas aproximadas?";

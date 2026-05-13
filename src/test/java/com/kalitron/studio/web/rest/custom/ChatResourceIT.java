@@ -11,11 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kalitron.studio.IntegrationTest;
 import com.kalitron.studio.domain.ChatMessage;
+import com.kalitron.studio.domain.DesignImage;
 import com.kalitron.studio.domain.DesignSession;
+import com.kalitron.studio.domain.enumeration.ImageType;
 import com.kalitron.studio.domain.enumeration.MessageRole;
 import com.kalitron.studio.domain.enumeration.ProjectType;
 import com.kalitron.studio.domain.enumeration.SessionStatus;
 import com.kalitron.studio.repository.ChatMessageRepository;
+import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
 import java.time.Instant;
 import java.util.Map;
@@ -44,8 +47,12 @@ class ChatResourceIT {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
+    @Autowired
+    private DesignImageRepository designImageRepository;
+
     @AfterEach
     void cleanup() {
+        designImageRepository.deleteAll();
         chatMessageRepository.deleteAll();
         designSessionRepository.deleteAll();
     }
@@ -134,6 +141,80 @@ class ChatResourceIT {
             .extracting(ChatMessage::getRole)
             .containsExactly(MessageRole.USER, MessageRole.ASSISTANT);
         assertThat(designSessionRepository.findById(session.getId()).orElseThrow().getSelectedStyle()).isEqualTo("Moderno Gris");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void sendMessageWithReferenceImagePersistsDesignImage() throws Exception {
+        DesignSession session = saveSession("KD-2026-779");
+
+        mockMvc
+            .perform(
+                post("/api/chat/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of(
+                                "sessionId",
+                                session.getId(),
+                                "message",
+                                "Esta es mi cocina actual",
+                                "imageBase64",
+                                "ZmFrZS1pbWFnZQ==",
+                                "imageFileName",
+                                "cocina.webp",
+                                "imageMimeType",
+                                "image/webp",
+                                "imageSizeBytes",
+                                10
+                            )
+                        )
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.reply").value(startsWith("Gracias por la foto")));
+
+        assertThat(designImageRepository.findAll()).extracting(DesignImage::getImageType).containsExactly(ImageType.REFERENCE);
+        DesignImage image = designImageRepository.findAll().getFirst();
+        assertThat(image.getSession().getId()).isEqualTo(session.getId());
+        assertThat(image.getFileName()).isEqualTo("cocina.webp");
+        assertThat(image.getMimeType()).isEqualTo("image/webp");
+        assertThat(image.getFilePath()).contains("KD-2026-779");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void sendMessageRejectsInvalidReferenceImageType() throws Exception {
+        DesignSession session = saveSession("KD-2026-780");
+
+        mockMvc
+            .perform(
+                post("/api/chat/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of(
+                                "sessionId",
+                                session.getId(),
+                                "message",
+                                "Foto",
+                                "imageBase64",
+                                "ZmFrZS1pbWFnZQ==",
+                                "imageFileName",
+                                "cocina.gif",
+                                "imageMimeType",
+                                "image/gif",
+                                "imageSizeBytes",
+                                10
+                            )
+                        )
+                    )
+            )
+            .andExpect(status().isBadRequest());
+
+        assertThat(designImageRepository.findAll()).isEmpty();
     }
 
     private DesignSession saveSession(String sessionCode) {
