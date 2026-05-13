@@ -1,9 +1,9 @@
 import './design-chat.scss';
 
-import React, { FormEvent, useEffect, useMemo, useState } from 'react';
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Form, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faPaperPlane, faRotateRight } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faImage, faPaperPlane, faRotateRight, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 import {
   ChatMessageView,
@@ -16,6 +16,16 @@ import {
 import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
 
 const STORAGE_KEY = 'kalitron.designChat.sessionCode';
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
+interface SelectedReferenceImage {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  base64: string;
+  previewUrl: string;
+}
 
 const formatPriceRange = (priceRange?: string | null) => {
   if (!priceRange) {
@@ -36,7 +46,24 @@ const formatPriceRange = (priceRange?: string | null) => {
   return `Precio ${priceRange}`;
 };
 
+const readImageAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+        return;
+      }
+      reject(new Error('Image reader did not return a data URL.'));
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+const toBase64Payload = (dataUrl: string) => dataUrl.split(',')[1] ?? dataUrl;
+
 const DesignChat = () => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [session, setSession] = useState<ChatSession | null>(null);
@@ -44,12 +71,14 @@ const DesignChat = () => {
   const [draft, setDraft] = useState('');
   const [catalogStyles, setCatalogStyles] = useState<ICatalogStyle[]>([]);
   const [selectedStyle, setSelectedStyle] = useState<ICatalogStyle | null>(null);
+  const [selectedReferenceImage, setSelectedReferenceImage] = useState<SelectedReferenceImage | null>(null);
   const [expandedStyleId, setExpandedStyleId] = useState<string | number | null>(null);
   const [styleSkipped, setStyleSkipped] = useState(false);
   const [isLoadingStyles, setIsLoadingStyles] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
+  const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,7 +123,10 @@ const DesignChat = () => {
     () => clientName.trim().length > 0 && clientEmail.trim().length > 0 && (!!selectedStyle || styleSkipped),
     [clientEmail, clientName, selectedStyle, styleSkipped],
   );
-  const canSend = useMemo(() => draft.trim().length > 0 && !!session && !isSending, [draft, isSending, session]);
+  const canSend = useMemo(
+    () => (draft.trim().length > 0 || !!selectedReferenceImage) && !!session && !isSending,
+    [draft, isSending, selectedReferenceImage, session],
+  );
 
   const handleStart = async (event: FormEvent) => {
     event.preventDefault();
@@ -127,19 +159,35 @@ const DesignChat = () => {
     }
 
     const messageText = draft.trim();
+    const imageToSend = selectedReferenceImage;
     const optimisticMessage: ChatMessageView = {
       role: 'USER',
-      content: messageText,
+      content: messageText || 'Imagen de referencia adjunta.',
       createdAt: new Date().toISOString(),
+      imageFileName: imageToSend?.fileName,
+      imagePreviewUrl: imageToSend?.previewUrl,
     };
 
     setDraft('');
+    setSelectedReferenceImage(null);
     setError(null);
     setIsSending(true);
     setMessages(currentMessages => [...currentMessages, optimisticMessage]);
 
     try {
-      const response = await sendChatMessage(session.sessionId, messageText, selectedStyle?.name ?? session.selectedStyle ?? null);
+      const response = await sendChatMessage(
+        session.sessionId,
+        messageText,
+        selectedStyle?.name ?? session.selectedStyle ?? null,
+        imageToSend
+          ? {
+              imageBase64: imageToSend.base64,
+              imageFileName: imageToSend.fileName,
+              imageMimeType: imageToSend.mimeType,
+              imageSizeBytes: imageToSend.sizeBytes,
+            }
+          : null,
+      );
       setMessages(currentMessages => [
         ...currentMessages,
         {
@@ -150,6 +198,7 @@ const DesignChat = () => {
       ]);
       setSession(currentSession => (currentSession ? { ...currentSession, sessionCode: response.sessionCode } : currentSession));
     } catch {
+      setSelectedReferenceImage(imageToSend);
       setError('No se pudo enviar el mensaje. Intenta nuevamente.');
     } finally {
       setIsSending(false);
@@ -162,8 +211,64 @@ const DesignChat = () => {
     setMessages([]);
     setDraft('');
     setSelectedStyle(null);
+    setSelectedReferenceImage(null);
     setStyleSkipped(false);
     setError(null);
+  };
+
+  const handleReferenceImage = async (file: File | undefined) => {
+    if (!file) {
+      return;
+    }
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setError('La imagen debe ser JPG, PNG o WebP.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setError('La imagen debe pesar 5MB o menos.');
+      return;
+    }
+
+    try {
+      const dataUrl = await readImageAsDataUrl(file);
+      setSelectedReferenceImage({
+        fileName: file.name,
+        mimeType: file.type,
+        sizeBytes: file.size,
+        base64: toBase64Payload(dataUrl),
+        previewUrl: dataUrl,
+      });
+      setError(null);
+    } catch {
+      setError('No se pudo leer la imagen seleccionada.');
+    }
+  };
+
+  const handleDragReferenceImage = (event: React.DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!session || isSending) {
+      return;
+    }
+    setIsDraggingReferenceImage(true);
+  };
+
+  const handleLeaveReferenceImage = (event: React.DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setIsDraggingReferenceImage(false);
+    }
+  };
+
+  const handleDropReferenceImage = (event: React.DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDraggingReferenceImage(false);
+    if (!session || isSending) {
+      return;
+    }
+    handleReferenceImage(event.dataTransfer.files[0]);
   };
 
   const handleSelectStyle = (style: ICatalogStyle) => {
@@ -298,7 +403,15 @@ const DesignChat = () => {
           )}
         </aside>
 
-        <section className="design-chat__conversation" aria-live="polite">
+        <section
+          className={`design-chat__conversation ${isDraggingReferenceImage ? 'design-chat__conversation--dragging' : ''}`}
+          aria-live="polite"
+          onDragEnter={handleDragReferenceImage}
+          onDragLeave={handleLeaveReferenceImage}
+          onDragOver={handleDragReferenceImage}
+          onDrop={handleDropReferenceImage}
+        >
+          {isDraggingReferenceImage ? <div className="design-chat__drop-zone">Suelta la imagen de referencia</div> : null}
           <header className="design-chat__header">
             <h2 className="h5 mb-1">Conversación de diseño</h2>
             <div className="design-chat__meta">
@@ -319,6 +432,13 @@ const DesignChat = () => {
                 }`}
                 key={`${message.createdAt}-${index}`}
               >
+                {message.imagePreviewUrl ? (
+                  <img
+                    className="design-chat__message-image"
+                    src={message.imagePreviewUrl}
+                    alt={message.imageFileName ?? 'Imagen de referencia'}
+                  />
+                ) : null}
                 {message.content}
               </div>
             ))}
@@ -336,17 +456,52 @@ const DesignChat = () => {
           )}
 
           <Form className="design-chat__composer" onSubmit={handleSend}>
-            <Form.Control
-              as="textarea"
-              value={draft}
-              onChange={event => setDraft(event.target.value)}
-              placeholder="Escribe sobre tu cocina, closet, estilo o medidas..."
-              disabled={!session || isSending}
-              maxLength={4000}
-            />
-            <Button type="submit" disabled={!canSend} aria-label="Enviar mensaje">
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </Button>
+            {selectedReferenceImage ? (
+              <div className="design-chat__attachment-preview">
+                <img src={selectedReferenceImage.previewUrl} alt={selectedReferenceImage.fileName} />
+                <span>{selectedReferenceImage.fileName}</span>
+                <Button
+                  aria-label="Quitar imagen de referencia"
+                  disabled={isSending}
+                  onClick={() => setSelectedReferenceImage(null)}
+                  size="sm"
+                  type="button"
+                  variant="link"
+                >
+                  <FontAwesomeIcon icon={faXmark} />
+                </Button>
+              </div>
+            ) : null}
+            <div className="design-chat__composer-row">
+              <input
+                accept={ACCEPTED_IMAGE_TYPES.join(',')}
+                className="d-none"
+                disabled={!session || isSending}
+                onChange={event => handleReferenceImage(event.target.files?.[0])}
+                ref={fileInputRef}
+                type="file"
+              />
+              <Button
+                aria-label="Adjuntar imagen de referencia"
+                disabled={!session || isSending}
+                onClick={() => fileInputRef.current?.click()}
+                type="button"
+                variant="outline-secondary"
+              >
+                <FontAwesomeIcon icon={faImage} />
+              </Button>
+              <Form.Control
+                as="textarea"
+                value={draft}
+                onChange={event => setDraft(event.target.value)}
+                placeholder="Escribe sobre tu cocina, closet, estilo o medidas..."
+                disabled={!session || isSending}
+                maxLength={4000}
+              />
+              <Button type="submit" disabled={!canSend} aria-label="Enviar mensaje">
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </Button>
+            </div>
           </Form>
         </section>
       </div>

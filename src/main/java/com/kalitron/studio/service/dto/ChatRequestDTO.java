@@ -1,6 +1,5 @@
 package com.kalitron.studio.service.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
@@ -10,11 +9,19 @@ public class ChatRequestDTO implements Serializable {
     @NotNull
     private Long sessionId;
 
-    @NotBlank
     @Size(max = 4000)
     private String message;
 
+    @Size(max = 7000000)
     private String imageBase64;
+
+    @Size(max = 255)
+    private String imageFileName;
+
+    @Size(max = 80)
+    private String imageMimeType;
+
+    private Long imageSizeBytes;
 
     @Size(max = 80)
     private String selectedStyle;
@@ -41,6 +48,30 @@ public class ChatRequestDTO implements Serializable {
 
     public void setImageBase64(String imageBase64) {
         this.imageBase64 = imageBase64;
+    }
+
+    public String getImageFileName() {
+        return imageFileName;
+    }
+
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
+    }
+
+    public String getImageMimeType() {
+        return imageMimeType;
+    }
+
+    public void setImageMimeType(String imageMimeType) {
+        this.imageMimeType = imageMimeType;
+    }
+
+    public Long getImageSizeBytes() {
+        return imageSizeBytes;
+    }
+
+    public void setImageSizeBytes(Long imageSizeBytes) {
+        this.imageSizeBytes = imageSizeBytes;
     }
 
     public String getSelectedStyle() {
