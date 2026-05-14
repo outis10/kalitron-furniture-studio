@@ -70,3 +70,11 @@ The monolith should persist generated outputs through `DesignImage`, `DesignArti
 Cloud GPU APIs remain possible later if local GPU setup becomes a barrier for demos or production deployments.
 
 Comfy.org Cloud is the lowest-friction cloud escape hatch: the workflow JSON is identical and only two integration changes are needed (polling endpoint + API key header). The main gate is confirming SDXL 1.0 + ControlNet Canny SDXL are in their pre-installed library; if not, the Creator plan ($35/mo) unlocks custom model uploads from HuggingFace.
+
+### RunPod operational learnings (validated 2026-05-14)
+
+RunPod persistent pods with `runpod/worker-comfyui` were tested end-to-end with an RTX 3090 (24 GB VRAM). The gateway required zero code changes — the ComfyUI REST API is identical to local.
+
+**Model pre-installation:** The `runpod/worker-comfyui` image ships with empty model directories (placeholder files only). SDXL 1.0, ControlNet Canny SDXL, and the VAE must be downloaded manually to the network volume on first run. Models persist across pod restarts once downloaded.
+
+**Corporate network constraints:** Firewalls running FortiGuard IPS categorise `*.runpod.net` proxy URLs as "Proxy Avoidance" and block them. Workarounds in order of preference: (1) SSH tunnel (`ssh -L 8188:localhost:8188 <pod>@ssh.runpod.io`), (2) mobile hotspot, (3) request IT whitelist for `*.runpod.net`. SSL inspection by corporate proxies additionally requires setting `COMFYUI_VERIFY_SSL=false` in the gateway so httpx skips certificate verification.
