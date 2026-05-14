@@ -1,6 +1,6 @@
 # E2 Issue 11: ChatResource Proxy to AI Gateway
 
-Status: Draft
+Status: Implementing
 Issue: #11
 Epic: #7
 
@@ -17,12 +17,12 @@ specs are ready.
 
 ## Acceptance Criteria
 
-- [ ] `POST /api/chat/message` requires JWT authentication.
-- [ ] Endpoint proxies to FastAPI `POST /api/v1/chat/message` using `RestClient`.
-- [ ] User message and AI reply are saved to `ChatMessage`.
-- [ ] `DesignSession.status` updates when `specsReady=true`.
-- [ ] Gateway base URL is configurable through `app.fastapi.base-url`.
-- [ ] FastAPI unavailable returns a graceful error response.
+- [x] `POST /api/chat/message` requires JWT authentication.
+- [x] Endpoint proxies to FastAPI `POST /api/v1/chat/message` using `RestClient`.
+- [x] User message and AI reply are saved to `ChatMessage`.
+- [x] `DesignSession.status` updates when `specsReady=true`.
+- [x] Gateway base URL is configurable through `app.fastapi.base-url`.
+- [x] FastAPI unavailable returns a graceful error response.
 
 ## Files
 
@@ -67,6 +67,11 @@ Response:
 Studio forwards session context, latest user message, optional image base64, and
 selected style context when present.
 
+Current AI Gateway schema accepts `session_id`, `message`, and `image_b64`.
+Studio sends `DesignSession.sessionCode` as `session_id`. Selected style context
+is included in the forwarded message text until the gateway schema grows a
+dedicated style field.
+
 ## Backend Behavior
 
 - `ChatResource` validates request and delegates to service.
@@ -75,23 +80,25 @@ selected style context when present.
 - `FastApiGateway` calls FastAPI via `RestClient`.
 - Service persists assistant `ChatMessage`.
 - If `specsReady=true`, set session status to `SPECS_READY`.
-- If Gateway fails, return a client-safe error without losing the user message.
+- If Gateway fails, return a client-safe assistant reply without losing the user message.
 
 ## Failure Cases
 
 - Missing auth: `401`.
 - Missing session: `404`.
 - Empty message and no image: `400`.
-- Gateway timeout/unavailable: graceful error response.
+- Gateway timeout/unavailable: `200` with a client-safe assistant reply so the
+  chat remains usable and the user message stays persisted.
 
 ## Test Plan
 
-- Backend integration test for authentication requirement.
-- Backend integration test for successful proxy and persistence.
-- Backend test for gateway unavailable.
-- Backend test for `SPECS_READY` transition.
+- [x] Backend integration test for authentication requirement.
+- [x] Backend integration test for successful proxy and persistence.
+- [x] Backend test for gateway unavailable.
+- [x] Backend test for `SPECS_READY` transition.
 
 ## Open Questions
 
-- [ ] Should the service save the user message if the Gateway call fails?
-- [ ] Should Gateway timeout use the existing `app.ai-gateway.timeout-seconds` property?
+- [x] Should the service save the user message if the Gateway call fails? Yes;
+      the user message is persisted before calling the gateway.
+- [x] Should Gateway timeout use the existing `app.ai-gateway.timeout-seconds` property? Yes.

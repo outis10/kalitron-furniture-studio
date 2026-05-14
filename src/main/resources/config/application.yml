@@ -227,4 +227,8 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+app:
+  fastapi:
+    base-url: ${FASTAPI_BASE_URL:http://localhost:8000}
+  ai-gateway:
+    timeout-seconds: ${AI_GATEWAY_TIMEOUT_SECONDS:30}

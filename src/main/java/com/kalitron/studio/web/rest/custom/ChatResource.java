@@ -49,6 +49,9 @@ public class ChatResource {
         try {
             return ResponseEntity.ok(designChatService.sendMessage(request));
         } catch (IllegalArgumentException e) {
+            if ("Design session not found".equals(e.getMessage())) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            }
             throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "invalidchatmessage");
         }
     }

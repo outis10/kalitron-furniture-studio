@@ -3,6 +3,9 @@ package com.kalitron.studio.web.rest.custom;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,14 +23,20 @@ import com.kalitron.studio.domain.enumeration.SessionStatus;
 import com.kalitron.studio.repository.ChatMessageRepository;
 import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
+import com.kalitron.studio.service.FastApiGateway;
+import com.kalitron.studio.service.FastApiGateway.GatewayChatRequest;
+import com.kalitron.studio.service.FastApiGatewayException;
+import com.kalitron.studio.service.dto.ChatResponseDTO;
 import java.time.Instant;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +59,9 @@ class ChatResourceIT {
     @Autowired
     private DesignImageRepository designImageRepository;
 
+    @MockitoBean
+    private FastApiGateway fastApiGateway;
+
     @AfterEach
     void cleanup() {
         designImageRepository.deleteAll();
@@ -61,6 +73,10 @@ class ChatResourceIT {
     void chatEndpointsRequireAuthentication() throws Exception {
         mockMvc
             .perform(post("/api/chat/sessions").contentType(MediaType.APPLICATION_JSON).content("{}"))
+            .andExpect(status().isUnauthorized());
+
+        mockMvc
+            .perform(post("/api/chat/message").contentType(MediaType.APPLICATION_JSON).content("{}"))
             .andExpect(status().isUnauthorized());
     }
 
@@ -113,6 +129,7 @@ class ChatResourceIT {
     @WithMockUser
     void sendMessagePersistsUserAndAssistantMessages() throws Exception {
         DesignSession session = saveSession("KD-2026-778");
+        when(fastApiGateway.sendMessage(any())).thenReturn(gatewayResponse(session, "Respuesta desde gateway", false));
 
         mockMvc
             .perform(
@@ -134,13 +151,18 @@ class ChatResourceIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.sessionId").value(session.getId()))
             .andExpect(jsonPath("$.sessionCode").value("KD-2026-778"))
-            .andExpect(jsonPath("$.reply").isString())
+            .andExpect(jsonPath("$.reply").value("Respuesta desde gateway"))
             .andExpect(jsonPath("$.specsReady").value(false));
 
         assertThat(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(session.getId()))
             .extracting(ChatMessage::getRole)
             .containsExactly(MessageRole.USER, MessageRole.ASSISTANT);
         assertThat(designSessionRepository.findById(session.getId()).orElseThrow().getSelectedStyle()).isEqualTo("Moderno Gris");
+        ArgumentCaptor<GatewayChatRequest> gatewayRequest = ArgumentCaptor.forClass(GatewayChatRequest.class);
+        verify(fastApiGateway).sendMessage(gatewayRequest.capture());
+        assertThat(gatewayRequest.getValue().sessionId()).isEqualTo("KD-2026-778");
+        assertThat(gatewayRequest.getValue().message()).contains("Estilo visual seleccionado: Moderno Gris");
+        assertThat(gatewayRequest.getValue().imageBase64()).isNull();
     }
 
     @Test
@@ -148,6 +170,7 @@ class ChatResourceIT {
     @WithMockUser
     void sendMessageWithReferenceImagePersistsDesignImage() throws Exception {
         DesignSession session = saveSession("KD-2026-779");
+        when(fastApiGateway.sendMessage(any())).thenReturn(gatewayResponse(session, "Veo la foto de referencia.", false));
 
         mockMvc
             .perform(
@@ -173,7 +196,7 @@ class ChatResourceIT {
                     )
             )
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.reply").value(startsWith("Gracias por la foto")));
+            .andExpect(jsonPath("$.reply").value("Veo la foto de referencia."));
 
         assertThat(designImageRepository.findAll()).extracting(DesignImage::getImageType).containsExactly(ImageType.REFERENCE);
         DesignImage image = designImageRepository.findAll().getFirst();
@@ -181,6 +204,67 @@ class ChatResourceIT {
         assertThat(image.getFileName()).isEqualTo("cocina.webp");
         assertThat(image.getMimeType()).isEqualTo("image/webp");
         assertThat(image.getFilePath()).contains("KD-2026-779");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void sendMessageUpdatesSessionStatusWhenSpecsReady() throws Exception {
+        DesignSession session = saveSession("KD-2026-781");
+        when(fastApiGateway.sendMessage(any())).thenReturn(gatewayResponse(session, "Especificaciones listas.", true));
+
+        mockMvc
+            .perform(
+                post("/api/chat/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "message", "Confirmo especificaciones")))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.specsReady").value(true));
+
+        assertThat(designSessionRepository.findById(session.getId()).orElseThrow().getStatus()).isEqualTo(SessionStatus.SPECS_READY);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void sendMessageAcceptsSpecsReadyCompletionReply() throws Exception {
+        DesignSession session = saveSession("KD-2026-783");
+        when(fastApiGateway.sendMessage(any())).thenReturn(
+            gatewayResponse(session, "Perfecto, ya tengo la información base para preparar las especificaciones de diseño.", true)
+        );
+
+        mockMvc
+            .perform(
+                post("/api/chat/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "message", "SI")))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.reply").value(startsWith("Perfecto")))
+            .andExpect(jsonPath("$.specsReady").value(true));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void sendMessageHandlesGatewayUnavailableWithoutLosingUserMessage() throws Exception {
+        DesignSession session = saveSession("KD-2026-782");
+        when(fastApiGateway.sendMessage(any())).thenThrow(new FastApiGatewayException("down"));
+
+        mockMvc
+            .perform(
+                post("/api/chat/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "message", "Necesito una cocina en L")))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.reply").value(startsWith("El diseñador IA no está disponible")))
+            .andExpect(jsonPath("$.specsReady").value(false));
+
+        assertThat(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(session.getId()))
+            .extracting(ChatMessage::getRole)
+            .containsExactly(MessageRole.USER, MessageRole.ASSISTANT);
     }
 
     @Test
@@ -217,6 +301,19 @@ class ChatResourceIT {
         assertThat(designImageRepository.findAll()).isEmpty();
     }
 
+    @Test
+    @Transactional
+    @WithMockUser
+    void sendMessageReturnsNotFoundForMissingSession() throws Exception {
+        mockMvc
+            .perform(
+                post("/api/chat/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", 999999L, "message", "Hola")))
+            )
+            .andExpect(status().isNotFound());
+    }
+
     private DesignSession saveSession(String sessionCode) {
         Instant now = Instant.now();
         return designSessionRepository.save(
@@ -229,5 +326,15 @@ class ChatResourceIT {
                 .createdAt(now)
                 .updatedAt(now)
         );
+    }
+
+    private ChatResponseDTO gatewayResponse(DesignSession session, String reply, boolean specsReady) {
+        ChatResponseDTO response = new ChatResponseDTO();
+        response.setSessionId(session.getId());
+        response.setSessionCode(session.getSessionCode());
+        response.setReply(reply);
+        response.setSpecsReady(specsReady);
+        response.setSpecsSummary(null);
+        return response;
     }
 }

@@ -11,6 +11,9 @@ import com.kalitron.studio.repository.ChatMessageRepository;
 import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
 import com.kalitron.studio.service.DesignChatService;
+import com.kalitron.studio.service.FastApiGateway;
+import com.kalitron.studio.service.FastApiGateway.GatewayChatRequest;
+import com.kalitron.studio.service.FastApiGatewayException;
 import com.kalitron.studio.service.dto.ChatMessageViewDTO;
 import com.kalitron.studio.service.dto.ChatRequestDTO;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
@@ -40,14 +43,18 @@ public class DesignChatServiceImpl implements DesignChatService {
 
     private final DesignImageRepository designImageRepository;
 
+    private final FastApiGateway fastApiGateway;
+
     public DesignChatServiceImpl(
         DesignSessionRepository designSessionRepository,
         ChatMessageRepository chatMessageRepository,
-        DesignImageRepository designImageRepository
+        DesignImageRepository designImageRepository,
+        FastApiGateway fastApiGateway
     ) {
         this.designSessionRepository = designSessionRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.designImageRepository = designImageRepository;
+        this.fastApiGateway = fastApiGateway;
     }
 
     @Override
@@ -107,15 +114,14 @@ public class DesignChatServiceImpl implements DesignChatService {
         session.setUpdatedAt(Instant.now());
         DesignSession savedSession = designSessionRepository.save(session);
 
-        String reply = buildTemporaryAssistantReply(message, hasReferenceImage);
-        saveMessage(savedSession, MessageRole.ASSISTANT, reply);
+        ChatResponseDTO response = sendToGateway(savedSession, message, request);
+        saveMessage(savedSession, MessageRole.ASSISTANT, response.getReply());
+        if (response.isSpecsReady()) {
+            savedSession.setStatus(SessionStatus.SPECS_READY);
+            savedSession.setUpdatedAt(Instant.now());
+            designSessionRepository.save(savedSession);
+        }
 
-        ChatResponseDTO response = new ChatResponseDTO();
-        response.setSessionId(savedSession.getId());
-        response.setSessionCode(savedSession.getSessionCode());
-        response.setReply(reply);
-        response.setSpecsReady(false);
-        response.setSpecsSummary(null);
         return response;
     }
 
@@ -238,26 +244,43 @@ public class DesignChatServiceImpl implements DesignChatService {
         return fileName.trim().replaceAll("[^A-Za-z0-9._-]", "-");
     }
 
-    private String buildTemporaryAssistantReply(String message, boolean hasReferenceImage) {
-        if (hasReferenceImage) {
-            return "Gracias por la foto. La usaré como referencia de distribución, accesos y ubicación general de los elementos. ¿Qué parte quieres conservar sin cambios?";
+    private ChatResponseDTO sendToGateway(DesignSession session, String message, ChatRequestDTO request) {
+        try {
+            return fastApiGateway.sendMessage(
+                new GatewayChatRequest(
+                    session.getSessionCode(),
+                    buildGatewayMessage(session, message),
+                    normalizeImageBase64(request.getImageBase64()),
+                    session.getId(),
+                    session.getSessionCode()
+                )
+            );
+        } catch (FastApiGatewayException e) {
+            ChatResponseDTO response = new ChatResponseDTO();
+            response.setSessionId(session.getId());
+            response.setSessionCode(session.getSessionCode());
+            response.setReply(
+                "El diseñador IA no está disponible por el momento. Guardé tu mensaje y puedes intentar de nuevo en unos minutos."
+            );
+            response.setSpecsReady(false);
+            response.setSpecsSummary(null);
+            return response;
+        }
+    }
+
+    private String buildGatewayMessage(DesignSession session, String message) {
+        String userMessage = message.isBlank() ? "Imagen de referencia adjunta." : message;
+        if (session.getSelectedStyle() == null || session.getSelectedStyle().isBlank()) {
+            return userMessage;
         }
 
-        String normalized = message.toLowerCase(Locale.ROOT);
-        if (normalized.contains("cocina") || normalized.contains("closet") || normalized.contains("ambos") || normalized.contains("both")) {
-            return "Perfecto. ¿Qué forma tiene tu espacio: lineal, en L o en U? ¿Tienes medidas aproximadas?";
+        return "Estilo visual seleccionado: " + session.getSelectedStyle() + ".\n\nMensaje del cliente: " + userMessage;
+    }
+
+    private String normalizeImageBase64(String imageBase64) {
+        if (imageBase64 == null || imageBase64.isBlank()) {
+            return null;
         }
-        if (
-            normalized.contains("moderno") ||
-            normalized.contains("minimalista") ||
-            normalized.contains("rustico") ||
-            normalized.contains("rústico")
-        ) {
-            return "Entendido. ¿Prefieres acabado claro, madera natural o tonos oscuros? ¿Buscas algo económico, medio o premium?";
-        }
-        if (normalized.matches(".*\\d+.*")) {
-            return "Gracias, esas medidas ayudan. ¿Dónde están tarja, estufa y refrigerador?";
-        }
-        return "Gracias. ¿Qué estilo visual prefieres? ¿Tienes medidas aproximadas del espacio?";
+        return imageBase64.trim();
     }
 }
