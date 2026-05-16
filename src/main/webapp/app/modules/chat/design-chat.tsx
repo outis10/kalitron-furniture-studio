@@ -8,6 +8,7 @@ import { faCheck, faImage, faPaperPlane, faRotateRight, faXmark } from '@fortawe
 import {
   ChatMessageView,
   ChatSession,
+  generateVisualConcept,
   getCatalogStyles,
   resumeChatSession,
   sendChatMessage,
@@ -72,11 +73,16 @@ const DesignChat = () => {
   const [catalogStyles, setCatalogStyles] = useState<ICatalogStyle[]>([]);
   const [selectedStyle, setSelectedStyle] = useState<ICatalogStyle | null>(null);
   const [selectedReferenceImage, setSelectedReferenceImage] = useState<SelectedReferenceImage | null>(null);
+  const [visualStyle, setVisualStyle] = useState('minimalista');
+  const [visualLayout, setVisualLayout] = useState('lineal');
+  const [visualFinish, setVisualFinish] = useState('negro opaco');
+  const [hasGeneratedConcept, setHasGeneratedConcept] = useState(false);
   const [expandedStyleId, setExpandedStyleId] = useState<string | number | null>(null);
   const [styleSkipped, setStyleSkipped] = useState(false);
   const [isLoadingStyles, setIsLoadingStyles] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,6 +132,10 @@ const DesignChat = () => {
   const canSend = useMemo(
     () => (draft.trim().length > 0 || !!selectedReferenceImage) && !!session && !isSending,
     [draft, isSending, selectedReferenceImage, session],
+  );
+  const canGenerateConcept = useMemo(
+    () => !!session && ['SPECS_READY', 'VISUAL_GENERATED'].includes(session.status) && !isGeneratingConcept,
+    [isGeneratingConcept, session],
   );
 
   const handleStart = async (event: FormEvent) => {
@@ -196,7 +206,15 @@ const DesignChat = () => {
           createdAt: new Date().toISOString(),
         },
       ]);
-      setSession(currentSession => (currentSession ? { ...currentSession, sessionCode: response.sessionCode } : currentSession));
+      setSession(currentSession =>
+        currentSession
+          ? {
+              ...currentSession,
+              sessionCode: response.sessionCode,
+              status: response.specsReady ? 'SPECS_READY' : currentSession.status,
+            }
+          : currentSession,
+      );
     } catch {
       setSelectedReferenceImage(imageToSend);
       setError('No se pudo enviar el mensaje. Intenta nuevamente.');
@@ -212,8 +230,45 @@ const DesignChat = () => {
     setDraft('');
     setSelectedStyle(null);
     setSelectedReferenceImage(null);
+    setHasGeneratedConcept(false);
     setStyleSkipped(false);
     setError(null);
+  };
+
+  const handleGenerateConcept = async () => {
+    if (!canGenerateConcept || !session) {
+      return;
+    }
+
+    setError(null);
+    setIsGeneratingConcept(true);
+    try {
+      const concept = await generateVisualConcept({
+        sessionId: session.sessionId,
+        style: visualStyle,
+        layout: visualLayout,
+        finish: visualFinish,
+      });
+      setMessages(currentMessages => [
+        ...currentMessages,
+        {
+          role: 'ASSISTANT',
+          content: 'Concepto visual generado.',
+          createdAt: new Date().toISOString(),
+          imagePreviewUrl: concept.imageUrl,
+          imageFileName: concept.pipeline,
+          imageBadge: concept.badge,
+        },
+      ]);
+      setHasGeneratedConcept(true);
+      setSession(currentSession =>
+        currentSession ? { ...currentSession, sessionCode: concept.sessionCode, status: 'VISUAL_GENERATED' } : currentSession,
+      );
+    } catch {
+      setError('No se pudo generar el concepto visual. Verifica que el AI Gateway y ComfyUI estén disponibles.');
+    } finally {
+      setIsGeneratingConcept(false);
+    }
   };
 
   const handleReferenceImage = async (file: File | undefined) => {
@@ -429,15 +484,18 @@ const DesignChat = () => {
               <div
                 className={`design-chat__message ${
                   message.role === 'USER' ? 'design-chat__message--user' : 'design-chat__message--assistant'
-                }`}
+                } ${message.imageBadge ? 'design-chat__message--concept' : ''}`}
                 key={`${message.createdAt}-${index}`}
               >
                 {message.imagePreviewUrl ? (
-                  <img
-                    className="design-chat__message-image"
-                    src={message.imagePreviewUrl}
-                    alt={message.imageFileName ?? 'Imagen de referencia'}
-                  />
+                  <>
+                    {message.imageBadge ? <span className="design-chat__image-badge">{message.imageBadge}</span> : null}
+                    <img
+                      className={`design-chat__message-image ${message.imageBadge ? 'design-chat__message-image--concept' : ''}`}
+                      src={message.imagePreviewUrl}
+                      alt={message.imageFileName ?? 'Imagen de referencia'}
+                    />
+                  </>
                 ) : null}
                 {message.content}
               </div>
@@ -445,6 +503,11 @@ const DesignChat = () => {
             {isSending && (
               <div className="design-chat__message design-chat__message--assistant">
                 <Spinner size="sm" /> Pensando...
+              </div>
+            )}
+            {isGeneratingConcept && (
+              <div className="design-chat__message design-chat__message--assistant">
+                <Spinner size="sm" /> Generando concepto visual... tiempo estimado 45-60s.
               </div>
             )}
           </div>
@@ -456,6 +519,43 @@ const DesignChat = () => {
           )}
 
           <Form className="design-chat__composer" onSubmit={handleSend}>
+            {canGenerateConcept ? (
+              <section className="design-chat__visual-controls" aria-label="Generar concepto visual">
+                <div className="design-chat__visual-grid">
+                  <Form.Group controlId="visualStyle">
+                    <Form.Label>Estilo</Form.Label>
+                    <Form.Select value={visualStyle} onChange={event => setVisualStyle(event.target.value)}>
+                      <option value="moderno">Moderno</option>
+                      <option value="minimalista">Minimalista</option>
+                      <option value="rustico">Rústico</option>
+                      <option value="clasico">Clásico</option>
+                      <option value="industrial">Industrial</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group controlId="visualLayout">
+                    <Form.Label>Layout</Form.Label>
+                    <Form.Select value={visualLayout} onChange={event => setVisualLayout(event.target.value)}>
+                      <option value="lineal">Lineal</option>
+                      <option value="L">En L</option>
+                      <option value="U">En U</option>
+                      <option value="isla">Con isla</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group controlId="visualFinish">
+                    <Form.Label>Acabado</Form.Label>
+                    <Form.Select value={visualFinish} onChange={event => setVisualFinish(event.target.value)}>
+                      <option value="blanco brillante">Blanco brillante</option>
+                      <option value="negro opaco">Negro opaco</option>
+                      <option value="madera natural">Madera natural</option>
+                      <option value="gris mate">Gris mate</option>
+                    </Form.Select>
+                  </Form.Group>
+                </div>
+                <Button type="button" onClick={handleGenerateConcept} disabled={isGeneratingConcept}>
+                  {isGeneratingConcept ? <Spinner size="sm" /> : hasGeneratedConcept ? 'Regenerar concepto' : 'Generar concepto'}
+                </Button>
+              </section>
+            ) : null}
             {selectedReferenceImage ? (
               <div className="design-chat__attachment-preview">
                 <img src={selectedReferenceImage.previewUrl} alt={selectedReferenceImage.fileName} />

@@ -5,6 +5,8 @@ import com.kalitron.studio.service.dto.ChatRequestDTO;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
 import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
+import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
+import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import com.kalitron.studio.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -53,6 +55,18 @@ public class ChatResource {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
             }
             throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "invalidchatmessage");
+        }
+    }
+
+    @PostMapping("/visual-concept")
+    public ResponseEntity<VisualConceptResponseDTO> generateVisualConcept(@Valid @RequestBody VisualConceptRequestDTO request) {
+        try {
+            return ResponseEntity.ok(designChatService.generateVisualConcept(request));
+        } catch (IllegalArgumentException e) {
+            if ("Design session not found".equals(e.getMessage())) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            }
+            throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "invalidvisualconcept");
         }
     }
 }

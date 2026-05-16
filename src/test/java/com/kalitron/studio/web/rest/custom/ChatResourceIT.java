@@ -25,8 +25,10 @@ import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
 import com.kalitron.studio.service.FastApiGateway;
 import com.kalitron.studio.service.FastApiGateway.GatewayChatRequest;
+import com.kalitron.studio.service.FastApiGateway.GatewayGenerateRequest;
 import com.kalitron.studio.service.FastApiGatewayException;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
+import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.time.Instant;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
@@ -228,6 +230,25 @@ class ChatResourceIT {
     @Test
     @Transactional
     @WithMockUser
+    void sendMessageDoesNotRegressSpecsReadyStatus() throws Exception {
+        DesignSession session = saveSession("KD-2026-788", SessionStatus.SPECS_READY);
+        when(fastApiGateway.sendMessage(any())).thenReturn(gatewayResponse(session, "Ajusto el concepto con esa nota.", false));
+
+        mockMvc
+            .perform(
+                post("/api/chat/message")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "message", "Agrega madera natural")))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.specsReady").value(false));
+
+        assertThat(designSessionRepository.findById(session.getId()).orElseThrow().getStatus()).isEqualTo(SessionStatus.SPECS_READY);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
     void sendMessageAcceptsSpecsReadyCompletionReply() throws Exception {
         DesignSession session = saveSession("KD-2026-783");
         when(fastApiGateway.sendMessage(any())).thenReturn(
@@ -314,13 +335,106 @@ class ChatResourceIT {
             .andExpect(status().isNotFound());
     }
 
+    @Test
+    @Transactional
+    @WithMockUser
+    void generateVisualConceptPersistsAiRenderImage() throws Exception {
+        DesignSession session = saveSession("KD-2026-784", SessionStatus.SPECS_READY);
+        when(fastApiGateway.generateVisualConcept(any())).thenReturn(
+            visualConceptResponse(session, "http://localhost:8000/outputs/concepts/KD-2026-784_txt2img.jpg", "txt2img")
+        );
+
+        mockMvc
+            .perform(
+                post("/api/chat/visual-concept")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of("sessionId", session.getId(), "style", "minimalista", "layout", "lineal", "finish", "negro opaco")
+                        )
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.imageUrl").value("http://localhost:8000/outputs/concepts/KD-2026-784_txt2img.jpg"))
+            .andExpect(jsonPath("$.pipeline").value("txt2img"))
+            .andExpect(jsonPath("$.badge").value("Generated from description"));
+
+        assertThat(designSessionRepository.findById(session.getId()).orElseThrow().getStatus()).isEqualTo(SessionStatus.VISUAL_GENERATED);
+        assertThat(designImageRepository.findAll()).extracting(DesignImage::getImageType).containsExactly(ImageType.AI_RENDER);
+        assertThat(designImageRepository.findAll().getFirst().getFilePath()).contains("KD-2026-784_txt2img.jpg");
+
+        ArgumentCaptor<GatewayGenerateRequest> gatewayRequest = ArgumentCaptor.forClass(GatewayGenerateRequest.class);
+        verify(fastApiGateway).generateVisualConcept(gatewayRequest.capture());
+        assertThat(gatewayRequest.getValue().sessionId()).isEqualTo("KD-2026-784");
+        assertThat(gatewayRequest.getValue().style()).isEqualTo("minimalista");
+        assertThat(gatewayRequest.getValue().layout()).isEqualTo("lineal");
+        assertThat(gatewayRequest.getValue().finish()).isEqualTo("negro opaco");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void generateVisualConceptKeepsLayoutConfirmedStatus() throws Exception {
+        DesignSession session = saveSession("KD-2026-787", SessionStatus.LAYOUT_CONFIRMED);
+        when(fastApiGateway.generateVisualConcept(any())).thenReturn(
+            visualConceptResponse(session, "http://localhost:8000/outputs/concepts/KD-2026-787_txt2img.jpg", "txt2img")
+        );
+
+        mockMvc
+            .perform(
+                post("/api/chat/visual-concept")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "style", "minimalista")))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.imageUrl").value("http://localhost:8000/outputs/concepts/KD-2026-787_txt2img.jpg"));
+
+        assertThat(designSessionRepository.findById(session.getId()).orElseThrow().getStatus()).isEqualTo(SessionStatus.LAYOUT_CONFIRMED);
+        assertThat(designImageRepository.findAll()).extracting(DesignImage::getImageType).containsExactly(ImageType.AI_RENDER);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void generateVisualConceptRejectsSessionBeforeSpecsReady() throws Exception {
+        DesignSession session = saveSession("KD-2026-785", SessionStatus.CHATTING);
+
+        mockMvc
+            .perform(
+                post("/api/chat/visual-concept")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "style", "moderno")))
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void generateVisualConceptHandlesGatewayUnavailable() throws Exception {
+        DesignSession session = saveSession("KD-2026-786", SessionStatus.SPECS_READY);
+        when(fastApiGateway.generateVisualConcept(any())).thenThrow(new FastApiGatewayException("down"));
+
+        mockMvc
+            .perform(
+                post("/api/chat/visual-concept")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId(), "style", "moderno")))
+            )
+            .andExpect(status().isServiceUnavailable());
+    }
+
     private DesignSession saveSession(String sessionCode) {
+        return saveSession(sessionCode, SessionStatus.CHATTING);
+    }
+
+    private DesignSession saveSession(String sessionCode, SessionStatus status) {
         Instant now = Instant.now();
         return designSessionRepository.save(
             new DesignSession()
                 .sessionCode(sessionCode)
                 .projectType(ProjectType.KITCHEN)
-                .status(SessionStatus.CHATTING)
+                .status(status)
                 .clientName("Ana Lopez")
                 .clientEmail("ana@example.com")
                 .createdAt(now)
@@ -335,6 +449,17 @@ class ChatResourceIT {
         response.setReply(reply);
         response.setSpecsReady(specsReady);
         response.setSpecsSummary(null);
+        return response;
+    }
+
+    private VisualConceptResponseDTO visualConceptResponse(DesignSession session, String imageUrl, String pipeline) {
+        VisualConceptResponseDTO response = new VisualConceptResponseDTO();
+        response.setSessionId(session.getId());
+        response.setSessionCode(session.getSessionCode());
+        response.setImageUrl(imageUrl);
+        response.setPromptUsed("kitchen interior design");
+        response.setPipeline(pipeline);
+        response.setBadge("img2img".equals(pipeline) ? "Based on your photo" : "Generated from description");
         return response;
     }
 }

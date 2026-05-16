@@ -13,12 +13,15 @@ import com.kalitron.studio.repository.DesignSessionRepository;
 import com.kalitron.studio.service.DesignChatService;
 import com.kalitron.studio.service.FastApiGateway;
 import com.kalitron.studio.service.FastApiGateway.GatewayChatRequest;
+import com.kalitron.studio.service.FastApiGateway.GatewayGenerateRequest;
 import com.kalitron.studio.service.FastApiGatewayException;
 import com.kalitron.studio.service.dto.ChatMessageViewDTO;
 import com.kalitron.studio.service.dto.ChatRequestDTO;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
 import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
+import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
+import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.time.Instant;
 import java.time.Year;
 import java.util.Base64;
@@ -26,8 +29,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -110,7 +115,9 @@ public class DesignChatServiceImpl implements DesignChatService {
         if (normalizeSelectedStyle(request.getSelectedStyle()) != null) {
             session.setSelectedStyle(normalizeSelectedStyle(request.getSelectedStyle()));
         }
-        session.setStatus(SessionStatus.CHATTING);
+        if (session.getStatus() == SessionStatus.DRAFT) {
+            session.setStatus(SessionStatus.CHATTING);
+        }
         session.setUpdatedAt(Instant.now());
         DesignSession savedSession = designSessionRepository.save(session);
 
@@ -123,6 +130,43 @@ public class DesignChatServiceImpl implements DesignChatService {
         }
 
         return response;
+    }
+
+    @Override
+    public VisualConceptResponseDTO generateVisualConcept(VisualConceptRequestDTO request) {
+        DesignSession session = designSessionRepository
+            .findById(request.getSessionId())
+            .orElseThrow(() -> new IllegalArgumentException("Design session not found"));
+
+        if (!canGenerateVisualConcept(session.getStatus())) {
+            throw new IllegalArgumentException(
+                "Design session must be specs ready before generating a visual concept. Current status: " + session.getStatus()
+            );
+        }
+
+        try {
+            VisualConceptResponseDTO response = fastApiGateway.generateVisualConcept(
+                new GatewayGenerateRequest(
+                    session.getSessionCode(),
+                    normalizeImageBase64(request.getClientImageBase64()),
+                    normalizeVisualOption(request.getStyle(), session.getSelectedStyle(), "moderno"),
+                    normalizeVisualOption(request.getLayout(), null, null),
+                    normalizeVisualOption(request.getFinish(), null, null),
+                    session.getId(),
+                    session.getSessionCode()
+                )
+            );
+
+            saveGeneratedImage(session, response);
+            if (session.getStatus() == SessionStatus.SPECS_READY) {
+                session.setStatus(SessionStatus.VISUAL_GENERATED);
+            }
+            session.setUpdatedAt(Instant.now());
+            designSessionRepository.save(session);
+            return response;
+        } catch (FastApiGatewayException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI visual concept generation is unavailable", e);
+        }
     }
 
     private String nextSessionCode() {
@@ -141,6 +185,10 @@ public class DesignChatServiceImpl implements DesignChatService {
     private ChatMessage saveMessage(DesignSession session, MessageRole role, String content) {
         ChatMessage message = new ChatMessage().session(session).role(role).content(content).createdAt(Instant.now());
         return chatMessageRepository.save(message);
+    }
+
+    private boolean canGenerateVisualConcept(SessionStatus status) {
+        return status == SessionStatus.SPECS_READY || status == SessionStatus.VISUAL_GENERATED || status == SessionStatus.LAYOUT_CONFIRMED;
     }
 
     private ChatSessionDTO toSessionDTO(DesignSession session) {
@@ -282,5 +330,44 @@ public class DesignChatServiceImpl implements DesignChatService {
             return null;
         }
         return imageBase64.trim();
+    }
+
+    private String normalizeVisualOption(String option, String fallback, String defaultValue) {
+        if (option != null && !option.isBlank()) {
+            return option.trim();
+        }
+        if (fallback != null && !fallback.isBlank()) {
+            return fallback.trim();
+        }
+        return defaultValue;
+    }
+
+    private void saveGeneratedImage(DesignSession session, VisualConceptResponseDTO response) {
+        Instant now = Instant.now();
+        String fileName = imageFileNameFromUrl(response.getImageUrl());
+        DesignImage image = new DesignImage()
+            .session(session)
+            .imageType(ImageType.AI_RENDER)
+            .fileName(fileName)
+            .filePath(response.getImageUrl())
+            .mimeType("image/jpeg")
+            .isActive(true)
+            .uploadedAt(now)
+            .description(response.getBadge());
+
+        designImageRepository.save(image);
+    }
+
+    private String imageFileNameFromUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return "visual-concept.jpg";
+        }
+
+        int slashIndex = imageUrl.lastIndexOf('/');
+        String fileName = slashIndex >= 0 ? imageUrl.substring(slashIndex + 1) : imageUrl;
+        if (fileName.isBlank()) {
+            return "visual-concept.jpg";
+        }
+        return sanitizeImageFileName(fileName);
     }
 }
