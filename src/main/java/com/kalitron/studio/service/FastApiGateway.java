@@ -101,6 +101,8 @@ public class FastApiGateway {
         String style,
         String layout,
         String finish,
+        @JsonProperty("project_type") String projectType,
+        @JsonProperty("design_brief") String designBrief,
         @JsonIgnore Long studioSessionId,
         @JsonIgnore String sessionCode
     ) {}

@@ -73,9 +73,9 @@ const DesignChat = () => {
   const [catalogStyles, setCatalogStyles] = useState<ICatalogStyle[]>([]);
   const [selectedStyle, setSelectedStyle] = useState<ICatalogStyle | null>(null);
   const [selectedReferenceImage, setSelectedReferenceImage] = useState<SelectedReferenceImage | null>(null);
-  const [visualStyle, setVisualStyle] = useState('minimalista');
-  const [visualLayout, setVisualLayout] = useState('lineal');
-  const [visualFinish, setVisualFinish] = useState('negro opaco');
+  const [visualStyle, setVisualStyle] = useState('');
+  const [visualLayout, setVisualLayout] = useState('');
+  const [visualFinish, setVisualFinish] = useState('');
   const [hasGeneratedConcept, setHasGeneratedConcept] = useState(false);
   const [expandedStyleId, setExpandedStyleId] = useState<string | number | null>(null);
   const [styleSkipped, setStyleSkipped] = useState(false);
@@ -245,9 +245,9 @@ const DesignChat = () => {
     try {
       const concept = await generateVisualConcept({
         sessionId: session.sessionId,
-        style: visualStyle,
-        layout: visualLayout,
-        finish: visualFinish,
+        style: visualStyle || null,
+        layout: visualLayout || null,
+        finish: visualFinish || null,
       });
       setMessages(currentMessages => [
         ...currentMessages,
@@ -525,6 +525,7 @@ const DesignChat = () => {
                   <Form.Group controlId="visualStyle">
                     <Form.Label>Estilo</Form.Label>
                     <Form.Select value={visualStyle} onChange={event => setVisualStyle(event.target.value)}>
+                      <option value="">Usar resumen confirmado</option>
                       <option value="moderno">Moderno</option>
                       <option value="minimalista">Minimalista</option>
                       <option value="rustico">Rústico</option>
@@ -535,6 +536,7 @@ const DesignChat = () => {
                   <Form.Group controlId="visualLayout">
                     <Form.Label>Layout</Form.Label>
                     <Form.Select value={visualLayout} onChange={event => setVisualLayout(event.target.value)}>
+                      <option value="">Usar resumen confirmado</option>
                       <option value="lineal">Lineal</option>
                       <option value="L">En L</option>
                       <option value="U">En U</option>
@@ -544,6 +546,7 @@ const DesignChat = () => {
                   <Form.Group controlId="visualFinish">
                     <Form.Label>Acabado</Form.Label>
                     <Form.Select value={visualFinish} onChange={event => setVisualFinish(event.target.value)}>
+                      <option value="">Usar resumen confirmado</option>
                       <option value="blanco brillante">Blanco brillante</option>
                       <option value="negro opaco">Negro opaco</option>
                       <option value="madera natural">Madera natural</option>

@@ -123,8 +123,13 @@ public class DesignChatServiceImpl implements DesignChatService {
 
         ChatResponseDTO response = sendToGateway(savedSession, message, request);
         saveMessage(savedSession, MessageRole.ASSISTANT, response.getReply());
+        ProjectType previousProjectType = savedSession.getProjectType();
+        updateProjectTypeFromMessage(savedSession, response.getReply());
         if (response.isSpecsReady()) {
             savedSession.setStatus(SessionStatus.SPECS_READY);
+            savedSession.setUpdatedAt(Instant.now());
+            designSessionRepository.save(savedSession);
+        } else if (savedSession.getProjectType() != previousProjectType) {
             savedSession.setUpdatedAt(Instant.now());
             designSessionRepository.save(savedSession);
         }
@@ -152,6 +157,8 @@ public class DesignChatServiceImpl implements DesignChatService {
                     normalizeVisualOption(request.getStyle(), session.getSelectedStyle(), "moderno"),
                     normalizeVisualOption(request.getLayout(), null, null),
                     normalizeVisualOption(request.getFinish(), null, null),
+                    session.getProjectType().name(),
+                    buildVisualDesignBrief(session),
                     session.getId(),
                     session.getSessionCode()
                 )
@@ -214,7 +221,14 @@ public class DesignChatServiceImpl implements DesignChatService {
         String normalized = message.toLowerCase(Locale.ROOT);
         if (normalized.contains("ambos") || normalized.contains("both")) {
             session.setProjectType(ProjectType.BOTH);
-        } else if (normalized.contains("closet") || normalized.contains("clóset")) {
+        } else if (
+            normalized.contains("closet") ||
+            normalized.contains("clóset") ||
+            normalized.contains("armario") ||
+            normalized.contains("ropero") ||
+            normalized.contains("guardarropa") ||
+            normalized.contains("wardrobe")
+        ) {
             session.setProjectType(ProjectType.CLOSET);
         } else if (normalized.contains("cocina") || normalized.contains("kitchen")) {
             session.setProjectType(ProjectType.KITCHEN);
@@ -323,6 +337,28 @@ public class DesignChatServiceImpl implements DesignChatService {
         }
 
         return "Estilo visual seleccionado: " + session.getSelectedStyle() + ".\n\nMensaje del cliente: " + userMessage;
+    }
+
+    private String buildVisualDesignBrief(DesignSession session) {
+        List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(session.getId());
+        String latestAssistantSummary = messages
+            .stream()
+            .filter(message -> message.getRole() == MessageRole.ASSISTANT)
+            .map(ChatMessage::getContent)
+            .filter(content -> content != null && content.toLowerCase(Locale.ROOT).contains("resumen"))
+            .reduce((previous, current) -> current)
+            .orElse(null);
+
+        if (latestAssistantSummary != null && !latestAssistantSummary.isBlank()) {
+            return latestAssistantSummary.trim();
+        }
+
+        return messages
+            .stream()
+            .filter(message -> message.getContent() != null && !message.getContent().isBlank())
+            .map(message -> message.getRole() + ": " + message.getContent().trim())
+            .reduce((previous, current) -> previous + "\n" + current)
+            .orElse("");
     }
 
     private String normalizeImageBase64(String imageBase64) {

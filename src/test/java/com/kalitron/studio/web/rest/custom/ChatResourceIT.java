@@ -340,6 +340,13 @@ class ChatResourceIT {
     @WithMockUser
     void generateVisualConceptPersistsAiRenderImage() throws Exception {
         DesignSession session = saveSession("KD-2026-784", SessionStatus.SPECS_READY);
+        chatMessageRepository.save(
+            new ChatMessage()
+                .session(session)
+                .role(MessageRole.ASSISTANT)
+                .content("Perfecto, aqui tienes el resumen de tu proyecto de cocina.")
+                .createdAt(Instant.now())
+        );
         when(fastApiGateway.generateVisualConcept(any())).thenReturn(
             visualConceptResponse(session, "http://localhost:8000/outputs/concepts/KD-2026-784_txt2img.jpg", "txt2img")
         );
@@ -369,6 +376,41 @@ class ChatResourceIT {
         assertThat(gatewayRequest.getValue().style()).isEqualTo("minimalista");
         assertThat(gatewayRequest.getValue().layout()).isEqualTo("lineal");
         assertThat(gatewayRequest.getValue().finish()).isEqualTo("negro opaco");
+        assertThat(gatewayRequest.getValue().projectType()).isEqualTo("KITCHEN");
+        assertThat(gatewayRequest.getValue().designBrief()).contains("resumen de tu proyecto de cocina");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void generateVisualConceptPassesClosetProjectAndSummaryToGateway() throws Exception {
+        DesignSession session = saveSession("KD-2026-789", SessionStatus.SPECS_READY);
+        session.setProjectType(ProjectType.CLOSET);
+        designSessionRepository.save(session);
+        chatMessageRepository.save(
+            new ChatMessage()
+                .session(session)
+                .role(MessageRole.ASSISTANT)
+                .content("Perfecto, aqui tienes el resumen de tu proyecto de armario: alto brillo blanco.")
+                .createdAt(Instant.now())
+        );
+        when(fastApiGateway.generateVisualConcept(any())).thenReturn(
+            visualConceptResponse(session, "http://localhost:8000/outputs/concepts/KD-2026-789_txt2img.jpg", "txt2img")
+        );
+
+        mockMvc
+            .perform(
+                post("/api/chat/visual-concept")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId())))
+            )
+            .andExpect(status().isOk());
+
+        ArgumentCaptor<GatewayGenerateRequest> gatewayRequest = ArgumentCaptor.forClass(GatewayGenerateRequest.class);
+        verify(fastApiGateway).generateVisualConcept(gatewayRequest.capture());
+        assertThat(gatewayRequest.getValue().projectType()).isEqualTo("CLOSET");
+        assertThat(gatewayRequest.getValue().designBrief()).contains("proyecto de armario");
+        assertThat(gatewayRequest.getValue().finish()).isNull();
     }
 
     @Test

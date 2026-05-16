@@ -71,10 +71,20 @@ Cloud GPU APIs remain possible later if local GPU setup becomes a barrier for de
 
 Comfy.org Cloud is the lowest-friction cloud escape hatch: the workflow JSON is identical and only two integration changes are needed (polling endpoint + API key header). The main gate is confirming SDXL 1.0 + ControlNet Canny SDXL are in their pre-installed library; if not, the Creator plan ($35/mo) unlocks custom model uploads from HuggingFace.
 
-### RunPod operational learnings (validated 2026-05-14)
+### Cloud GPU provider comparison (validated 2026-05-14)
 
-RunPod persistent pods with `runpod/worker-comfyui` were tested end-to-end with an RTX 3090 (24 GB VRAM). The gateway required zero code changes — the ComfyUI REST API is identical to local.
+#### RunPod (persistent pod)
 
-**Model pre-installation:** The `runpod/worker-comfyui` image ships with empty model directories (placeholder files only). SDXL 1.0, ControlNet Canny SDXL, and the VAE must be downloaded manually to the network volume on first run. Models persist across pod restarts once downloaded.
+Tested end-to-end with RTX 3090 (24 GB VRAM). The gateway required zero code changes — the ComfyUI REST API on RunPod is identical to local.
 
-**Corporate network constraints:** Firewalls running FortiGuard IPS categorise `*.runpod.net` proxy URLs as "Proxy Avoidance" and block them. Workarounds in order of preference: (1) SSH tunnel (`ssh -L 8188:localhost:8188 <pod>@ssh.runpod.io`), (2) mobile hotspot, (3) request IT whitelist for `*.runpod.net`. SSL inspection by corporate proxies additionally requires setting `COMFYUI_VERIFY_SSL=false` in the gateway so httpx skips certificate verification.
+**Model pre-installation:** `runpod/worker-comfyui` ships with empty model directories. SDXL 1.0, ControlNet Canny SDXL, and the VAE must be downloaded manually to the network volume on first run via `wget` from HuggingFace. Models persist across pod restarts.
+
+**Corporate network constraints:** FortiGuard IPS categorises `*.runpod.net` proxy URLs as "Proxy Avoidance" and blocks them. Workarounds: (1) SSH tunnel (`ssh -L 8188:localhost:8188 <pod>@ssh.runpod.io`), (2) mobile hotspot, (3) IT whitelist for `*.runpod.net`. SSL inspection additionally requires `COMFYUI_VERIFY_SSL=false`.
+
+#### Vast.ai (persistent instance)
+
+Tested end-to-end with RTX 3090 (24 GB VRAM). Vast.ai provides a pre-built ComfyUI template with a panel-based launcher — no Docker setup needed. Model directories are empty on first run and require the same manual `wget` downloads.
+
+**Authentication:** Vast.ai wraps ComfyUI behind a reverse proxy that requires a token on every request. The token is provided as `?token=<value>` and is visible in the "Advanced Connection Options" panel. The gateway handles this via `COMFYUI_TOKEN` setting, passed as a query parameter with `follow_redirects=True`. Both the direct IP (`http://<ip>:<port>`) and Cloudflare Quick Tunnel (`https://<name>.trycloudflare.com`) endpoints require the token.
+
+**Cost vs RunPod:** Vast.ai tends to be cheaper per GPU-hour but instances can be reclaimed by the host. RunPod persistent pods offer more stability for longer sessions.
