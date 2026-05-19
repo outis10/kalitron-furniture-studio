@@ -73,6 +73,7 @@ const DesignChat = () => {
   const [catalogStyles, setCatalogStyles] = useState<ICatalogStyle[]>([]);
   const [selectedStyle, setSelectedStyle] = useState<ICatalogStyle | null>(null);
   const [selectedReferenceImage, setSelectedReferenceImage] = useState<SelectedReferenceImage | null>(null);
+  const [referenceImageBase64, setReferenceImageBase64] = useState<string | null>(null);
   const [visualStyle, setVisualStyle] = useState('');
   const [visualLayout, setVisualLayout] = useState('');
   const [visualFinish, setVisualFinish] = useState('');
@@ -180,6 +181,9 @@ const DesignChat = () => {
 
     setDraft('');
     setSelectedReferenceImage(null);
+    if (imageToSend?.base64) {
+      setReferenceImageBase64(imageToSend.base64);
+    }
     setError(null);
     setIsSending(true);
     setMessages(currentMessages => [...currentMessages, optimisticMessage]);
@@ -230,6 +234,7 @@ const DesignChat = () => {
     setDraft('');
     setSelectedStyle(null);
     setSelectedReferenceImage(null);
+    setReferenceImageBase64(null);
     setHasGeneratedConcept(false);
     setStyleSkipped(false);
     setError(null);
@@ -248,6 +253,7 @@ const DesignChat = () => {
         style: visualStyle || null,
         layout: visualLayout || null,
         finish: visualFinish || null,
+        clientImageBase64: selectedReferenceImage?.base64 || referenceImageBase64 || null,
       });
       setMessages(currentMessages => [
         ...currentMessages,

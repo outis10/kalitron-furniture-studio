@@ -88,3 +88,26 @@ Tested end-to-end with RTX 3090 (24 GB VRAM). Vast.ai provides a pre-built Comfy
 **Authentication:** Vast.ai wraps ComfyUI behind a reverse proxy that requires a token on every request. The token is provided as `?token=<value>` and is visible in the "Advanced Connection Options" panel. The gateway handles this via `COMFYUI_TOKEN` setting, passed as a query parameter with `follow_redirects=True`. Both the direct IP (`http://<ip>:<port>`) and Cloudflare Quick Tunnel (`https://<name>.trycloudflare.com`) endpoints require the token.
 
 **Cost vs RunPod:** Vast.ai tends to be cheaper per GPU-hour but instances can be reclaimed by the host. RunPod persistent pods offer more stability for longer sessions.
+
+**Custom nodes:** The `CannyEdgePreprocessor` node required for img2img is not pre-installed. Install it via:
+```bash
+cd /workspace/ComfyUI/custom_nodes
+git clone https://github.com/Fannovel16/comfyui_controlnet_aux
+cd comfyui_controlnet_aux && pip install -r requirements.txt
+```
+
+### img2img pipeline tuning (validated 2026-05-18)
+
+The initial img2img workflow used `VAEEncode` to encode the client reference photo into the latent space, then ran KSampler with `denoise=0.75`. This caused the original cabinet color (e.g. brown wood) to bleed into the output even at `denoise=0.88` because the VAE latent carries strong color signal.
+
+**Decision:** Replace `VAEEncode` with `EmptyLatentImage` in the img2img workflow. ControlNet Canny still extracts structural edge lines from the reference photo, enforcing layout and cabinet positions. The KSampler starts from pure noise (`denoise=1.0`), so color and style come entirely from the positive prompt. This makes img2img behave as a ControlNet-guided txt2img — full style transformation while preserving room structure.
+
+Final img2img parameters: `ControlNet strength=0.70`, `steps=35`, `cfg=7.5`, `denoise=1.0`.
+
+### Prompt engineering learnings (validated 2026-05-18)
+
+**Composite style names:** The Studio sends style names like `"Minimalista Negro"` where the color is embedded in the style label. STYLE_MAP only had exact keys (`"minimalista"`), so `"Minimalista Negro"` fell through to the `"modern"` default. Fix: substring match — check if any STYLE_MAP key appears within the style string.
+
+**Color must be explicit and early:** SDXL assigns more weight to earlier prompt tokens. The minimalist template included `"neutral palette"` which competed against the intended black color and won, producing cream/beige cabinets. Fix: (1) remove `"neutral palette"` from the minimalist template, (2) extract the color modifier from the composite style name and inject it as the first extra token — e.g. `"Minimalista Negro"` → `"matte black cabinets, all-black kitchen furniture, dark black cabinet color"` prepended before layout and finish details.
+
+**Layout and finish arrive as null:** The Studio often sends `layout=null` and `finish=null` even when the design brief contains the confirmed specs. The gateway now extracts layout and finish by scanning the brief for `Distribución:` and `Acabado/Color:` lines as a fallback. `_translate_design_brief` was also made prescriptive about layout keywords to prevent SDXL from ignoring the linear constraint and generating L-shaped or island kitchens.
