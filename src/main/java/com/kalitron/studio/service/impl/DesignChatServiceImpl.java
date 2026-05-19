@@ -153,12 +153,12 @@ public class DesignChatServiceImpl implements DesignChatService {
             VisualConceptResponseDTO response = fastApiGateway.generateVisualConcept(
                 new GatewayGenerateRequest(
                     session.getSessionCode(),
-                    normalizeImageBase64(request.getClientImageBase64()),
+                    resolveVisualReferenceImageBase64(session, request),
                     normalizeVisualOption(request.getStyle(), session.getSelectedStyle(), "moderno"),
                     normalizeVisualOption(request.getLayout(), null, null),
                     normalizeVisualOption(request.getFinish(), null, null),
                     session.getProjectType().name(),
-                    buildVisualDesignBrief(session),
+                    buildVisualDesignBrief(session, request.getVisualInstructions()),
                     session.getId(),
                     session.getSessionCode()
                 )
@@ -270,6 +270,7 @@ public class DesignChatServiceImpl implements DesignChatService {
             .imageType(ImageType.REFERENCE)
             .fileName(fileName)
             .filePath("reference-images/" + session.getSessionCode() + "/" + Instant.now().toEpochMilli() + "-" + fileName)
+            .imageDataBase64(normalizeImageBase64(request.getImageBase64()))
             .mimeType(mimeType)
             .fileSizeKb(Math.max(1L, (long) Math.ceil(imageSizeBytes / 1024.0)))
             .isActive(true)
@@ -340,7 +341,7 @@ public class DesignChatServiceImpl implements DesignChatService {
         return "Estilo visual seleccionado: " + session.getSelectedStyle() + ".\n\nMensaje del cliente: " + userMessage;
     }
 
-    private String buildVisualDesignBrief(DesignSession session) {
+    private String buildVisualDesignBrief(DesignSession session, String visualInstructions) {
         List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(session.getId());
         String latestAssistantSummary = messages
             .stream()
@@ -350,23 +351,47 @@ public class DesignChatServiceImpl implements DesignChatService {
             .reduce((previous, current) -> current)
             .orElse(null);
 
-        if (latestAssistantSummary != null && !latestAssistantSummary.isBlank()) {
-            return latestAssistantSummary.trim();
+        String baseBrief =
+            latestAssistantSummary != null && !latestAssistantSummary.isBlank()
+                ? latestAssistantSummary.trim()
+                : messages
+                      .stream()
+                      .filter(message -> message.getContent() != null && !message.getContent().isBlank())
+                      .map(message -> message.getRole() + ": " + message.getContent().trim())
+                      .reduce((previous, current) -> previous + "\n" + current)
+                      .orElse("");
+
+        String normalizedInstructions = normalizeVisualOption(visualInstructions, null, null);
+        if (normalizedInstructions == null) {
+            return baseBrief;
         }
 
-        return messages
-            .stream()
-            .filter(message -> message.getContent() != null && !message.getContent().isBlank())
-            .map(message -> message.getRole() + ": " + message.getContent().trim())
-            .reduce((previous, current) -> previous + "\n" + current)
-            .orElse("");
+        return baseBrief + "\n\nInstrucciones visuales para esta regeneracion: " + normalizedInstructions;
     }
 
     private String normalizeImageBase64(String imageBase64) {
         if (imageBase64 == null || imageBase64.isBlank()) {
             return null;
         }
-        return imageBase64.trim();
+        String normalized = imageBase64.trim();
+        int commaIndex = normalized.indexOf(',');
+        if (commaIndex >= 0) {
+            return normalized.substring(commaIndex + 1);
+        }
+        return normalized;
+    }
+
+    private String resolveVisualReferenceImageBase64(DesignSession session, VisualConceptRequestDTO request) {
+        String requestImage = normalizeImageBase64(request.getClientImageBase64());
+        if (requestImage != null) {
+            return requestImage;
+        }
+
+        return designImageRepository
+            .findFirstBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtDesc(session.getId(), ImageType.REFERENCE)
+            .map(DesignImage::getImageDataBase64)
+            .map(this::normalizeImageBase64)
+            .orElse(null);
     }
 
     private String normalizeVisualOption(String option, String fallback, String defaultValue) {

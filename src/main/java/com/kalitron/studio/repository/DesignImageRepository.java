@@ -1,6 +1,7 @@
 package com.kalitron.studio.repository;
 
 import com.kalitron.studio.domain.DesignImage;
+import com.kalitron.studio.domain.enumeration.ImageType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -37,4 +38,6 @@ public interface DesignImageRepository extends JpaRepository<DesignImage, Long> 
 
     @Query("select designImage from DesignImage designImage left join fetch designImage.session where designImage.id =:id")
     Optional<DesignImage> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Optional<DesignImage> findFirstBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtDesc(Long sessionId, ImageType imageType);
 }

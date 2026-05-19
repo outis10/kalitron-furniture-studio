@@ -131,8 +131,8 @@ const DesignChat = () => {
     [clientEmail, clientName, selectedStyle, styleSkipped],
   );
   const canSend = useMemo(
-    () => (draft.trim().length > 0 || !!selectedReferenceImage) && !!session && !isSending,
-    [draft, isSending, selectedReferenceImage, session],
+    () => (draft.trim().length > 0 || !!selectedReferenceImage) && !!session && !isSending && !isGeneratingConcept,
+    [draft, isGeneratingConcept, isSending, selectedReferenceImage, session],
   );
   const canGenerateConcept = useMemo(
     () => !!session && ['SPECS_READY', 'VISUAL_GENERATED'].includes(session.status) && !isGeneratingConcept,
@@ -185,8 +185,14 @@ const DesignChat = () => {
       setReferenceImageBase64(imageToSend.base64);
     }
     setError(null);
-    setIsSending(true);
     setMessages(currentMessages => [...currentMessages, optimisticMessage]);
+
+    if (canGenerateConcept && (messageText || imageToSend)) {
+      await handleGenerateConcept(messageText || null, imageToSend);
+      return;
+    }
+
+    setIsSending(true);
 
     try {
       const response = await sendChatMessage(
@@ -240,7 +246,7 @@ const DesignChat = () => {
     setError(null);
   };
 
-  const handleGenerateConcept = async () => {
+  const handleGenerateConcept = async (visualInstructions?: string | null, referenceImageOverride?: SelectedReferenceImage | null) => {
     if (!canGenerateConcept || !session) {
       return;
     }
@@ -253,7 +259,8 @@ const DesignChat = () => {
         style: visualStyle || null,
         layout: visualLayout || null,
         finish: visualFinish || null,
-        clientImageBase64: selectedReferenceImage?.base64 || referenceImageBase64 || null,
+        clientImageBase64: referenceImageOverride?.base64 || selectedReferenceImage?.base64 || referenceImageBase64 || null,
+        visualInstructions: visualInstructions || null,
       });
       setMessages(currentMessages => [
         ...currentMessages,
@@ -560,7 +567,7 @@ const DesignChat = () => {
                     </Form.Select>
                   </Form.Group>
                 </div>
-                <Button type="button" onClick={handleGenerateConcept} disabled={isGeneratingConcept}>
+                <Button type="button" onClick={() => handleGenerateConcept()} disabled={isGeneratingConcept}>
                   {isGeneratingConcept ? <Spinner size="sm" /> : hasGeneratedConcept ? 'Regenerar concepto' : 'Generar concepto'}
                 </Button>
               </section>
@@ -603,8 +610,12 @@ const DesignChat = () => {
                 as="textarea"
                 value={draft}
                 onChange={event => setDraft(event.target.value)}
-                placeholder="Escribe sobre tu cocina, closet, estilo o medidas..."
-                disabled={!session || isSending}
+                placeholder={
+                  canGenerateConcept
+                    ? 'Escribe ajustes para regenerar: colores, cubierta, puertas, materiales...'
+                    : 'Escribe sobre tu cocina, closet, estilo o medidas...'
+                }
+                disabled={!session || isSending || isGeneratingConcept}
                 maxLength={4000}
               />
               <Button type="submit" disabled={!canSend} aria-label="Enviar mensaje">

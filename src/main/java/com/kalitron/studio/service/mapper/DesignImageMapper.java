@@ -9,8 +9,14 @@ import org.mapstruct.*;
 /**
  * Mapper for the entity {@link DesignImage} and its DTO {@link DesignImageDTO}.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface DesignImageMapper extends EntityMapper<DesignImageDTO, DesignImage> {
+    @Mapping(target = "imageDataBase64", ignore = true)
+    DesignImage toEntity(DesignImageDTO designImageDTO);
+
+    @Mapping(target = "imageDataBase64", ignore = true)
+    void partialUpdate(@MappingTarget DesignImage designImage, DesignImageDTO designImageDTO);
+
     @Mapping(target = "session", source = "session", qualifiedByName = "designSessionSessionCode")
     DesignImageDTO toDto(DesignImage s);
 
