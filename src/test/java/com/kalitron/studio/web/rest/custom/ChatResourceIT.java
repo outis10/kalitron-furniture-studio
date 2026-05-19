@@ -129,6 +129,75 @@ class ChatResourceIT {
     @Test
     @Transactional
     @WithMockUser
+    void listSessionsReturnsRecentSessionsWithConceptCounts() throws Exception {
+        DesignSession olderSession = saveSession("KD-2026-760", SessionStatus.CHATTING);
+        olderSession.setUpdatedAt(Instant.parse("2026-05-01T10:00:00Z"));
+        designSessionRepository.save(olderSession);
+
+        DesignSession recentSession = saveSession("KD-2026-761", SessionStatus.VISUAL_GENERATED);
+        recentSession.setUpdatedAt(Instant.parse("2026-05-02T10:00:00Z"));
+        designSessionRepository.save(recentSession);
+        designImageRepository.save(
+            new DesignImage()
+                .session(recentSession)
+                .imageType(ImageType.AI_RENDER)
+                .fileName("concept.jpg")
+                .filePath("http://localhost:8000/outputs/concept.jpg")
+                .mimeType("image/jpeg")
+                .isActive(true)
+                .uploadedAt(Instant.parse("2026-05-02T10:01:00Z"))
+                .description("Based on your photo")
+        );
+
+        mockMvc
+            .perform(get("/api/chat/sessions"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[0].sessionCode").value("KD-2026-761"))
+            .andExpect(jsonPath("$[0].status").value("VISUAL_GENERATED"))
+            .andExpect(jsonPath("$[0].generatedConceptCount").value(1))
+            .andExpect(jsonPath("$[1].sessionCode").value("KD-2026-760"))
+            .andExpect(jsonPath("$[1].generatedConceptCount").value(0));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void resumeSessionIncludesGeneratedConceptsInHistory() throws Exception {
+        DesignSession session = saveSession("KD-2026-762", SessionStatus.VISUAL_GENERATED);
+        chatMessageRepository.save(
+            new ChatMessage()
+                .session(session)
+                .role(MessageRole.ASSISTANT)
+                .content("Resumen listo")
+                .createdAt(Instant.parse("2026-05-02T10:00:00Z"))
+        );
+        designImageRepository.save(
+            new DesignImage()
+                .session(session)
+                .imageType(ImageType.AI_RENDER)
+                .fileName("concept.jpg")
+                .filePath("http://localhost:8000/outputs/concept.jpg")
+                .mimeType("image/jpeg")
+                .isActive(true)
+                .uploadedAt(Instant.parse("2026-05-02T10:01:00Z"))
+                .description("Based on your photo")
+        );
+
+        mockMvc
+            .perform(get("/api/chat/sessions/{sessionCode}", "KD-2026-762"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.messages", hasSize(2)))
+            .andExpect(jsonPath("$.messages[0].content").value("Resumen listo"))
+            .andExpect(jsonPath("$.messages[1].content").value("Concepto visual generado."))
+            .andExpect(jsonPath("$.messages[1].imagePreviewUrl").value("http://localhost:8000/outputs/concept.jpg"))
+            .andExpect(jsonPath("$.messages[1].imageFileName").value("concept.jpg"))
+            .andExpect(jsonPath("$.messages[1].imageBadge").value("Based on your photo"));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
     void sendMessagePersistsUserAndAssistantMessages() throws Exception {
         DesignSession session = saveSession("KD-2026-778");
         when(fastApiGateway.sendMessage(any())).thenReturn(gatewayResponse(session, "Respuesta desde gateway", false));

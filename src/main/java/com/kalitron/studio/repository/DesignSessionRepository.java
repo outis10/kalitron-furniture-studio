@@ -20,6 +20,8 @@ public interface DesignSessionRepository extends JpaRepository<DesignSession, Lo
 
     Optional<DesignSession> findBySessionCode(String sessionCode);
 
+    List<DesignSession> findAllByOrderByUpdatedAtDesc();
+
     default Optional<DesignSession> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

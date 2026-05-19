@@ -40,4 +40,8 @@ public interface DesignImageRepository extends JpaRepository<DesignImage, Long> 
     Optional<DesignImage> findOneWithToOneRelationships(@Param("id") Long id);
 
     Optional<DesignImage> findFirstBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtDesc(Long sessionId, ImageType imageType);
+
+    List<DesignImage> findBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtAsc(Long sessionId, ImageType imageType);
+
+    long countBySessionIdAndImageTypeAndIsActiveTrue(Long sessionId, ImageType imageType);
 }

@@ -8,6 +8,7 @@ import PasswordResetFinish from 'app/modules/account/password-reset/finish/passw
 import PasswordResetInit from 'app/modules/account/password-reset/init/password-reset-init';
 import Register from 'app/modules/account/register/register';
 import DesignChat from 'app/modules/chat/design-chat';
+import DesignSessions from 'app/modules/chat/design-sessions';
 import Home from 'app/modules/home/home';
 import Login from 'app/modules/login/login';
 import Logout from 'app/modules/login/logout';
@@ -38,6 +39,14 @@ const AppRoutes = () => {
             element={
               <PrivateRoute hasAnyAuthorities={[Authority.USER]}>
                 <DesignChat />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="design-sessions"
+            element={
+              <PrivateRoute hasAnyAuthorities={[Authority.USER]}>
+                <DesignSessions />
               </PrivateRoute>
             }
           />
