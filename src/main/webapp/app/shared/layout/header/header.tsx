@@ -11,7 +11,7 @@ import { setLocale } from 'app/shared/reducers/locale';
 import { setTheme } from 'app/shared/reducers/theme';
 import { AccountMenu, AdminMenu, EntitiesMenu, LocaleMenu, ThemeMenu } from '../menus';
 
-import { Brand, Home } from './header-components';
+import { Brand, Home, MySessions } from './header-components';
 
 export interface IHeaderProps {
   isAuthenticated: boolean;
@@ -56,6 +56,7 @@ const Header = (props: IHeaderProps) => {
         <Navbar.Collapse id="header-tabs">
           <Nav className="ms-auto">
             <Home />
+            {props.isAuthenticated && <MySessions />}
             {props.isAuthenticated && <EntitiesMenu />}
             {props.isAuthenticated && props.isAdmin && <AdminMenu showOpenAPI={props.isOpenAPIEnabled} />}
             <ThemeMenu currentTheme={currentTheme} onClick={handleThemeChange} />

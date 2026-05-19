@@ -3,7 +3,7 @@ import { NavItem, NavLink, NavbarBrand } from 'react-bootstrap';
 import { Translate } from 'react-jhipster';
 import { NavLink as Link } from 'react-router';
 
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { faFolderOpen, faHome } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const BrandIcon = props => (
@@ -29,6 +29,15 @@ export const Home = () => (
       <span>
         <Translate contentKey="global.menu.home">Home</Translate>
       </span>
+    </NavLink>
+  </NavItem>
+);
+
+export const MySessions = () => (
+  <NavItem>
+    <NavLink as={Link as any} to="/design-sessions" className="d-flex align-items-center">
+      <FontAwesomeIcon icon={faFolderOpen} />
+      <span>Mis sesiones</span>
     </NavLink>
   </NavItem>
 );

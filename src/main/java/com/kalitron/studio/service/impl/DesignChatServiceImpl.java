@@ -20,11 +20,13 @@ import com.kalitron.studio.service.dto.ChatRequestDTO;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
 import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
+import com.kalitron.studio.service.dto.ChatSessionSummaryDTO;
 import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.time.Instant;
 import java.time.Year;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -89,6 +91,12 @@ public class DesignChatServiceImpl implements DesignChatService {
     @Transactional(readOnly = true)
     public Optional<ChatSessionDTO> resumeSession(String sessionCode) {
         return designSessionRepository.findBySessionCode(sessionCode).map(this::toSessionDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChatSessionSummaryDTO> listSessions() {
+        return designSessionRepository.findAllByOrderByUpdatedAtDesc().stream().map(this::toSessionSummaryDTO).toList();
     }
 
     @Override
@@ -205,6 +213,26 @@ public class DesignChatServiceImpl implements DesignChatService {
             .map(message -> new ChatMessageViewDTO(message.getRole(), message.getContent(), message.getCreatedAt()))
             .toList();
 
+        List<ChatMessageViewDTO> generatedConcepts = designImageRepository
+            .findBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtAsc(session.getId(), ImageType.AI_RENDER)
+            .stream()
+            .map(image ->
+                new ChatMessageViewDTO(
+                    MessageRole.ASSISTANT,
+                    "Concepto visual generado.",
+                    image.getUploadedAt(),
+                    image.getFilePath(),
+                    image.getFileName(),
+                    image.getDescription()
+                )
+            )
+            .toList();
+
+        List<ChatMessageViewDTO> timeline = new java.util.ArrayList<>();
+        timeline.addAll(messages);
+        timeline.addAll(generatedConcepts);
+        timeline.sort(Comparator.comparing(ChatMessageViewDTO::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())));
+
         ChatSessionDTO dto = new ChatSessionDTO();
         dto.setSessionId(session.getId());
         dto.setSessionCode(session.getSessionCode());
@@ -213,7 +241,22 @@ public class DesignChatServiceImpl implements DesignChatService {
         dto.setSelectedStyle(session.getSelectedStyle());
         dto.setProjectType(session.getProjectType());
         dto.setStatus(session.getStatus());
-        dto.setMessages(messages);
+        dto.setMessages(timeline);
+        return dto;
+    }
+
+    private ChatSessionSummaryDTO toSessionSummaryDTO(DesignSession session) {
+        ChatSessionSummaryDTO dto = new ChatSessionSummaryDTO();
+        dto.setSessionId(session.getId());
+        dto.setSessionCode(session.getSessionCode());
+        dto.setClientName(session.getClientName());
+        dto.setProjectType(session.getProjectType());
+        dto.setStatus(session.getStatus());
+        dto.setCreatedAt(session.getCreatedAt());
+        dto.setUpdatedAt(session.getUpdatedAt());
+        dto.setGeneratedConceptCount(
+            designImageRepository.countBySessionIdAndImageTypeAndIsActiveTrue(session.getId(), ImageType.AI_RENDER)
+        );
         return dto;
     }
 

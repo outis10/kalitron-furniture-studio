@@ -15,6 +15,7 @@ import {
   startChatSession,
 } from 'app/shared/api/design-chat-api';
 import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
+import { useSearchParams } from 'react-router';
 
 const STORAGE_KEY = 'kalitron.designChat.sessionCode';
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -87,6 +88,7 @@ const DesignChat = () => {
   const [isResuming, setIsResuming] = useState(false);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     setIsLoadingStyles(true);
@@ -105,7 +107,8 @@ const DesignChat = () => {
   }, []);
 
   useEffect(() => {
-    const storedSessionCode = window.localStorage.getItem(STORAGE_KEY);
+    const querySessionCode = searchParams.get('sessionCode');
+    const storedSessionCode = querySessionCode || window.localStorage.getItem(STORAGE_KEY);
     if (!storedSessionCode) {
       return;
     }
@@ -115,6 +118,7 @@ const DesignChat = () => {
       .then(resumedSession => {
         setSession(resumedSession);
         setMessages(resumedSession.messages ?? []);
+        window.localStorage.setItem(STORAGE_KEY, resumedSession.sessionCode);
         if (resumedSession.selectedStyle) {
           setSelectedStyle({ name: resumedSession.selectedStyle, isActive: true });
           setStyleSkipped(false);
@@ -124,7 +128,7 @@ const DesignChat = () => {
         window.localStorage.removeItem(STORAGE_KEY);
       })
       .finally(() => setIsResuming(false));
-  }, []);
+  }, [searchParams]);
 
   const canStart = useMemo(
     () => clientName.trim().length > 0 && clientEmail.trim().length > 0 && (!!selectedStyle || styleSkipped),

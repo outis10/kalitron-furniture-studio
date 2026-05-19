@@ -5,11 +5,13 @@ import com.kalitron.studio.service.dto.ChatRequestDTO;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
 import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
+import com.kalitron.studio.service.dto.ChatSessionSummaryDTO;
 import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import com.kalitron.studio.web.rest.errors.BadRequestAlertException;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +38,11 @@ public class ChatResource {
     public ResponseEntity<ChatSessionDTO> startSession(@Valid @RequestBody ChatSessionStartRequestDTO request) {
         ChatSessionDTO session = designChatService.startSession(request);
         return ResponseEntity.created(URI.create("/api/chat/sessions/" + session.getSessionCode())).body(session);
+    }
+
+    @GetMapping("/sessions")
+    public ResponseEntity<List<ChatSessionSummaryDTO>> listSessions() {
+        return ResponseEntity.ok(designChatService.listSessions());
     }
 
     @GetMapping("/sessions/{sessionCode}")

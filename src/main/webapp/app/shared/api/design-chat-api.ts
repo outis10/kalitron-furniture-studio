@@ -24,6 +24,17 @@ export interface ChatSession {
   messages: ChatMessageView[];
 }
 
+export interface ChatSessionSummary {
+  sessionId: number;
+  sessionCode: string;
+  clientName: string;
+  projectType: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  generatedConceptCount: number;
+}
+
 export interface ChatResponse {
   sessionId: number;
   sessionCode: string;
@@ -45,6 +56,11 @@ export const startChatSession = async (request: StartChatSessionRequest): Promis
 
 export const resumeChatSession = async (sessionCode: string): Promise<ChatSession> => {
   const response = await axios.get<ChatSession>(`/api/chat/sessions/${encodeURIComponent(sessionCode)}`);
+  return response.data;
+};
+
+export const listChatSessions = async (): Promise<ChatSessionSummary[]> => {
+  const response = await axios.get<ChatSessionSummary[]>('/api/chat/sessions');
   return response.data;
 };
 
