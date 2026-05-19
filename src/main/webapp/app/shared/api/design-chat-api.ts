@@ -10,6 +10,7 @@ export interface ChatMessageView {
   createdAt: string;
   imagePreviewUrl?: string;
   imageFileName?: string;
+  imageBadge?: string;
 }
 
 export interface ChatSession {
@@ -66,5 +67,27 @@ export const sendChatMessage = async (
 
 export const getCatalogStyles = async (): Promise<ICatalogStyle[]> => {
   const response = await axios.get<ICatalogStyle[]>('/api/catalog-styles');
+  return response.data;
+};
+
+export interface VisualConceptRequest {
+  sessionId: number;
+  style?: string | null;
+  layout?: string | null;
+  finish?: string | null;
+  clientImageBase64?: string | null;
+}
+
+export interface VisualConceptResponse {
+  sessionId: number;
+  sessionCode: string;
+  imageUrl: string;
+  promptUsed?: string | null;
+  pipeline: string;
+  badge: string;
+}
+
+export const generateVisualConcept = async (request: VisualConceptRequest): Promise<VisualConceptResponse> => {
+  const response = await axios.post<VisualConceptResponse>('/api/chat/visual-concept', request);
   return response.data;
 };
