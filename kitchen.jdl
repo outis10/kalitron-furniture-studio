@@ -226,6 +226,7 @@ entity DesignImage {
   imageType ImageType required
   fileName String required maxlength(255)
   filePath String required maxlength(500)
+  imageDataBase64 TextBlob
   mimeType String maxlength(80)
   fileSizeKb Long
   widthPx Integer

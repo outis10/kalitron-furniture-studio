@@ -89,6 +89,22 @@ Tested end-to-end with RTX 3090 (24 GB VRAM). Vast.ai provides a pre-built Comfy
 
 **Cost vs RunPod:** Vast.ai tends to be cheaper per GPU-hour but instances can be reclaimed by the host. RunPod persistent pods offer more stability for longer sessions.
 
+**Model downloads (validated URLs):**
+```bash
+# SDXL 1.0 base checkpoint (~6.5 GB)
+wget -c -O /workspace/ComfyUI/models/checkpoints/sd_xl_base_1.0.safetensors \
+  https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+
+# SDXL VAE fp16-fix (~330 MB)
+wget -c -O /workspace/ComfyUI/models/vae/sdxl_vae.safetensors \
+  https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/main/sdxl_vae.safetensors
+
+# ControlNet Canny SDXL — xinsir V2 (~2.5 GB)
+# Note: repo file is diffusion_pytorch_model_V2.safetensors, rename on download
+wget -c -O /workspace/ComfyUI/models/controlnet/controlnet-canny-sdxl-1.0.safetensors \
+  https://huggingface.co/xinsir/controlnet-canny-sdxl-1.0/resolve/main/diffusion_pytorch_model_V2.safetensors
+```
+
 **Custom nodes:** The `CannyEdgePreprocessor` node required for img2img is not pre-installed. Install it via:
 ```bash
 cd /workspace/ComfyUI/custom_nodes

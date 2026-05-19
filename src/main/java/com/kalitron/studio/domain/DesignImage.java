@@ -1,5 +1,6 @@
 package com.kalitron.studio.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.kalitron.studio.domain.enumeration.ImageType;
 import jakarta.persistence.*;
@@ -42,6 +43,11 @@ public class DesignImage implements Serializable {
     @Size(max = 500)
     @Column(name = "file_path", length = 500, nullable = false)
     private String filePath;
+
+    @Lob
+    @JsonIgnore
+    @Column(name = "image_data_base64")
+    private String imageDataBase64;
 
     @Size(max = 80)
     @Column(name = "mime_type", length = 80)
@@ -128,6 +134,19 @@ public class DesignImage implements Serializable {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public String getImageDataBase64() {
+        return this.imageDataBase64;
+    }
+
+    public DesignImage imageDataBase64(String imageDataBase64) {
+        this.setImageDataBase64(imageDataBase64);
+        return this;
+    }
+
+    public void setImageDataBase64(String imageDataBase64) {
+        this.imageDataBase64 = imageDataBase64;
     }
 
     public String getMimeType() {

@@ -206,6 +206,7 @@ class ChatResourceIT {
         assertThat(image.getFileName()).isEqualTo("cocina.webp");
         assertThat(image.getMimeType()).isEqualTo("image/webp");
         assertThat(image.getFilePath()).contains("KD-2026-779");
+        assertThat(image.getImageDataBase64()).isEqualTo("ZmFrZS1pbWFnZQ==");
 
         ArgumentCaptor<GatewayChatRequest> gatewayRequest = ArgumentCaptor.forClass(GatewayChatRequest.class);
         verify(fastApiGateway).sendMessage(gatewayRequest.capture());
@@ -383,6 +384,91 @@ class ChatResourceIT {
         assertThat(gatewayRequest.getValue().finish()).isEqualTo("negro opaco");
         assertThat(gatewayRequest.getValue().projectType()).isEqualTo("KITCHEN");
         assertThat(gatewayRequest.getValue().designBrief()).contains("resumen de tu proyecto de cocina");
+        assertThat(gatewayRequest.getValue().clientImageBase64()).isNull();
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void generateVisualConceptUsesLatestReferenceImageForImg2Img() throws Exception {
+        DesignSession session = saveSession("KD-2026-790", SessionStatus.SPECS_READY);
+        designImageRepository.save(
+            new DesignImage()
+                .session(session)
+                .imageType(ImageType.REFERENCE)
+                .fileName("cocina.webp")
+                .filePath("reference-images/KD-2026-790/cocina.webp")
+                .imageDataBase64("cmVmZXJlbmNlLWltYWdl")
+                .mimeType("image/webp")
+                .fileSizeKb(1L)
+                .isActive(true)
+                .uploadedAt(Instant.now())
+                .description("Reference photo uploaded from design chat")
+        );
+        when(fastApiGateway.generateVisualConcept(any())).thenReturn(
+            visualConceptResponse(session, "http://localhost:8000/outputs/concepts/KD-2026-790_img2img.jpg", "img2img")
+        );
+
+        mockMvc
+            .perform(
+                post("/api/chat/visual-concept")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(Map.of("sessionId", session.getId())))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.pipeline").value("img2img"))
+            .andExpect(jsonPath("$.badge").value("Based on your photo"));
+
+        ArgumentCaptor<GatewayGenerateRequest> gatewayRequest = ArgumentCaptor.forClass(GatewayGenerateRequest.class);
+        verify(fastApiGateway).generateVisualConcept(gatewayRequest.capture());
+        assertThat(gatewayRequest.getValue().clientImageBase64()).isEqualTo("cmVmZXJlbmNlLWltYWdl");
+        assertThat(designImageRepository.findAll())
+            .extracting(DesignImage::getImageType)
+            .contains(ImageType.REFERENCE, ImageType.AI_RENDER);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void generateVisualConceptAppendsVisualInstructionsToDesignBrief() throws Exception {
+        DesignSession session = saveSession("KD-2026-791", SessionStatus.VISUAL_GENERATED);
+        chatMessageRepository.save(
+            new ChatMessage()
+                .session(session)
+                .role(MessageRole.ASSISTANT)
+                .content("Perfecto, aqui tienes el resumen de tu proyecto de cocina: muebles de madera.")
+                .createdAt(Instant.now())
+        );
+        when(fastApiGateway.generateVisualConcept(any())).thenReturn(
+            visualConceptResponse(session, "http://localhost:8000/outputs/concepts/KD-2026-791_img2img.jpg", "img2img")
+        );
+
+        mockMvc
+            .perform(
+                post("/api/chat/visual-concept")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of(
+                                "sessionId",
+                                session.getId(),
+                                "finish",
+                                "negro opaco",
+                                "visualInstructions",
+                                "La encimera color blanco y los muebles color negro opaco"
+                            )
+                        )
+                    )
+            )
+            .andExpect(status().isOk());
+
+        ArgumentCaptor<GatewayGenerateRequest> gatewayRequest = ArgumentCaptor.forClass(GatewayGenerateRequest.class);
+        verify(fastApiGateway).generateVisualConcept(gatewayRequest.capture());
+        assertThat(gatewayRequest.getValue().finish()).isEqualTo("negro opaco");
+        assertThat(gatewayRequest.getValue().designBrief()).contains("resumen de tu proyecto de cocina");
+        assertThat(gatewayRequest.getValue().designBrief()).contains("Instrucciones visuales para esta regeneracion");
+        assertThat(gatewayRequest.getValue().designBrief()).contains("encimera color blanco");
+        assertThat(gatewayRequest.getValue().designBrief()).contains("muebles color negro opaco");
     }
 
     @Test

@@ -18,6 +18,9 @@ public class VisualConceptRequestDTO implements Serializable {
     @Size(max = 120)
     private String finish;
 
+    @Size(max = 1000)
+    private String visualInstructions;
+
     private String clientImageBase64;
 
     public Long getSessionId() {
@@ -50,6 +53,14 @@ public class VisualConceptRequestDTO implements Serializable {
 
     public void setFinish(String finish) {
         this.finish = finish;
+    }
+
+    public String getVisualInstructions() {
+        return visualInstructions;
+    }
+
+    public void setVisualInstructions(String visualInstructions) {
+        this.visualInstructions = visualInstructions;
     }
 
     public String getClientImageBase64() {

@@ -76,6 +76,7 @@ export interface VisualConceptRequest {
   layout?: string | null;
   finish?: string | null;
   clientImageBase64?: string | null;
+  visualInstructions?: string | null;
 }
 
 export interface VisualConceptResponse {
