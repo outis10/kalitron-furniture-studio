@@ -206,6 +206,11 @@ class ChatResourceIT {
         assertThat(image.getFileName()).isEqualTo("cocina.webp");
         assertThat(image.getMimeType()).isEqualTo("image/webp");
         assertThat(image.getFilePath()).contains("KD-2026-779");
+
+        ArgumentCaptor<GatewayChatRequest> gatewayRequest = ArgumentCaptor.forClass(GatewayChatRequest.class);
+        verify(fastApiGateway).sendMessage(gatewayRequest.capture());
+        assertThat(gatewayRequest.getValue().imageBase64()).isEqualTo("ZmFrZS1pbWFnZQ==");
+        assertThat(gatewayRequest.getValue().imageMimeType()).isEqualTo("image/webp");
     }
 
     @Test

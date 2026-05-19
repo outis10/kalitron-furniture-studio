@@ -85,6 +85,7 @@ public class FastApiGateway {
         @JsonProperty("session_id") String sessionId,
         String message,
         @JsonProperty("image_b64") String imageBase64,
+        @JsonProperty("image_mime_type") String imageMimeType,
         @JsonIgnore Long studioSessionId,
         @JsonIgnore String sessionCode
     ) {}

@@ -313,6 +313,7 @@ public class DesignChatServiceImpl implements DesignChatService {
                     session.getSessionCode(),
                     buildGatewayMessage(session, message),
                     normalizeImageBase64(request.getImageBase64()),
+                    normalizeImageMimeType(request.getImageMimeType()),
                     session.getId(),
                     session.getSessionCode()
                 )
