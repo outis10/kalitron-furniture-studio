@@ -14,6 +14,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface RoomObstacleRepository extends JpaRepository<RoomObstacle, Long> {
+    List<RoomObstacle> findBySessionIdOrderByIdAsc(Long sessionId);
+
+    void deleteBySessionId(Long sessionId);
+
     default Optional<RoomObstacle> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

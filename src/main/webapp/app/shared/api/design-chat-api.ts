@@ -140,6 +140,36 @@ export interface MeasuredWallSegment {
   sortOrder?: number | null;
 }
 
+export type LayoutObstacleType = 'WINDOW' | 'DOOR' | 'COLUMN' | 'OUTLET' | 'WATER' | 'GAS' | 'DRAIN' | 'RANGE_HOOD' | 'APPLIANCE' | 'OTHER';
+
+export interface LayoutZone {
+  zoneCode: string;
+  zoneType: string;
+  wallCode: string;
+  xMm: number;
+  yMm?: number | null;
+  zMm?: number | null;
+  widthMm?: number | null;
+  heightMm?: number | null;
+  depthMm?: number | null;
+  clearanceLeftMm?: number | null;
+  clearanceRightMm?: number | null;
+  notes?: string | null;
+}
+
+export interface LayoutObstacle {
+  obstacleType: LayoutObstacleType;
+  label?: string | null;
+  wallCode: string;
+  xMm: number;
+  yMm?: number | null;
+  zMm?: number | null;
+  widthMm?: number | null;
+  heightMm?: number | null;
+  depthMm?: number | null;
+  notes?: string | null;
+}
+
 export interface MeasuredLayout {
   sessionId: number;
   layout: MeasuredKitchenLayout;
@@ -147,8 +177,8 @@ export interface MeasuredLayout {
   defaultBaseDepthMm?: number | null;
   defaultUpperDepthMm?: number | null;
   walls: MeasuredWallSegment[];
-  zones?: unknown[];
-  obstacles?: unknown[];
+  zones?: LayoutZone[];
+  obstacles?: LayoutObstacle[];
   notes?: string | null;
 }
 

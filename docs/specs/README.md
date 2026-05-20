@@ -49,6 +49,7 @@ docs/specs/
   e6-measured-layout-cabinet-planning/
     epic.md
     39-measured-room-layout.md
+    40-layout-zones-obstacles.md
     41-layout-cabinet-planning-contracts.md
 ```
 
