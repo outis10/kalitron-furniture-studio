@@ -1,5 +1,6 @@
 package com.kalitron.studio.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
 
@@ -19,12 +20,15 @@ public class LayoutZoneDTO implements Serializable {
 
     @NotNull
     @Min(0)
+    @JsonProperty("xMm")
     private Integer xMm;
 
     @Min(0)
+    @JsonProperty("yMm")
     private Integer yMm;
 
     @Min(0)
+    @JsonProperty("zMm")
     private Integer zMm;
 
     @Min(1)

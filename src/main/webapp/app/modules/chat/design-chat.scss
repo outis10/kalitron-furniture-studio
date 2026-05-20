@@ -534,6 +534,32 @@
   gap: 0.75rem;
 }
 
+.measured-layout__fieldset {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d8dee4;
+}
+
+.measured-layout__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.measured-layout__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr)) auto;
+  gap: 0.75rem;
+  align-items: end;
+  padding: 0.75rem;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
 .measured-layout__preview {
   display: grid;
   align-content: start;
@@ -579,6 +605,7 @@
   }
 
   .measured-layout__wall-list,
+  .measured-layout__row,
   .measured-layout__preview dl {
     grid-template-columns: 1fr;
   }
