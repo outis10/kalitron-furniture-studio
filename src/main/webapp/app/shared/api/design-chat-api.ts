@@ -35,6 +35,20 @@ export interface ChatSessionSummary {
   generatedConceptCount: number;
 }
 
+export interface DesignProposal {
+  sessionId: number;
+  sessionCode: string;
+  clientName: string;
+  projectType: string;
+  status: string;
+  selectedStyle?: string | null;
+  updatedAt: string;
+  renderImageUrl?: string | null;
+  renderBadge?: string | null;
+  specsSummary?: string | null;
+  cabinetCount: number;
+}
+
 export interface ChatResponse {
   sessionId: number;
   sessionCode: string;
@@ -61,6 +75,11 @@ export const resumeChatSession = async (sessionCode: string): Promise<ChatSessio
 
 export const listChatSessions = async (): Promise<ChatSessionSummary[]> => {
   const response = await axios.get<ChatSessionSummary[]>('/api/chat/sessions');
+  return response.data;
+};
+
+export const getDesignProposal = async (sessionCode: string): Promise<DesignProposal> => {
+  const response = await axios.get<DesignProposal>(`/api/public/proposals/${encodeURIComponent(sessionCode)}`);
   return response.data;
 };
 

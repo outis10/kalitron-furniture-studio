@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CabinetRepository extends JpaRepository<Cabinet, Long>, JpaSpecificationExecutor<Cabinet> {
+    long countBySpecId(Long specId);
+
     default Optional<Cabinet> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

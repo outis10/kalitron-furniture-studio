@@ -100,6 +100,9 @@ const DesignSessions = () => {
               <Button as={Link as any} to={`/design-chat?sessionCode=${encodeURIComponent(session.sessionCode)}`} variant="outline-primary">
                 Reabrir chat
               </Button>
+              <Button as={Link as any} to={`/proposal/${encodeURIComponent(session.sessionCode)}`} variant="outline-secondary">
+                Ver propuesta
+              </Button>
             </article>
           ))}
         </section>

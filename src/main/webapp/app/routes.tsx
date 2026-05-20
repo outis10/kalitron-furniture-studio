@@ -8,6 +8,7 @@ import PasswordResetFinish from 'app/modules/account/password-reset/finish/passw
 import PasswordResetInit from 'app/modules/account/password-reset/init/password-reset-init';
 import Register from 'app/modules/account/register/register';
 import DesignChat from 'app/modules/chat/design-chat';
+import DesignProposalPage from 'app/modules/chat/design-proposal';
 import DesignSessions from 'app/modules/chat/design-sessions';
 import Home from 'app/modules/home/home';
 import Login from 'app/modules/login/login';
@@ -34,6 +35,7 @@ const AppRoutes = () => {
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="logout" element={<Logout />} />
+          <Route path="proposal/:sessionCode" element={<DesignProposalPage />} />
           <Route
             path="design-chat"
             element={

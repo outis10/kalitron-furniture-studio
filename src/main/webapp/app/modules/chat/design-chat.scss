@@ -409,3 +409,127 @@
     display: grid;
   }
 }
+
+.design-proposal {
+  max-width: 1080px;
+  margin: 0 auto;
+  color: #1f2937;
+}
+
+.design-proposal__hero,
+.design-proposal__details,
+.design-proposal__next,
+.design-proposal__render {
+  margin-bottom: 1rem;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.design-proposal__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.design-proposal__eyebrow {
+  margin-bottom: 0.25rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.design-proposal__meta {
+  margin-bottom: 0;
+  color: #64748b;
+}
+
+.design-proposal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.design-proposal__render {
+  padding: 1rem;
+}
+
+.design-proposal__render img {
+  display: block;
+  width: 100%;
+  max-height: 760px;
+  border-radius: 6px;
+  object-fit: contain;
+  background: #f8fafc;
+}
+
+.design-proposal__details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.design-proposal__details p {
+  white-space: pre-wrap;
+}
+
+.design-proposal__details dl {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.design-proposal__details dt {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.design-proposal__details dd {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.design-proposal__next,
+.design-proposal__empty {
+  padding: 1.25rem;
+}
+
+@media (max-width: 720px) {
+  .design-proposal__hero,
+  .design-proposal__details {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .design-proposal__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media print {
+  #app-header,
+  .design-proposal__actions,
+  .ribbon,
+  .loading-bar {
+    display: none !important;
+  }
+
+  .design-proposal {
+    max-width: none;
+    margin: 0;
+  }
+
+  .design-proposal__hero,
+  .design-proposal__details,
+  .design-proposal__next,
+  .design-proposal__render {
+    break-inside: avoid;
+    border-color: #cbd5e1;
+    box-shadow: none;
+  }
+}
