@@ -46,6 +46,9 @@ docs/specs/
     10-catalog-style-selection.md
     11-chat-gateway-proxy.md
     12-seed-catalog-styles.md
+  e6-measured-layout-cabinet-planning/
+    epic.md
+    41-layout-cabinet-planning-contracts.md
 ```
 
 ## Rules
