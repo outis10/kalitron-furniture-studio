@@ -182,7 +182,8 @@ class MeasuredLayoutResourceIT {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.zones[0].zoneCode").value("SINK-1"))
-            .andExpect(jsonPath("$.obstacles[0].obstacleType").value("WINDOW"));
+            .andExpect(jsonPath("$.obstacles[0].obstacleType").value("WINDOW"))
+            .andExpect(jsonPath("$.obstacles[0].zMm").value(1100));
 
         assertThat(roomObstacleRepository.findBySessionIdOrderByIdAsc(session.getId())).hasSize(2);
 
@@ -257,6 +258,7 @@ class MeasuredLayoutResourceIT {
         obstacle.setLabel(label);
         obstacle.setWallCode(wallCode);
         obstacle.setxMm(xMm);
+        obstacle.setzMm(1100);
         obstacle.setWidthMm(widthMm);
         obstacle.setHeightMm(heightMm);
         return obstacle;

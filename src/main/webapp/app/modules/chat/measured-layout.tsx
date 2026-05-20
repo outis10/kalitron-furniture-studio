@@ -224,6 +224,7 @@ const MeasuredLayoutPage = () => {
         label: 'Ventana',
         wallCode,
         xMm: 0,
+        zMm: 1100,
         widthMm: 900,
         heightMm: 700,
       };
@@ -462,6 +463,15 @@ const MeasuredLayoutPage = () => {
                     min={1}
                     value={mmToCm(obstacle.heightMm)}
                     onChange={event => updateObstacle(index, { heightMm: cmToMm(event.target.value) })}
+                  />
+                </Form.Group>
+                <Form.Group controlId={`obstacle-z-${index}`}>
+                  <Form.Label>Altura desde piso (cm)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    min={0}
+                    value={mmToCm(obstacle.zMm)}
+                    onChange={event => updateObstacle(index, { zMm: cmToMm(event.target.value) })}
                   />
                 </Form.Group>
                 <Button type="button" variant="outline-danger" size="sm" onClick={() => removeObstacle(index)}>
