@@ -41,6 +41,4 @@ WhatsApp sharing affordances.
 ## Validation Notes
 
 - `./npmw run webapp:build:dev -- --env stats=minimal` passed.
-- `./gradlew integrationTest --tests com.kalitron.studio.web.rest.custom.ProposalResourceIT -x webapp -x webapp_test`
-  could not complete in this environment because Testcontainers could not find a
-  valid Docker environment for `postgres:18.3`.
+- `./gradlew integrationTest --tests com.kalitron.studio.web.rest.custom.ProposalResourceIT -x webapp -x webapp_test` passed.
