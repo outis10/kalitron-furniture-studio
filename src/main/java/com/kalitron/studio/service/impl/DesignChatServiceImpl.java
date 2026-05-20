@@ -7,6 +7,7 @@ import com.kalitron.studio.domain.enumeration.ImageType;
 import com.kalitron.studio.domain.enumeration.MessageRole;
 import com.kalitron.studio.domain.enumeration.ProjectType;
 import com.kalitron.studio.domain.enumeration.SessionStatus;
+import com.kalitron.studio.repository.CabinetRepository;
 import com.kalitron.studio.repository.ChatMessageRepository;
 import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
@@ -21,6 +22,7 @@ import com.kalitron.studio.service.dto.ChatResponseDTO;
 import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
 import com.kalitron.studio.service.dto.ChatSessionSummaryDTO;
+import com.kalitron.studio.service.dto.DesignProposalDTO;
 import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.time.Instant;
@@ -50,17 +52,21 @@ public class DesignChatServiceImpl implements DesignChatService {
 
     private final DesignImageRepository designImageRepository;
 
+    private final CabinetRepository cabinetRepository;
+
     private final FastApiGateway fastApiGateway;
 
     public DesignChatServiceImpl(
         DesignSessionRepository designSessionRepository,
         ChatMessageRepository chatMessageRepository,
         DesignImageRepository designImageRepository,
+        CabinetRepository cabinetRepository,
         FastApiGateway fastApiGateway
     ) {
         this.designSessionRepository = designSessionRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.designImageRepository = designImageRepository;
+        this.cabinetRepository = cabinetRepository;
         this.fastApiGateway = fastApiGateway;
     }
 
@@ -97,6 +103,12 @@ public class DesignChatServiceImpl implements DesignChatService {
     @Transactional(readOnly = true)
     public List<ChatSessionSummaryDTO> listSessions() {
         return designSessionRepository.findAllByOrderByUpdatedAtDesc().stream().map(this::toSessionSummaryDTO).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<DesignProposalDTO> findProposal(String sessionCode) {
+        return designSessionRepository.findBySessionCode(sessionCode).map(this::toProposalDTO);
     }
 
     @Override
@@ -258,6 +270,44 @@ public class DesignChatServiceImpl implements DesignChatService {
             designImageRepository.countBySessionIdAndImageTypeAndIsActiveTrue(session.getId(), ImageType.AI_RENDER)
         );
         return dto;
+    }
+
+    private DesignProposalDTO toProposalDTO(DesignSession session) {
+        DesignProposalDTO dto = new DesignProposalDTO();
+        dto.setSessionId(session.getId());
+        dto.setSessionCode(session.getSessionCode());
+        dto.setClientName(session.getClientName());
+        dto.setProjectType(session.getProjectType());
+        dto.setStatus(session.getStatus());
+        dto.setSelectedStyle(session.getSelectedStyle());
+        dto.setUpdatedAt(session.getUpdatedAt());
+        dto.setSpecsSummary(resolveProposalSummary(session));
+
+        designImageRepository
+            .findFirstBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtDesc(session.getId(), ImageType.AI_RENDER)
+            .ifPresent(image -> {
+                dto.setRenderImageUrl(image.getFilePath());
+                dto.setRenderBadge(image.getDescription());
+            });
+
+        if (session.getSpec() != null && session.getSpec().getId() != null) {
+            dto.setCabinetCount(cabinetRepository.countBySpecId(session.getSpec().getId()));
+        } else {
+            dto.setCabinetCount(0);
+        }
+
+        return dto;
+    }
+
+    private String resolveProposalSummary(DesignSession session) {
+        return chatMessageRepository
+            .findBySessionIdOrderByCreatedAtAsc(session.getId())
+            .stream()
+            .filter(message -> message.getRole() == MessageRole.ASSISTANT)
+            .map(ChatMessage::getContent)
+            .filter(content -> content != null && content.toLowerCase(Locale.ROOT).contains("resumen"))
+            .reduce((previous, current) -> current)
+            .orElse(session.getNotes());
     }
 
     private void updateProjectTypeFromMessage(DesignSession session, String message) {
