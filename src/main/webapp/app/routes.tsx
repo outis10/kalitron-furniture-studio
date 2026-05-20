@@ -10,6 +10,7 @@ import Register from 'app/modules/account/register/register';
 import DesignChat from 'app/modules/chat/design-chat';
 import DesignProposalPage from 'app/modules/chat/design-proposal';
 import DesignSessions from 'app/modules/chat/design-sessions';
+import MeasuredLayoutPage from 'app/modules/chat/measured-layout';
 import Home from 'app/modules/home/home';
 import Login from 'app/modules/login/login';
 import Logout from 'app/modules/login/logout';
@@ -49,6 +50,14 @@ const AppRoutes = () => {
             element={
               <PrivateRoute hasAnyAuthorities={[Authority.USER]}>
                 <DesignSessions />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="design-layout/:sessionId"
+            element={
+              <PrivateRoute hasAnyAuthorities={[Authority.USER]}>
+                <MeasuredLayoutPage />
               </PrivateRoute>
             }
           />

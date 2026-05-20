@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DesignArtifactRepository extends JpaRepository<DesignArtifact, Long> {
+    Optional<DesignArtifact> findFirstBySessionIdAndFileNameOrderByCreatedAtDesc(Long sessionId, String fileName);
+
     default Optional<DesignArtifact> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }
