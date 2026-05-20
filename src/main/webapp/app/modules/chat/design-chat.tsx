@@ -386,6 +386,9 @@ const DesignChat = () => {
               <Button type="button" variant="outline-secondary" size="sm" onClick={handleRestart}>
                 <FontAwesomeIcon icon={faRotateRight} /> Nueva sesión
               </Button>
+              <Button as={Link as any} to={`/design-layout/${session.sessionId}`} className="ms-2" variant="outline-primary" size="sm">
+                Layout medido
+              </Button>
             </>
           ) : (
             <Form onSubmit={handleStart}>

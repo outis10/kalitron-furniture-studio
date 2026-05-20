@@ -14,6 +14,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface RoomWallRepository extends JpaRepository<RoomWall, Long> {
+    List<RoomWall> findBySessionIdOrderBySortOrderAsc(Long sessionId);
+
+    void deleteBySessionId(Long sessionId);
+
     default Optional<RoomWall> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

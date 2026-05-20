@@ -48,6 +48,7 @@ docs/specs/
     12-seed-catalog-styles.md
   e6-measured-layout-cabinet-planning/
     epic.md
+    39-measured-room-layout.md
     41-layout-cabinet-planning-contracts.md
 ```
 

@@ -127,3 +127,37 @@ export const generateVisualConcept = async (request: VisualConceptRequest): Prom
   const response = await axios.post<VisualConceptResponse>('/api/chat/visual-concept', request);
   return response.data;
 };
+
+export type MeasuredKitchenLayout = 'LINEAR' | 'L_SHAPE' | 'U_SHAPE' | 'ISLAND';
+
+export interface MeasuredWallSegment {
+  wallCode: string;
+  lengthMm: number;
+  heightMm?: number | null;
+  angleDeg?: number | null;
+  startXMm?: number | null;
+  startYMm?: number | null;
+  sortOrder?: number | null;
+}
+
+export interface MeasuredLayout {
+  sessionId: number;
+  layout: MeasuredKitchenLayout;
+  roomHeightMm: number;
+  defaultBaseDepthMm?: number | null;
+  defaultUpperDepthMm?: number | null;
+  walls: MeasuredWallSegment[];
+  zones?: unknown[];
+  obstacles?: unknown[];
+  notes?: string | null;
+}
+
+export const getMeasuredLayout = async (sessionId: number): Promise<MeasuredLayout> => {
+  const response = await axios.get<MeasuredLayout>(`/api/design-sessions/${sessionId}/measured-layout`);
+  return response.data;
+};
+
+export const saveMeasuredLayout = async (sessionId: number, layout: MeasuredLayout): Promise<MeasuredLayout> => {
+  const response = await axios.put<MeasuredLayout>(`/api/design-sessions/${sessionId}/measured-layout`, layout);
+  return response.data;
+};
