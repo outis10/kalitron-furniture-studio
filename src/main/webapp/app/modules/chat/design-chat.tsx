@@ -15,7 +15,7 @@ import {
   startChatSession,
 } from 'app/shared/api/design-chat-api';
 import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
 const STORAGE_KEY = 'kalitron.designChat.sessionCode';
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -564,6 +564,7 @@ const DesignChat = () => {
                     <Form.Label>Acabado</Form.Label>
                     <Form.Select value={visualFinish} onChange={event => setVisualFinish(event.target.value)}>
                       <option value="">Usar resumen confirmado</option>
+                      <option value="blanco mate">Blanco mate</option>
                       <option value="blanco brillante">Blanco brillante</option>
                       <option value="negro opaco">Negro opaco</option>
                       <option value="madera natural">Madera natural</option>
@@ -574,6 +575,11 @@ const DesignChat = () => {
                 <Button type="button" onClick={() => handleGenerateConcept()} disabled={isGeneratingConcept}>
                   {isGeneratingConcept ? <Spinner size="sm" /> : hasGeneratedConcept ? 'Regenerar concepto' : 'Generar concepto'}
                 </Button>
+                {session?.status === 'VISUAL_GENERATED' ? (
+                  <Button as={Link as any} to={`/proposal/${session.sessionCode}`} variant="outline-primary">
+                    Ver propuesta
+                  </Button>
+                ) : null}
               </section>
             ) : null}
             {selectedReferenceImage ? (

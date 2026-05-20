@@ -91,6 +91,20 @@ export default defineConfig(
       '@typescript-eslint/no-empty-function': 'off',
     },
   },
+  {
+    files: ['cypress/**/*.ts', 'cypress.config.ts'],
+    extends: [...tseslint.configs.recommended],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.mocha,
+        ...globals.node,
+        cy: 'readonly',
+        Cypress: 'readonly',
+        expect: 'readonly',
+      },
+    },
+  },
   // jhipster-needle-eslint-add-config - JHipster will add additional config here
   prettier,
 );
