@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faImage, faPaperPlane, faRotateRight, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 import {
+  analyzeSketch,
   ChatMessageView,
   ChatSession,
   generateVisualConcept,
@@ -28,6 +29,8 @@ interface SelectedReferenceImage {
   base64: string;
   previewUrl: string;
 }
+
+type SelectedSketchImage = SelectedReferenceImage;
 
 const formatPriceRange = (priceRange?: string | null) => {
   if (!priceRange) {
@@ -64,8 +67,13 @@ const readImageAsDataUrl = (file: File): Promise<string> =>
 
 const toBase64Payload = (dataUrl: string) => dataUrl.split(',')[1] ?? dataUrl;
 
+const formatSketchValue = (value?: string | null) => value?.replaceAll('_', ' ').toLowerCase() ?? 'no detectado';
+
+const sketchCountLabel = (count: number, singular: string, plural: string) => `${count} ${count === 1 ? singular : plural}`;
+
 const DesignChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sketchInputRef = useRef<HTMLInputElement>(null);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
   const [session, setSession] = useState<ChatSession | null>(null);
@@ -74,6 +82,7 @@ const DesignChat = () => {
   const [catalogStyles, setCatalogStyles] = useState<ICatalogStyle[]>([]);
   const [selectedStyle, setSelectedStyle] = useState<ICatalogStyle | null>(null);
   const [selectedReferenceImage, setSelectedReferenceImage] = useState<SelectedReferenceImage | null>(null);
+  const [selectedSketchImage, setSelectedSketchImage] = useState<SelectedSketchImage | null>(null);
   const [referenceImageBase64, setReferenceImageBase64] = useState<string | null>(null);
   const [visualStyle, setVisualStyle] = useState('');
   const [visualLayout, setVisualLayout] = useState('');
@@ -84,6 +93,7 @@ const DesignChat = () => {
   const [isLoadingStyles, setIsLoadingStyles] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isAnalyzingSketch, setIsAnalyzingSketch] = useState(false);
   const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
@@ -135,8 +145,12 @@ const DesignChat = () => {
     [clientEmail, clientName, selectedStyle, styleSkipped],
   );
   const canSend = useMemo(
-    () => (draft.trim().length > 0 || !!selectedReferenceImage) && !!session && !isSending && !isGeneratingConcept,
-    [draft, isGeneratingConcept, isSending, selectedReferenceImage, session],
+    () => (draft.trim().length > 0 || !!selectedReferenceImage) && !!session && !isSending && !isGeneratingConcept && !isAnalyzingSketch,
+    [draft, isAnalyzingSketch, isGeneratingConcept, isSending, selectedReferenceImage, session],
+  );
+  const canAnalyzeSketch = useMemo(
+    () => !!session && !!selectedSketchImage && !isAnalyzingSketch && !isSending && !isGeneratingConcept,
+    [isAnalyzingSketch, isGeneratingConcept, isSending, selectedSketchImage, session],
   );
   const canGenerateConcept = useMemo(
     () => !!session && ['SPECS_READY', 'VISUAL_GENERATED'].includes(session.status) && !isGeneratingConcept,
@@ -244,6 +258,7 @@ const DesignChat = () => {
     setDraft('');
     setSelectedStyle(null);
     setSelectedReferenceImage(null);
+    setSelectedSketchImage(null);
     setReferenceImageBase64(null);
     setHasGeneratedConcept(false);
     setStyleSkipped(false);
@@ -313,6 +328,116 @@ const DesignChat = () => {
       setError(null);
     } catch {
       setError('No se pudo leer la imagen seleccionada.');
+    }
+  };
+
+  const handleSketchImage = async (file: File | undefined) => {
+    if (!file) {
+      return;
+    }
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      setError('El boceto debe ser JPG, PNG o WebP.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setError('El boceto debe pesar 5MB o menos.');
+      return;
+    }
+
+    try {
+      const dataUrl = await readImageAsDataUrl(file);
+      setSelectedSketchImage({
+        fileName: file.name,
+        mimeType: file.type,
+        sizeBytes: file.size,
+        base64: toBase64Payload(dataUrl),
+        previewUrl: dataUrl,
+      });
+      setError(null);
+    } catch {
+      setError('No se pudo leer el boceto seleccionado.');
+    }
+  };
+
+  const summarizeSketchExtraction = (extraction: Awaited<ReturnType<typeof analyzeSketch>>) => {
+    const wallCount = extraction.walls?.length ?? 0;
+    const zoneCount = extraction.zones?.length ?? 0;
+    const cabinetCount = extraction.cabinetCandidates?.length ?? 0;
+    const missingInfo = extraction.missingInfo?.map(item => item.message).filter(Boolean) ?? [];
+    const questions = extraction.questions ?? [];
+    const warnings = extraction.warnings ?? [];
+
+    const lines = [
+      'Boceto analizado como borrador, no como plano confirmado.',
+      '',
+      `Tipo detectado: ${formatSketchValue(extraction.projectType?.value)} (${extraction.projectType?.confidence ?? 'sin confianza'})`,
+      `Layout detectado: ${formatSketchValue(extraction.layout?.value)} (${extraction.layout?.confidence ?? 'sin confianza'})`,
+      `Elementos: ${sketchCountLabel(wallCount, 'pared', 'paredes')}, ${sketchCountLabel(zoneCount, 'zona', 'zonas')}, ${sketchCountLabel(cabinetCount, 'mueble candidato', 'muebles candidatos')}.`,
+    ];
+
+    if (missingInfo.length > 0) {
+      lines.push('', 'Falta confirmar:', ...missingInfo.slice(0, 3).map(item => `- ${item}`));
+    }
+
+    if (questions.length > 0) {
+      lines.push('', 'Preguntas sugeridas:', ...questions.slice(0, 2).map(item => `- ${item}`));
+    }
+
+    if (warnings.length > 0) {
+      lines.push('', 'Advertencias:', ...warnings.slice(0, 2).map(item => `- ${item}`));
+    }
+
+    return lines.join('\n');
+  };
+
+  const handleAnalyzeSketch = async () => {
+    if (!session || !selectedSketchImage || !canAnalyzeSketch) {
+      return;
+    }
+
+    const sketchToAnalyze = selectedSketchImage;
+    const sketchPrompt = draft.trim();
+    setError(null);
+    setIsAnalyzingSketch(true);
+    setDraft('');
+    setMessages(currentMessages => [
+      ...currentMessages,
+      {
+        role: 'USER',
+        content: sketchPrompt
+          ? `Boceto para extracción de layout y muebles. Nota: ${sketchPrompt}`
+          : 'Boceto para extracción de layout y muebles. Requiere revisión antes de guardar.',
+        createdAt: new Date().toISOString(),
+        imageFileName: sketchToAnalyze.fileName,
+        imagePreviewUrl: sketchToAnalyze.previewUrl,
+      },
+    ]);
+
+    try {
+      const extraction = await analyzeSketch({
+        sessionId: session.sessionId,
+        imageBase64: sketchToAnalyze.base64,
+        imageFileName: sketchToAnalyze.fileName,
+        imageMimeType: sketchToAnalyze.mimeType,
+        imageSizeBytes: sketchToAnalyze.sizeBytes,
+        projectTypeHint: session.projectType,
+        unitHint: 'MM',
+        userPrompt: sketchPrompt || null,
+      });
+      setMessages(currentMessages => [
+        ...currentMessages,
+        {
+          role: 'ASSISTANT',
+          content: summarizeSketchExtraction(extraction),
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      setSelectedSketchImage(null);
+    } catch {
+      setDraft(sketchPrompt);
+      setError('No se pudo analizar el boceto. Verifica que el AI Gateway esté disponible e intenta de nuevo.');
+    } finally {
+      setIsAnalyzingSketch(false);
     }
   };
 
@@ -389,6 +514,50 @@ const DesignChat = () => {
               <Button as={Link as any} to={`/design-layout/${session.sessionId}`} className="ms-2" variant="outline-primary" size="sm">
                 Layout medido
               </Button>
+              <section className="design-chat__sketch-panel" aria-label="Boceto para extracción">
+                <div>
+                  <h2 className="h6 mb-1">Boceto</h2>
+                  <p className="design-chat__meta mb-2">Sube una foto del dibujo. Se analizará como borrador, no como plano confirmado.</p>
+                </div>
+                {selectedSketchImage ? (
+                  <div className="design-chat__sketch-preview">
+                    <img src={selectedSketchImage.previewUrl} alt={selectedSketchImage.fileName} />
+                    <span>{selectedSketchImage.fileName}</span>
+                    <Button
+                      aria-label="Quitar boceto"
+                      disabled={isAnalyzingSketch}
+                      onClick={() => setSelectedSketchImage(null)}
+                      size="sm"
+                      type="button"
+                      variant="link"
+                    >
+                      <FontAwesomeIcon icon={faXmark} />
+                    </Button>
+                  </div>
+                ) : null}
+                <input
+                  accept={ACCEPTED_IMAGE_TYPES.join(',')}
+                  className="d-none"
+                  disabled={!session || isAnalyzingSketch}
+                  onChange={event => handleSketchImage(event.target.files?.[0])}
+                  ref={sketchInputRef}
+                  type="file"
+                />
+                <div className="design-chat__sketch-actions">
+                  <Button
+                    disabled={isAnalyzingSketch}
+                    onClick={() => sketchInputRef.current?.click()}
+                    type="button"
+                    variant="outline-secondary"
+                    size="sm"
+                  >
+                    <FontAwesomeIcon icon={faImage} /> Subir boceto
+                  </Button>
+                  <Button disabled={!canAnalyzeSketch} onClick={handleAnalyzeSketch} type="button" size="sm">
+                    {isAnalyzingSketch ? <Spinner size="sm" /> : 'Analizar'}
+                  </Button>
+                </div>
+              </section>
             </>
           ) : (
             <Form onSubmit={handleStart}>
@@ -530,6 +699,11 @@ const DesignChat = () => {
                 <Spinner size="sm" /> Generando concepto visual... tiempo estimado 45-60s.
               </div>
             )}
+            {isAnalyzingSketch && (
+              <div className="design-chat__message design-chat__message--assistant">
+                <Spinner size="sm" /> Analizando boceto...
+              </div>
+            )}
           </div>
 
           {error && (
@@ -605,14 +779,14 @@ const DesignChat = () => {
               <input
                 accept={ACCEPTED_IMAGE_TYPES.join(',')}
                 className="d-none"
-                disabled={!session || isSending}
+                disabled={!session || isSending || isAnalyzingSketch}
                 onChange={event => handleReferenceImage(event.target.files?.[0])}
                 ref={fileInputRef}
                 type="file"
               />
               <Button
                 aria-label="Adjuntar imagen de referencia"
-                disabled={!session || isSending}
+                disabled={!session || isSending || isAnalyzingSketch}
                 onClick={() => fileInputRef.current?.click()}
                 type="button"
                 variant="outline-secondary"
@@ -628,7 +802,7 @@ const DesignChat = () => {
                     ? 'Escribe ajustes para regenerar: colores, cubierta, puertas, materiales...'
                     : 'Escribe sobre tu cocina, closet, estilo o medidas...'
                 }
-                disabled={!session || isSending || isGeneratingConcept}
+                disabled={!session || isSending || isGeneratingConcept || isAnalyzingSketch}
                 maxLength={4000}
               />
               <Button type="submit" disabled={!canSend} aria-label="Enviar mensaje">
