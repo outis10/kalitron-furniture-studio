@@ -185,7 +185,7 @@ export interface MeasuredLayout {
 export interface CabinetPlanItem {
   cabinetCode?: string | null;
   templateCode?: string | null;
-  category: string;
+  category: CabinetCategory;
   label: string;
   widthMm: number;
   heightMm: number;
@@ -203,6 +203,8 @@ export interface CabinetPlanItem {
   materialCode?: string | null;
   notes?: string | null;
 }
+
+export type CabinetCategory = 'UPPER' | 'LOWER' | 'CORNER' | 'TALL' | 'SINK' | 'ISLAND' | 'DRAWER_BASE' | 'APPLIANCE' | 'FILLER' | 'PANEL';
 
 export interface CabinetPlanValidationMessage {
   severity: 'INFO' | 'WARNING' | 'ERROR';
@@ -240,5 +242,10 @@ export const getCabinetPlan = async (sessionId: number): Promise<CabinetPlan> =>
 
 export const generateCabinetPlan = async (sessionId: number): Promise<CabinetPlan> => {
   const response = await axios.post<CabinetPlan>(`/api/design-sessions/${sessionId}/cabinet-plan`);
+  return response.data;
+};
+
+export const saveCabinetPlan = async (sessionId: number, cabinetPlan: CabinetPlan): Promise<CabinetPlan> => {
+  const response = await axios.put<CabinetPlan>(`/api/design-sessions/${sessionId}/cabinet-plan`, cabinetPlan);
   return response.data;
 };

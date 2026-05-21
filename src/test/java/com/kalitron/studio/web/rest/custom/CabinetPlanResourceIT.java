@@ -21,6 +21,7 @@ import com.kalitron.studio.repository.KitchenSpecRepository;
 import com.kalitron.studio.repository.MaterialRepository;
 import com.kalitron.studio.repository.RoomObstacleRepository;
 import com.kalitron.studio.repository.RoomWallRepository;
+import com.kalitron.studio.service.dto.CabinetPlanResponseDTO;
 import com.kalitron.studio.service.dto.LayoutObstacleDTO;
 import com.kalitron.studio.service.dto.LayoutZoneDTO;
 import com.kalitron.studio.service.dto.MeasuredLayoutRequestDTO;
@@ -82,6 +83,7 @@ class CabinetPlanResourceIT {
     void cabinetPlanEndpointsRequireAuthentication() throws Exception {
         mockMvc.perform(get("/api/design-sessions/1/cabinet-plan")).andExpect(status().isUnauthorized());
         mockMvc.perform(post("/api/design-sessions/1/cabinet-plan")).andExpect(status().isUnauthorized());
+        mockMvc.perform(put("/api/design-sessions/1/cabinet-plan")).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -125,6 +127,86 @@ class CabinetPlanResourceIT {
     @Test
     @Transactional
     @WithMockUser
+    void saveEditedCabinetPlanValidatesAndPersistsIt() throws Exception {
+        DesignSession session = designSessionRepository.save(
+            new DesignSession()
+                .sessionCode("KD-2026-042")
+                .projectType(ProjectType.KITCHEN)
+                .status(SessionStatus.LAYOUT_CONFIRMED)
+                .clientName("Cabinet Editor")
+                .clientEmail("editor@example.com")
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+        );
+        saveMeasuredLayout(session.getId());
+        CabinetPlanResponseDTO generatedPlan = generateCabinetPlan(session.getId());
+        generatedPlan.getCabinets().getFirst().setLabel("Base ajustada");
+        generatedPlan.getCabinets().getFirst().setWidthMm(500);
+        generatedPlan.getCabinets().getFirst().setNotes("Ajuste manual aprobado.");
+
+        mockMvc
+            .perform(
+                put("/api/design-sessions/{sessionId}/cabinet-plan", session.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(generatedPlan))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.valid").value(true))
+            .andExpect(jsonPath("$.cabinetCount").value(5))
+            .andExpect(jsonPath("$.totalOccupiedLengthMm").value(3500))
+            .andExpect(jsonPath("$.cabinets[0].label").value("Base ajustada"));
+
+        assertThat(
+            cabinetRepository.findBySpecIdOrderByPositionSeqAsc(
+                kitchenSpecRepository.findBySessionId(session.getId()).orElseThrow().getId()
+            )
+        ).anySatisfy(cabinet -> {
+            assertThat(cabinet.getLabel()).isEqualTo("Base ajustada");
+            assertThat(cabinet.getWidthMm()).isEqualTo(500);
+            assertThat(cabinet.getNotes()).isEqualTo("Ajuste manual aprobado.");
+        });
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void saveEditedCabinetPlanReturnsValidationErrorsWithoutPersistingInvalidPlan() throws Exception {
+        DesignSession session = designSessionRepository.save(
+            new DesignSession()
+                .sessionCode("KD-2026-042-BAD")
+                .projectType(ProjectType.KITCHEN)
+                .status(SessionStatus.LAYOUT_CONFIRMED)
+                .clientName("Cabinet Editor")
+                .clientEmail("editor@example.com")
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+        );
+        saveMeasuredLayout(session.getId());
+        CabinetPlanResponseDTO generatedPlan = generateCabinetPlan(session.getId());
+        generatedPlan.getCabinets().getFirst().setWidthMm(50);
+
+        mockMvc
+            .perform(
+                put("/api/design-sessions/{sessionId}/cabinet-plan", session.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsBytes(generatedPlan))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.valid").value(false))
+            .andExpect(jsonPath("$.validationMessages[?(@.code == 'CABINET_WIDTH_OUT_OF_RANGE')]").isArray());
+
+        assertThat(
+            cabinetRepository.findBySpecIdOrderByPositionSeqAsc(
+                kitchenSpecRepository.findBySessionId(session.getId()).orElseThrow().getId()
+            )
+        )
+            .hasSize(5)
+            .noneSatisfy(cabinet -> assertThat(cabinet.getWidthMm()).isEqualTo(50));
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
     void generateCabinetPlanReturnsNotFoundWithoutMeasuredLayout() throws Exception {
         DesignSession session = designSessionRepository.save(
             new DesignSession()
@@ -138,6 +220,18 @@ class CabinetPlanResourceIT {
         );
 
         mockMvc.perform(post("/api/design-sessions/{sessionId}/cabinet-plan", session.getId())).andExpect(status().isNotFound());
+    }
+
+    private CabinetPlanResponseDTO generateCabinetPlan(Long sessionId) throws Exception {
+        return om.readValue(
+            mockMvc
+                .perform(post("/api/design-sessions/{sessionId}/cabinet-plan", sessionId))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsByteArray(),
+            CabinetPlanResponseDTO.class
+        );
     }
 
     private void saveMeasuredLayout(Long sessionId) throws Exception {

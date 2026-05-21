@@ -5,7 +5,9 @@ import { Alert, Button, Form, Spinner } from 'react-bootstrap';
 import { Link, useParams } from 'react-router';
 
 import {
+  CabinetCategory,
   CabinetPlan,
+  CabinetPlanItem,
   LayoutObstacle,
   LayoutObstacleType,
   LayoutZone,
@@ -15,6 +17,7 @@ import {
   generateCabinetPlan,
   getCabinetPlan,
   getMeasuredLayout,
+  saveCabinetPlan,
   saveMeasuredLayout,
 } from 'app/shared/api/design-chat-api';
 
@@ -44,6 +47,19 @@ const obstacleOptions: { value: LayoutObstacleType; label: string }[] = [
   { value: 'RANGE_HOOD', label: 'Campana' },
   { value: 'APPLIANCE', label: 'Electrodoméstico' },
   { value: 'OTHER', label: 'Otro' },
+];
+
+const cabinetCategoryOptions: { value: CabinetCategory; label: string }[] = [
+  { value: 'LOWER', label: 'Base puertas' },
+  { value: 'DRAWER_BASE', label: 'Base cajones' },
+  { value: 'SINK', label: 'Base tarja' },
+  { value: 'APPLIANCE', label: 'Electrodoméstico' },
+  { value: 'UPPER', label: 'Superior' },
+  { value: 'TALL', label: 'Torre' },
+  { value: 'FILLER', label: 'Relleno' },
+  { value: 'PANEL', label: 'Panel' },
+  { value: 'CORNER', label: 'Esquinero' },
+  { value: 'ISLAND', label: 'Isla' },
 ];
 
 const wallCodeForIndex = (index: number) => String.fromCharCode(65 + index);
@@ -117,6 +133,23 @@ const previewPoint = (layout: MeasuredKitchenLayout, walls: MeasuredWallSegment[
   return { x: 222, y: 180 - ratio * 124 };
 };
 
+const reflowCabinetPositions = (cabinets: CabinetPlanItem[]) => {
+  const sortedCabinets = [...cabinets].sort(
+    (first, second) =>
+      first.wallCode.localeCompare(second.wallCode) || first.xMm - second.xMm || (first.positionSeq ?? 0) - (second.positionSeq ?? 0),
+  );
+  const wallCursors = new Map<string, number>();
+  return sortedCabinets.map((cabinet, index) => {
+    const xMm = wallCursors.get(cabinet.wallCode) ?? 0;
+    wallCursors.set(cabinet.wallCode, xMm + cabinet.widthMm);
+    return {
+      ...cabinet,
+      xMm,
+      positionSeq: index + 1,
+    };
+  });
+};
+
 const MeasuredLayoutPage = () => {
   const { sessionId: sessionIdParam = '' } = useParams();
   const sessionId = Number(sessionIdParam);
@@ -124,6 +157,7 @@ const MeasuredLayoutPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
   const [cabinetPlan, setCabinetPlan] = useState<CabinetPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
@@ -151,6 +185,11 @@ const MeasuredLayoutPage = () => {
   }, [sessionId]);
 
   const previewPath = useMemo(() => (layout ? buildPath(layout.layout, layout.walls) : ''), [layout]);
+  const cabinetCount = cabinetPlan?.cabinets.length ?? 0;
+  const cabinetTotalWidthMm = useMemo(
+    () => cabinetPlan?.cabinets.reduce((total, cabinet) => total + cabinet.widthMm, 0) ?? 0,
+    [cabinetPlan],
+  );
 
   const updateLayoutType = (nextLayout: MeasuredKitchenLayout) => {
     setLayout(currentLayout =>
@@ -304,6 +343,49 @@ const MeasuredLayoutPage = () => {
       setError('No se pudo generar la lista de muebles. Revisa layout, zonas y obstáculos.');
     } finally {
       setIsGeneratingPlan(false);
+    }
+  };
+
+  const updateCabinet = (index: number, nextCabinet: Partial<CabinetPlanItem>) => {
+    setCabinetPlan(currentPlan => {
+      if (!currentPlan) {
+        return currentPlan;
+      }
+      const cabinets = currentPlan.cabinets.map((cabinet, cabinetIndex) =>
+        cabinetIndex === index ? { ...cabinet, ...nextCabinet } : cabinet,
+      );
+      const reflowedCabinets = reflowCabinetPositions(cabinets);
+      return {
+        ...currentPlan,
+        cabinets: reflowedCabinets,
+        cabinetCount: reflowedCabinets.length,
+        totalOccupiedLengthMm: reflowedCabinets.reduce((total, cabinet) => total + cabinet.widthMm, 0),
+        validationMessages: [],
+        valid: true,
+      };
+    });
+  };
+
+  const handleSaveCabinetPlan = async () => {
+    if (!cabinetPlan) {
+      return;
+    }
+
+    setError(null);
+    setSavedMessage(null);
+    setIsSavingPlan(true);
+    try {
+      const savedPlan = await saveCabinetPlan(sessionId, cabinetPlan);
+      setCabinetPlan(savedPlan);
+      if (savedPlan.valid) {
+        setSavedMessage('Lista de muebles guardada.');
+      } else {
+        setError('La lista tiene errores de validación. Corrige los campos marcados antes de guardar.');
+      }
+    } catch {
+      setError('No se pudo guardar la lista de muebles. Revisa los datos e intenta de nuevo.');
+    } finally {
+      setIsSavingPlan(false);
     }
   };
 
@@ -594,10 +676,17 @@ const MeasuredLayoutPage = () => {
         <section className="measured-layout__cabinet-plan" aria-label="Lista de muebles generada">
           <div className="measured-layout__section-heading">
             <div>
-              <p className="design-chat__meta mb-1">Lista generada</p>
-              <h2 className="h5 mb-0">{cabinetPlan.cabinetCount} muebles</h2>
+              <p className="design-chat__meta mb-1">Lista editable</p>
+              <h2 className="h5 mb-0">
+                {cabinetCount} muebles · {mmToCm(cabinetTotalWidthMm)} cm ocupados
+              </h2>
             </div>
-            <strong>{cabinetPlan.valid ? 'Válida' : 'Revisar advertencias'}</strong>
+            <div className="measured-layout__actions">
+              <strong>{cabinetPlan.valid ? 'Válida' : 'Revisar advertencias'}</strong>
+              <Button type="button" variant="primary" disabled={isSavingPlan} onClick={handleSaveCabinetPlan}>
+                {isSavingPlan ? <Spinner size="sm" /> : 'Guardar muebles'}
+              </Button>
+            </div>
           </div>
           {cabinetPlan.validationMessages.length > 0 ? (
             <div className="measured-layout__messages">
@@ -608,20 +697,97 @@ const MeasuredLayoutPage = () => {
               ))}
             </div>
           ) : null}
-          <div className="measured-layout__cabinet-list">
-            {cabinetPlan.cabinets.map(cabinet => (
-              <article className="measured-layout__cabinet-item" key={cabinet.cabinetCode ?? `${cabinet.wallCode}-${cabinet.xMm}`}>
-                <div>
-                  <strong>{cabinet.label}</strong>
-                  <p className="design-chat__meta mb-0">
-                    {cabinet.category} · Pared {cabinet.wallCode} · X {mmToCm(cabinet.xMm)} cm
-                  </p>
-                </div>
-                <div>
-                  {mmToCm(cabinet.widthMm)} x {mmToCm(cabinet.heightMm)} x {mmToCm(cabinet.depthMm)} cm
-                </div>
-              </article>
-            ))}
+          <div className="measured-layout__cabinet-table-wrap">
+            <table className="measured-layout__cabinet-table">
+              <thead>
+                <tr>
+                  <th>Mueble</th>
+                  <th>Tipo</th>
+                  <th>Pared</th>
+                  <th>X</th>
+                  <th>Ancho</th>
+                  <th>Alto</th>
+                  <th>Fondo</th>
+                  <th>Notas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cabinetPlan.cabinets.map((cabinet, index) => (
+                  <tr key={cabinet.cabinetCode ?? `${cabinet.wallCode}-${cabinet.xMm}-${index}`}>
+                    <td>
+                      <Form.Control
+                        aria-label={`Nombre de ${cabinet.cabinetCode}`}
+                        value={cabinet.label}
+                        maxLength={120}
+                        onChange={event => updateCabinet(index, { label: event.target.value })}
+                      />
+                    </td>
+                    <td>
+                      <Form.Select
+                        aria-label={`Tipo de ${cabinet.cabinetCode}`}
+                        value={cabinet.category}
+                        onChange={event => updateCabinet(index, { category: event.target.value as CabinetCategory })}
+                      >
+                        {cabinetCategoryOptions.map(option => (
+                          <option value={option.value} key={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </td>
+                    <td>
+                      <Form.Select
+                        aria-label={`Pared de ${cabinet.cabinetCode}`}
+                        value={cabinet.wallCode}
+                        onChange={event => updateCabinet(index, { wallCode: event.target.value })}
+                      >
+                        {layout.walls.map(wall => (
+                          <option value={wall.wallCode} key={wall.wallCode}>
+                            {wall.wallCode}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </td>
+                    <td>{mmToCm(cabinet.xMm)} cm</td>
+                    <td>
+                      <Form.Control
+                        aria-label={`Ancho de ${cabinet.cabinetCode}`}
+                        type="number"
+                        min={1}
+                        value={mmToCm(cabinet.widthMm)}
+                        onChange={event => updateCabinet(index, { widthMm: cmToMm(event.target.value) })}
+                      />
+                    </td>
+                    <td>
+                      <Form.Control
+                        aria-label={`Alto de ${cabinet.cabinetCode}`}
+                        type="number"
+                        min={1}
+                        value={mmToCm(cabinet.heightMm)}
+                        onChange={event => updateCabinet(index, { heightMm: cmToMm(event.target.value) })}
+                      />
+                    </td>
+                    <td>
+                      <Form.Control
+                        aria-label={`Fondo de ${cabinet.cabinetCode}`}
+                        type="number"
+                        min={1}
+                        value={mmToCm(cabinet.depthMm)}
+                        onChange={event => updateCabinet(index, { depthMm: cmToMm(event.target.value) })}
+                      />
+                    </td>
+                    <td>
+                      <Form.Control
+                        aria-label={`Notas de ${cabinet.cabinetCode}`}
+                        value={cabinet.notes ?? ''}
+                        maxLength={300}
+                        onChange={event => updateCabinet(index, { notes: event.target.value })}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
       ) : null}

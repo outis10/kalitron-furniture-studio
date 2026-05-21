@@ -112,15 +112,27 @@ public class CabinetPlanServiceImpl implements CabinetPlanService {
         response.setTotalOccupiedLengthMm(totalOccupiedLengthMm);
         response.setValid(messages.stream().noneMatch(message -> "ERROR".equals(message.getSeverity())));
 
-        KitchenSpec spec = ensureKitchenSpec(session, layout);
-        Material material = ensureMaterial();
-        cabinetRepository.deleteBySpecId(spec.getId());
-        for (CabinetPlanItemDTO cabinet : cabinets) {
-            cabinetRepository.save(toCabinet(cabinet, spec, material));
+        persistValidCabinetPlan(session, layout, response);
+        return response;
+    }
+
+    @Override
+    public CabinetPlanResponseDTO saveCabinetPlan(Long sessionId, CabinetPlanResponseDTO cabinetPlan) {
+        DesignSession session = designSessionRepository
+            .findById(sessionId)
+            .orElseThrow(() -> new IllegalArgumentException("Design session not found"));
+        MeasuredLayoutRequestDTO layout = measuredLayoutService
+            .findMeasuredLayout(sessionId)
+            .orElseThrow(() -> new IllegalArgumentException("Measured layout not found"));
+
+        CabinetPlanResponseDTO response = normalizeSubmittedCabinetPlan(session, layout, cabinetPlan);
+        List<CabinetPlanValidationMessageDTO> messages = response.getValidationMessages();
+        messages.addAll(cabinetPlanValidator.validate(layout, response.getCabinets()));
+        response.setValid(messages.stream().noneMatch(message -> "ERROR".equals(message.getSeverity())));
+
+        if (response.isValid()) {
+            persistValidCabinetPlan(session, layout, response);
         }
-        persistCabinetPlanSnapshot(session, response);
-        session.setUpdatedAt(Instant.now());
-        designSessionRepository.save(session);
         return response;
     }
 
@@ -131,6 +143,44 @@ public class CabinetPlanServiceImpl implements CabinetPlanService {
             .findFirstBySessionIdAndFileNameOrderByCreatedAtDesc(sessionId, CABINET_PLAN_FILE_NAME)
             .map(DesignArtifact::getMetadataJson)
             .flatMap(this::readCabinetPlanSnapshot);
+    }
+
+    private CabinetPlanResponseDTO normalizeSubmittedCabinetPlan(
+        DesignSession session,
+        MeasuredLayoutRequestDTO layout,
+        CabinetPlanResponseDTO submittedPlan
+    ) {
+        CabinetPlanResponseDTO response = new CabinetPlanResponseDTO();
+        response.setSessionId(session.getId());
+        response.setSessionCode(session.getSessionCode());
+        response.setLayout(layout.getLayout());
+        List<CabinetPlanItemDTO> cabinets = submittedPlan.getCabinets() == null ? new ArrayList<>() : submittedPlan.getCabinets();
+        int sequence = 1;
+        for (CabinetPlanItemDTO cabinet : cabinets) {
+            if (cabinet.getPositionSeq() == null) {
+                cabinet.setPositionSeq(sequence);
+            }
+            if (cabinet.getCabinetCode() == null || cabinet.getCabinetCode().isBlank()) {
+                cabinet.setCabinetCode(cabinet.getWallCode() + "-" + String.format("%03d", sequence));
+            }
+            sequence++;
+        }
+        response.setCabinets(cabinets);
+        response.setCabinetCount(cabinets.size());
+        response.setTotalOccupiedLengthMm(cabinets.stream().map(CabinetPlanItemDTO::getWidthMm).reduce(0, Integer::sum));
+        return response;
+    }
+
+    private void persistValidCabinetPlan(DesignSession session, MeasuredLayoutRequestDTO layout, CabinetPlanResponseDTO response) {
+        KitchenSpec spec = ensureKitchenSpec(session, layout);
+        Material material = ensureMaterial();
+        cabinetRepository.deleteBySpecId(spec.getId());
+        for (CabinetPlanItemDTO cabinet : response.getCabinets()) {
+            cabinetRepository.save(toCabinet(cabinet, spec, material));
+        }
+        persistCabinetPlanSnapshot(session, response);
+        session.setUpdatedAt(Instant.now());
+        designSessionRepository.save(session);
     }
 
     private WallPlan planWall(
