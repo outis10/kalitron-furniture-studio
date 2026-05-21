@@ -15,6 +15,7 @@ import com.kalitron.studio.service.DesignChatService;
 import com.kalitron.studio.service.FastApiGateway;
 import com.kalitron.studio.service.FastApiGateway.GatewayChatRequest;
 import com.kalitron.studio.service.FastApiGateway.GatewayGenerateRequest;
+import com.kalitron.studio.service.FastApiGateway.GatewaySketchAnalysisRequest;
 import com.kalitron.studio.service.FastApiGatewayException;
 import com.kalitron.studio.service.dto.ChatMessageViewDTO;
 import com.kalitron.studio.service.dto.ChatRequestDTO;
@@ -23,6 +24,8 @@ import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
 import com.kalitron.studio.service.dto.ChatSessionSummaryDTO;
 import com.kalitron.studio.service.dto.DesignProposalDTO;
+import com.kalitron.studio.service.dto.SketchAnalysisRequestDTO;
+import com.kalitron.studio.service.dto.SketchExtractionResponseDTO;
 import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.time.Instant;
@@ -193,6 +196,39 @@ public class DesignChatServiceImpl implements DesignChatService {
             return response;
         } catch (FastApiGatewayException e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI visual concept generation is unavailable", e);
+        }
+    }
+
+    @Override
+    public SketchExtractionResponseDTO analyzeSketch(SketchAnalysisRequestDTO request) {
+        DesignSession session = designSessionRepository
+            .findById(request.getSessionId())
+            .orElseThrow(() -> new IllegalArgumentException("Design session not found"));
+
+        if (request.getImageBase64() == null || request.getImageBase64().isBlank()) {
+            throw new IllegalArgumentException("Sketch image is required");
+        }
+
+        saveSketchImage(session, request);
+        try {
+            SketchExtractionResponseDTO response = fastApiGateway.analyzeSketch(
+                new GatewaySketchAnalysisRequest(
+                    session.getSessionCode(),
+                    normalizeImageBase64(request.getImageBase64()),
+                    normalizeImageMimeType(request.getImageMimeType()),
+                    sanitizeImageFileName(request.getImageFileName()),
+                    resolveProjectTypeHint(session, request),
+                    normalizeSketchOption(request.getUnitHint()),
+                    normalizeSketchOption(request.getUserPrompt()),
+                    session.getId(),
+                    session.getSessionCode()
+                )
+            );
+            session.setUpdatedAt(Instant.now());
+            designSessionRepository.save(session);
+            return response;
+        } catch (FastApiGatewayException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI sketch analysis is unavailable", e);
         }
     }
 
@@ -373,6 +409,33 @@ public class DesignChatServiceImpl implements DesignChatService {
         designImageRepository.save(image);
     }
 
+    private void saveSketchImage(DesignSession session, SketchAnalysisRequestDTO request) {
+        String mimeType = normalizeImageMimeType(request.getImageMimeType());
+        if (!ALLOWED_REFERENCE_IMAGE_TYPES.contains(mimeType)) {
+            throw new IllegalArgumentException("Sketch image must be JPG, PNG, or WebP");
+        }
+
+        long imageSizeBytes = resolveSketchImageSizeBytes(request);
+        if (imageSizeBytes > MAX_REFERENCE_IMAGE_BYTES) {
+            throw new IllegalArgumentException("Sketch image must be 5MB or smaller");
+        }
+
+        String fileName = sanitizeImageFileName(request.getImageFileName());
+        DesignImage image = new DesignImage()
+            .session(session)
+            .imageType(ImageType.SKETCH)
+            .fileName(fileName)
+            .filePath("sketch-images/" + session.getSessionCode() + "/" + Instant.now().toEpochMilli() + "-" + fileName)
+            .imageDataBase64(normalizeImageBase64(request.getImageBase64()))
+            .mimeType(mimeType)
+            .fileSizeKb(Math.max(1L, (long) Math.ceil(imageSizeBytes / 1024.0)))
+            .isActive(true)
+            .uploadedAt(Instant.now())
+            .description("Sketch uploaded for AI extraction");
+
+        designImageRepository.save(image);
+    }
+
     private String normalizeImageMimeType(String mimeType) {
         if (mimeType == null || mimeType.isBlank()) {
             return "";
@@ -381,6 +444,19 @@ public class DesignChatServiceImpl implements DesignChatService {
     }
 
     private long resolveImageSizeBytes(ChatRequestDTO request) {
+        if (request.getImageSizeBytes() != null && request.getImageSizeBytes() > 0) {
+            return request.getImageSizeBytes();
+        }
+
+        String base64 = request.getImageBase64().trim();
+        int commaIndex = base64.indexOf(',');
+        if (commaIndex >= 0) {
+            base64 = base64.substring(commaIndex + 1);
+        }
+        return Base64.getDecoder().decode(base64).length;
+    }
+
+    private long resolveSketchImageSizeBytes(SketchAnalysisRequestDTO request) {
         if (request.getImageSizeBytes() != null && request.getImageSizeBytes() > 0) {
             return request.getImageSizeBytes();
         }
@@ -495,6 +571,20 @@ public class DesignChatServiceImpl implements DesignChatService {
             return fallback.trim();
         }
         return defaultValue;
+    }
+
+    private String normalizeSketchOption(String option) {
+        if (option == null || option.isBlank()) {
+            return null;
+        }
+        return option.trim();
+    }
+
+    private String resolveProjectTypeHint(DesignSession session, SketchAnalysisRequestDTO request) {
+        if (request.getProjectTypeHint() != null) {
+            return request.getProjectTypeHint().name();
+        }
+        return session.getProjectType() == null ? null : session.getProjectType().name();
     }
 
     private void saveGeneratedImage(DesignSession session, VisualConceptResponseDTO response) {

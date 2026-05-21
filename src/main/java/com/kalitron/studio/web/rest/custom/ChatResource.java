@@ -6,6 +6,8 @@ import com.kalitron.studio.service.dto.ChatResponseDTO;
 import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
 import com.kalitron.studio.service.dto.ChatSessionSummaryDTO;
+import com.kalitron.studio.service.dto.SketchAnalysisRequestDTO;
+import com.kalitron.studio.service.dto.SketchExtractionResponseDTO;
 import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import com.kalitron.studio.web.rest.errors.BadRequestAlertException;
@@ -74,6 +76,18 @@ public class ChatResource {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
             }
             throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "invalidvisualconcept");
+        }
+    }
+
+    @PostMapping("/sketch-analysis")
+    public ResponseEntity<SketchExtractionResponseDTO> analyzeSketch(@Valid @RequestBody SketchAnalysisRequestDTO request) {
+        try {
+            return ResponseEntity.ok(designChatService.analyzeSketch(request));
+        } catch (IllegalArgumentException e) {
+            if ("Design session not found".equals(e.getMessage())) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            }
+            throw new BadRequestAlertException(e.getMessage(), ENTITY_NAME, "invalidsketchanalysis");
         }
     }
 }
