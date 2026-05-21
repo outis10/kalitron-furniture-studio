@@ -11,7 +11,10 @@ import {
   ChatSession,
   generateVisualConcept,
   getCatalogStyles,
+  LayoutObstacleType,
+  MeasuredKitchenLayout,
   resumeChatSession,
+  saveMeasuredLayout,
   sendChatMessage,
   SketchCabinetCandidate,
   SketchExtractionResponse,
@@ -230,6 +233,70 @@ const toSketchReview = (extraction: SketchExtractionResponse): SketchReviewState
 
 const confidenceClass = (confidence?: string | null) => `design-chat__confidence--${(confidence ?? 'MISSING').toLowerCase()}`;
 
+const normalizeLayout = (layout: string): MeasuredKitchenLayout | null => {
+  const normalized = layout.trim().toUpperCase().replaceAll(' ', '_').replaceAll('-', '_');
+  if (normalized === 'L' || normalized === 'EN_L') {
+    return 'L_SHAPE';
+  }
+  if (normalized === 'U' || normalized === 'EN_U') {
+    return 'U_SHAPE';
+  }
+  const supportedLayouts: MeasuredKitchenLayout[] = ['LINEAR', 'L_SHAPE', 'U_SHAPE', 'ISLAND', 'PENINSULA', 'GALLEY', 'CUSTOM'];
+  return supportedLayouts.includes(normalized as MeasuredKitchenLayout) ? (normalized as MeasuredKitchenLayout) : null;
+};
+
+const normalizeObstacleType = (obstacleType: string): LayoutObstacleType => {
+  const normalized = obstacleType.trim().toUpperCase().replaceAll(' ', '_').replaceAll('-', '_');
+  const supportedTypes: LayoutObstacleType[] = [
+    'WINDOW',
+    'DOOR',
+    'COLUMN',
+    'OUTLET',
+    'WATER',
+    'GAS',
+    'DRAIN',
+    'RANGE_HOOD',
+    'APPLIANCE',
+    'OTHER',
+  ];
+  return supportedTypes.includes(normalized as LayoutObstacleType) ? (normalized as LayoutObstacleType) : 'OTHER';
+};
+
+const normalizeUnit = (unit: string) => unit.trim().toUpperCase();
+
+const toMm = (value: string, unit: string): number | null => {
+  if (!value.trim()) {
+    return null;
+  }
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return null;
+  }
+  const normalizedUnit = normalizeUnit(unit);
+  if (normalizedUnit === 'CM') {
+    return Math.round(numericValue * 10);
+  }
+  if (normalizedUnit === 'IN') {
+    return Math.round(numericValue * 25.4);
+  }
+  return Math.round(numericValue);
+};
+
+const toOptionalMm = (value: string, unit: string): number | null => {
+  if (!value.trim()) {
+    return null;
+  }
+  return toMm(value, unit);
+};
+
+const toOptionalInteger = (value: string): number | null => {
+  if (!value.trim()) {
+    return null;
+  }
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? Math.round(numericValue) : null;
+};
+
 const DesignChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sketchInputRef = useRef<HTMLInputElement>(null);
@@ -255,6 +322,7 @@ const DesignChat = () => {
   const [isStarting, setIsStarting] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isAnalyzingSketch, setIsAnalyzingSketch] = useState(false);
+  const [isSavingMeasuredLayout, setIsSavingMeasuredLayout] = useState(false);
   const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
@@ -306,12 +374,18 @@ const DesignChat = () => {
     [clientEmail, clientName, selectedStyle, styleSkipped],
   );
   const canSend = useMemo(
-    () => (draft.trim().length > 0 || !!selectedReferenceImage) && !!session && !isSending && !isGeneratingConcept && !isAnalyzingSketch,
-    [draft, isAnalyzingSketch, isGeneratingConcept, isSending, selectedReferenceImage, session],
+    () =>
+      (draft.trim().length > 0 || !!selectedReferenceImage) &&
+      !!session &&
+      !isSending &&
+      !isGeneratingConcept &&
+      !isAnalyzingSketch &&
+      !isSavingMeasuredLayout,
+    [draft, isAnalyzingSketch, isGeneratingConcept, isSavingMeasuredLayout, isSending, selectedReferenceImage, session],
   );
   const canAnalyzeSketch = useMemo(
-    () => !!session && !!selectedSketchImage && !isAnalyzingSketch && !isSending && !isGeneratingConcept,
-    [isAnalyzingSketch, isGeneratingConcept, isSending, selectedSketchImage, session],
+    () => !!session && !!selectedSketchImage && !isAnalyzingSketch && !isSending && !isGeneratingConcept && !isSavingMeasuredLayout,
+    [isAnalyzingSketch, isGeneratingConcept, isSavingMeasuredLayout, isSending, selectedSketchImage, session],
   );
   const canGenerateConcept = useMemo(
     () => !!session && ['SPECS_READY', 'VISUAL_GENERATED'].includes(session.status) && !isGeneratingConcept,
@@ -425,6 +499,7 @@ const DesignChat = () => {
     setReferenceImageBase64(null);
     setHasGeneratedConcept(false);
     setStyleSkipped(false);
+    setIsSavingMeasuredLayout(false);
     setError(null);
   };
 
@@ -656,6 +731,110 @@ const DesignChat = () => {
     ]);
   };
 
+  const buildMeasuredLayoutFromReview = () => {
+    if (!session || !sketchReview) {
+      throw new Error('No hay extracción confirmada para guardar.');
+    }
+
+    const layout = normalizeLayout(sketchReview.layout);
+    if (!layout) {
+      throw new Error('Confirma un layout válido antes de guardar.');
+    }
+
+    const roomHeightMm = sketchReview.walls
+      .map(wall => toMm(wall.height, sketchReview.unit))
+      .find((height): height is number => height !== null);
+    if (!roomHeightMm) {
+      throw new Error('Confirma la altura del cuarto antes de guardar.');
+    }
+
+    const walls = sketchReview.walls.map((wall, index) => {
+      const lengthMm = toMm(wall.length, sketchReview.unit);
+      if (!wall.wallCode.trim() || !lengthMm) {
+        throw new Error('Todas las paredes necesitan código y largo antes de guardar.');
+      }
+
+      return {
+        wallCode: wall.wallCode.trim(),
+        lengthMm,
+        heightMm: toOptionalMm(wall.height, sketchReview.unit) ?? roomHeightMm,
+        angleDeg: toOptionalInteger(wall.angleDeg) ?? 0,
+        sortOrder: index + 1,
+      };
+    });
+
+    const zones = sketchReview.zones.map((zone, index) => {
+      const xMm = toOptionalMm(zone.x, sketchReview.unit);
+      if (!zone.zoneCode.trim() || !zone.zoneType.trim() || !zone.wallCode.trim() || xMm === null) {
+        throw new Error('Todas las zonas necesitan código, tipo, pared y posición X antes de guardar.');
+      }
+
+      return {
+        zoneCode: zone.zoneCode.trim() || `ZONE-${index + 1}`,
+        zoneType: zone.zoneType.trim().toUpperCase(),
+        wallCode: zone.wallCode.trim(),
+        xMm,
+        widthMm: toOptionalMm(zone.width, sketchReview.unit),
+      };
+    });
+
+    const obstacles = sketchReview.obstacles.map(obstacle => {
+      const xMm = toOptionalMm(obstacle.x, sketchReview.unit);
+      if (!obstacle.wallCode.trim() || xMm === null) {
+        throw new Error('Todos los obstáculos necesitan pared y posición X antes de guardar.');
+      }
+
+      return {
+        obstacleType: normalizeObstacleType(obstacle.obstacleType),
+        label: obstacle.label.trim() || null,
+        wallCode: obstacle.wallCode.trim(),
+        xMm,
+        widthMm: toOptionalMm(obstacle.width, sketchReview.unit),
+      };
+    });
+
+    return {
+      sessionId: session.sessionId,
+      layout,
+      roomHeightMm,
+      defaultBaseDepthMm: 600,
+      defaultUpperDepthMm: 350,
+      walls,
+      zones,
+      obstacles,
+      notes: 'Layout convertido desde extracción de boceto revisada por usuario.',
+    };
+  };
+
+  const handleSaveMeasuredLayoutFromSketch = async () => {
+    if (!session || !sketchReview) {
+      return;
+    }
+    if (!isSketchReviewConfirmed) {
+      setError('Confirma la extracción antes de guardarla como layout medido.');
+      return;
+    }
+
+    setError(null);
+    setIsSavingMeasuredLayout(true);
+    try {
+      const measuredLayout = buildMeasuredLayoutFromReview();
+      await saveMeasuredLayout(session.sessionId, measuredLayout);
+      setMessages(currentMessages => [
+        ...currentMessages,
+        {
+          role: 'ASSISTANT',
+          content: 'Layout medido guardado desde el boceto revisado. Puedes abrir Layout medido para ajustar detalles manualmente.',
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'No se pudo guardar el layout medido.');
+    } finally {
+      setIsSavingMeasuredLayout(false);
+    }
+  };
+
   const handleDragReferenceImage = (event: React.DragEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -857,6 +1036,9 @@ const DesignChat = () => {
         <div className="design-chat__review-actions">
           <Button onClick={handleConfirmSketchReview} type="button" disabled={isSketchReviewConfirmed}>
             Confirmar extracción
+          </Button>
+          <Button onClick={handleSaveMeasuredLayoutFromSketch} type="button" disabled={!isSketchReviewConfirmed || isSavingMeasuredLayout}>
+            {isSavingMeasuredLayout ? <Spinner size="sm" /> : 'Guardar layout medido'}
           </Button>
           <Button onClick={handleRejectSketchReview} type="button" variant="outline-secondary">
             Descartar extracción
