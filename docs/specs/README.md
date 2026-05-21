@@ -61,6 +61,9 @@ docs/specs/
     61-convert-confirmed-sketch-cabinets-to-editable-cabinet-plan.md
     62-convert-confirmed-sketch-extraction-to-measured-layout.md
     63-review-extracted-layout-before-saving.md
+  e8-3d-prototype-from-confirmed-cabinet-plan/
+    epic.md
+    65-3d-prototype-generation-contract.md
 ```
 
 ## Rules
