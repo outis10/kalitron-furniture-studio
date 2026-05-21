@@ -54,6 +54,8 @@ docs/specs/
     42-review-edit-cabinet-dimensions.md
     43-cabinet-layout-validation-rules.md
     44-generate-cabinet-list.md
+  e7-sketch-to-layout-extraction/
+    59-sketch-extraction-contract.md
 ```
 
 ## Rules
