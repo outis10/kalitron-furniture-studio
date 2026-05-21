@@ -56,7 +56,7 @@ const DesignSessions = () => {
           <h1 className="h3 mb-2">Mis sesiones</h1>
           <p className="design-sessions__meta">Continúa conversaciones de diseño y revisa conceptos generados.</p>
         </div>
-        <Button as={Link as any} to="/design-chat">
+        <Button as={Link as any} to="/design-chat?new=true">
           Nueva sesión
         </Button>
       </header>
@@ -71,7 +71,7 @@ const DesignSessions = () => {
         <section className="design-sessions__empty">
           <h2 className="h5">Todavía no hay sesiones</h2>
           <p className="design-sessions__meta">Crea una sesión para empezar a diseñar con IA.</p>
-          <Button as={Link as any} to="/design-chat">
+          <Button as={Link as any} to="/design-chat?new=true">
             Iniciar diseño
           </Button>
         </section>

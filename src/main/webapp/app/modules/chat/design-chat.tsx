@@ -29,7 +29,16 @@ import {
   startChatSession,
 } from 'app/shared/api/design-chat-api';
 import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
+import axios from 'axios';
 import { Link, useSearchParams } from 'react-router';
+
+const extractApiError = (error: unknown, fallback: string): string => {
+  if (axios.isAxiosError(error)) {
+    const title: unknown = error.response?.data?.title;
+    if (typeof title === 'string' && title.trim()) return title.trim();
+  }
+  return error instanceof Error ? error.message : fallback;
+};
 
 const STORAGE_KEY = 'kalitron.designChat.sessionCode';
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -345,29 +354,26 @@ const normalizeObstacleType = (obstacleType: string): LayoutObstacleType => {
 
 const normalizeUnit = (unit: string) => unit.trim().toUpperCase();
 
-const toMm = (value: string, unit: string): number | null => {
-  if (!value.trim()) {
-    return null;
-  }
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue) || numericValue <= 0) {
-    return null;
-  }
+const applyUnitConversion = (numericValue: number, unit: string): number => {
   const normalizedUnit = normalizeUnit(unit);
-  if (normalizedUnit === 'CM') {
-    return Math.round(numericValue * 10);
-  }
-  if (normalizedUnit === 'IN') {
-    return Math.round(numericValue * 25.4);
-  }
+  if (normalizedUnit === 'CM') return Math.round(numericValue * 10);
+  if (normalizedUnit === 'IN') return Math.round(numericValue * 25.4);
   return Math.round(numericValue);
 };
 
+const toMm = (value: string, unit: string): number | null => {
+  if (!value.trim()) return null;
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) return null;
+  return applyUnitConversion(numericValue, unit);
+};
+
+// For position fields (x, y, z) where 0 is a valid coordinate (floor level, wall start, etc.)
 const toOptionalMm = (value: string, unit: string): number | null => {
-  if (!value.trim()) {
-    return null;
-  }
-  return toMm(value, unit);
+  if (!value.trim()) return null;
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue < 0) return null;
+  return applyUnitConversion(numericValue, unit);
 };
 
 const toOptionalInteger = (value: string): number | null => {
@@ -429,6 +435,10 @@ const DesignChat = () => {
 
   useEffect(() => {
     const querySessionCode = searchParams.get('sessionCode');
+    if (searchParams.get('new') === 'true') {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
     const storedSessionCode = querySessionCode || window.localStorage.getItem(STORAGE_KEY);
     if (!storedSessionCode) {
       return;
@@ -1018,7 +1028,7 @@ const DesignChat = () => {
         },
       ]);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'No se pudo guardar el layout medido.');
+      setError(extractApiError(saveError, 'No se pudo guardar el layout medido.'));
     } finally {
       setIsSavingMeasuredLayout(false);
     }
@@ -1053,7 +1063,7 @@ const DesignChat = () => {
         },
       ]);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'No se pudieron guardar los muebles detectados.');
+      setError(extractApiError(saveError, 'No se pudieron guardar los muebles detectados.'));
     } finally {
       setIsSavingCabinetPlan(false);
     }
