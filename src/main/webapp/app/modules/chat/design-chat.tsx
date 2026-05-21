@@ -12,7 +12,9 @@ import {
   ChatMessageView,
   ChatSession,
   generateVisualConcept,
+  getCabinetPlan,
   getCatalogStyles,
+  getMeasuredLayout,
   LayoutObstacleType,
   MeasuredKitchenLayout,
   resumeChatSession,
@@ -413,6 +415,8 @@ const DesignChat = () => {
   const [isSavingCabinetPlan, setIsSavingCabinetPlan] = useState(false);
   const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
+  const [savedLayoutInfo, setSavedLayoutInfo] = useState<{ wallCount: number; zoneCount: number } | null>(null);
+  const [savedCabinetPlanInfo, setSavedCabinetPlanInfo] = useState<{ cabinetCount: number } | null>(null);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
@@ -454,6 +458,19 @@ const DesignChat = () => {
           setSelectedStyle({ name: resumedSession.selectedStyle, isActive: true });
           setStyleSkipped(false);
         }
+        Promise.allSettled([getMeasuredLayout(resumedSession.sessionId), getCabinetPlan(resumedSession.sessionId)]).then(
+          ([layoutResult, planResult]) => {
+            if (layoutResult.status === 'fulfilled') {
+              setSavedLayoutInfo({
+                wallCount: layoutResult.value.walls?.length ?? 0,
+                zoneCount: layoutResult.value.zones?.length ?? 0,
+              });
+            }
+            if (planResult.status === 'fulfilled') {
+              setSavedCabinetPlanInfo({ cabinetCount: planResult.value.cabinetCount });
+            }
+          },
+        );
       })
       .catch(() => {
         window.localStorage.removeItem(STORAGE_KEY);
@@ -1019,6 +1036,7 @@ const DesignChat = () => {
     try {
       const measuredLayout = buildMeasuredLayoutFromReview();
       await saveMeasuredLayout(session.sessionId, measuredLayout);
+      setSavedLayoutInfo({ wallCount: measuredLayout.walls.length, zoneCount: measuredLayout.zones?.length ?? 0 });
       setMessages(currentMessages => [
         ...currentMessages,
         {
@@ -1048,8 +1066,10 @@ const DesignChat = () => {
     try {
       const measuredLayout = buildMeasuredLayoutFromReview();
       await saveMeasuredLayout(session.sessionId, measuredLayout);
+      setSavedLayoutInfo({ wallCount: measuredLayout.walls.length, zoneCount: measuredLayout.zones?.length ?? 0 });
       const cabinetPlan = buildCabinetPlanFromReview();
       const savedPlan = await saveCabinetPlan(session.sessionId, cabinetPlan);
+      setSavedCabinetPlanInfo({ cabinetCount: savedPlan.cabinetCount });
       const blockingMessages = savedPlan.validationMessages.filter(message => message.severity === 'ERROR');
       setMessages(currentMessages => [
         ...currentMessages,
@@ -1326,6 +1346,24 @@ const DesignChat = () => {
               <Button as={Link as any} to={`/design-layout/${session.sessionId}`} className="ms-2" variant="outline-primary" size="sm">
                 Layout medido
               </Button>
+              {savedLayoutInfo || savedCabinetPlanInfo ? (
+                <div className="design-chat__saved-info mt-3">
+                  {savedLayoutInfo ? (
+                    <p className="design-chat__meta mb-1">
+                      <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
+                      Layout guardado — {savedLayoutInfo.wallCount} {savedLayoutInfo.wallCount === 1 ? 'pared' : 'paredes'}
+                      {savedLayoutInfo.zoneCount > 0 ? `, ${savedLayoutInfo.zoneCount} zonas` : ''}
+                    </p>
+                  ) : null}
+                  {savedCabinetPlanInfo ? (
+                    <p className="design-chat__meta mb-0">
+                      <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
+                      {savedCabinetPlanInfo.cabinetCount}{' '}
+                      {savedCabinetPlanInfo.cabinetCount === 1 ? 'mueble guardado' : 'muebles guardados'}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               <section className="design-chat__sketch-panel" aria-label="Boceto para extracción">
                 <div>
                   <h2 className="h6 mb-1">Boceto</h2>
