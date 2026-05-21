@@ -128,6 +128,93 @@ export const generateVisualConcept = async (request: VisualConceptRequest): Prom
   return response.data;
 };
 
+export type SketchConfidence = 'HIGH' | 'MEDIUM' | 'LOW' | 'MISSING';
+
+export interface SketchField<T> {
+  value?: T | null;
+  confidence?: SketchConfidence | null;
+  sourceText?: string | null;
+}
+
+export interface SketchMeasurement {
+  value?: number | null;
+  unit?: string | null;
+  confidence?: SketchConfidence | null;
+  sourceText?: string | null;
+}
+
+export interface SketchWallCandidate {
+  wallCode?: SketchField<string> | null;
+  length?: SketchMeasurement | null;
+  height?: SketchMeasurement | null;
+  angleDeg?: SketchField<number> | null;
+}
+
+export interface SketchZoneCandidate {
+  zoneCode?: SketchField<string> | null;
+  zoneType?: SketchField<string> | null;
+  wallCode?: SketchField<string> | null;
+  x?: SketchMeasurement | null;
+  width?: SketchMeasurement | null;
+}
+
+export interface SketchObstacleCandidate {
+  obstacleType?: SketchField<string> | null;
+  label?: SketchField<string> | null;
+  wallCode?: SketchField<string> | null;
+  x?: SketchMeasurement | null;
+  width?: SketchMeasurement | null;
+}
+
+export interface SketchCabinetCandidate {
+  candidateCode?: string | null;
+  category?: SketchField<string> | null;
+  label?: SketchField<string> | null;
+  wallCode?: SketchField<string> | null;
+  x?: SketchMeasurement | null;
+  width?: SketchMeasurement | null;
+  height?: SketchMeasurement | null;
+  depth?: SketchMeasurement | null;
+  doors?: SketchField<number> | null;
+  drawers?: SketchField<number> | null;
+}
+
+export interface SketchMissingInfo {
+  code?: string | null;
+  message?: string | null;
+  severity?: string | null;
+}
+
+export interface SketchExtractionResponse {
+  schemaVersion: string;
+  requestId?: string | null;
+  sessionId: number;
+  sessionCode: string;
+  projectType?: SketchField<string> | null;
+  layout?: SketchField<string> | null;
+  unit?: SketchField<string> | null;
+  walls?: SketchWallCandidate[] | null;
+  zones?: SketchZoneCandidate[] | null;
+  obstacles?: SketchObstacleCandidate[] | null;
+  cabinetCandidates?: SketchCabinetCandidate[] | null;
+  missingInfo?: SketchMissingInfo[] | null;
+  questions?: string[] | null;
+  warnings?: string[] | null;
+  rawExtraction?: Record<string, unknown> | null;
+}
+
+export interface SketchAnalysisRequest extends SendChatImage {
+  sessionId: number;
+  projectTypeHint?: string | null;
+  unitHint?: string | null;
+  userPrompt?: string | null;
+}
+
+export const analyzeSketch = async (request: SketchAnalysisRequest): Promise<SketchExtractionResponse> => {
+  const response = await axios.post<SketchExtractionResponse>('/api/chat/sketch-analysis', request);
+  return response.data;
+};
+
 export type MeasuredKitchenLayout = 'LINEAR' | 'L_SHAPE' | 'U_SHAPE' | 'ISLAND';
 
 export interface MeasuredWallSegment {

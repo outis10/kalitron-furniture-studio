@@ -57,6 +57,7 @@ docs/specs/
   e7-sketch-to-layout-extraction/
     58-ai-gateway-sketch-analysis-endpoint.md
     59-sketch-extraction-contract.md
+    60-upload-sketch-image-for-extraction.md
 ```
 
 ## Rules
