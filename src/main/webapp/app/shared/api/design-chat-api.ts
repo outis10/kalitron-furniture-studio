@@ -215,7 +215,7 @@ export const analyzeSketch = async (request: SketchAnalysisRequest): Promise<Ske
   return response.data;
 };
 
-export type MeasuredKitchenLayout = 'LINEAR' | 'L_SHAPE' | 'U_SHAPE' | 'ISLAND';
+export type MeasuredKitchenLayout = 'LINEAR' | 'L_SHAPE' | 'U_SHAPE' | 'ISLAND' | 'PENINSULA' | 'GALLEY' | 'CUSTOM';
 
 export interface MeasuredWallSegment {
   wallCode: string;
