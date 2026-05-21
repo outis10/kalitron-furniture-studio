@@ -1,14 +1,19 @@
 package com.kalitron.studio.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kalitron.studio.domain.ChatMessage;
+import com.kalitron.studio.domain.DesignArtifact;
 import com.kalitron.studio.domain.DesignImage;
 import com.kalitron.studio.domain.DesignSession;
+import com.kalitron.studio.domain.enumeration.ArtifactType;
 import com.kalitron.studio.domain.enumeration.ImageType;
 import com.kalitron.studio.domain.enumeration.MessageRole;
 import com.kalitron.studio.domain.enumeration.ProjectType;
 import com.kalitron.studio.domain.enumeration.SessionStatus;
 import com.kalitron.studio.repository.CabinetRepository;
 import com.kalitron.studio.repository.ChatMessageRepository;
+import com.kalitron.studio.repository.DesignArtifactRepository;
 import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
 import com.kalitron.studio.service.DesignChatService;
@@ -28,14 +33,21 @@ import com.kalitron.studio.service.dto.SketchAnalysisRequestDTO;
 import com.kalitron.studio.service.dto.SketchExtractionResponseDTO;
 import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.Year;
 import java.util.Base64;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,22 +67,34 @@ public class DesignChatServiceImpl implements DesignChatService {
 
     private final DesignImageRepository designImageRepository;
 
+    private final DesignArtifactRepository designArtifactRepository;
+
     private final CabinetRepository cabinetRepository;
 
     private final FastApiGateway fastApiGateway;
+
+    private final ObjectMapper objectMapper;
+
+    private final Path outputDir;
 
     public DesignChatServiceImpl(
         DesignSessionRepository designSessionRepository,
         ChatMessageRepository chatMessageRepository,
         DesignImageRepository designImageRepository,
+        DesignArtifactRepository designArtifactRepository,
         CabinetRepository cabinetRepository,
-        FastApiGateway fastApiGateway
+        FastApiGateway fastApiGateway,
+        ObjectMapper objectMapper,
+        @Value("${app.output.dir:./outputs}") String outputDir
     ) {
         this.designSessionRepository = designSessionRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.designImageRepository = designImageRepository;
+        this.designArtifactRepository = designArtifactRepository;
         this.cabinetRepository = cabinetRepository;
         this.fastApiGateway = fastApiGateway;
+        this.objectMapper = objectMapper;
+        this.outputDir = Path.of(outputDir);
     }
 
     @Override
@@ -209,7 +233,7 @@ public class DesignChatServiceImpl implements DesignChatService {
             throw new IllegalArgumentException("Sketch image is required");
         }
 
-        saveSketchImage(session, request);
+        validateSketchImage(request);
         try {
             SketchExtractionResponseDTO response = fastApiGateway.analyzeSketch(
                 new GatewaySketchAnalysisRequest(
@@ -224,6 +248,8 @@ public class DesignChatServiceImpl implements DesignChatService {
                     session.getSessionCode()
                 )
             );
+            saveSketchImage(session, request);
+            saveSketchExtractionArtifact(session, response);
             session.setUpdatedAt(Instant.now());
             designSessionRepository.save(session);
             return response;
@@ -410,6 +436,28 @@ public class DesignChatServiceImpl implements DesignChatService {
     }
 
     private void saveSketchImage(DesignSession session, SketchAnalysisRequestDTO request) {
+        validateSketchImage(request);
+        String mimeType = normalizeImageMimeType(request.getImageMimeType());
+        long imageSizeBytes = resolveSketchImageSizeBytes(request);
+        String fileName = sanitizeImageFileName(request.getImageFileName());
+        byte[] imageBytes = decodeBase64(normalizeImageBase64(request.getImageBase64()));
+        String relativePath = "sketch-images/" + session.getSessionCode() + "/" + Instant.now().toEpochMilli() + "-" + fileName;
+        writeOutputFile(relativePath, imageBytes);
+        DesignImage image = new DesignImage()
+            .session(session)
+            .imageType(ImageType.SKETCH)
+            .fileName(fileName)
+            .filePath(relativePath)
+            .mimeType(mimeType)
+            .fileSizeKb(Math.max(1L, (long) Math.ceil(imageSizeBytes / 1024.0)))
+            .isActive(true)
+            .uploadedAt(Instant.now())
+            .description("Sketch uploaded for AI extraction");
+
+        designImageRepository.save(image);
+    }
+
+    private void validateSketchImage(SketchAnalysisRequestDTO request) {
         String mimeType = normalizeImageMimeType(request.getImageMimeType());
         if (!ALLOWED_REFERENCE_IMAGE_TYPES.contains(mimeType)) {
             throw new IllegalArgumentException("Sketch image must be JPG, PNG, or WebP");
@@ -419,21 +467,33 @@ public class DesignChatServiceImpl implements DesignChatService {
         if (imageSizeBytes > MAX_REFERENCE_IMAGE_BYTES) {
             throw new IllegalArgumentException("Sketch image must be 5MB or smaller");
         }
+    }
 
-        String fileName = sanitizeImageFileName(request.getImageFileName());
-        DesignImage image = new DesignImage()
-            .session(session)
-            .imageType(ImageType.SKETCH)
-            .fileName(fileName)
-            .filePath("sketch-images/" + session.getSessionCode() + "/" + Instant.now().toEpochMilli() + "-" + fileName)
-            .imageDataBase64(normalizeImageBase64(request.getImageBase64()))
-            .mimeType(mimeType)
-            .fileSizeKb(Math.max(1L, (long) Math.ceil(imageSizeBytes / 1024.0)))
-            .isActive(true)
-            .uploadedAt(Instant.now())
-            .description("Sketch uploaded for AI extraction");
+    private void saveSketchExtractionArtifact(DesignSession session, SketchExtractionResponseDTO response) {
+        try {
+            String extractionJson = objectMapper.writeValueAsString(response);
+            byte[] artifactBytes = extractionJson.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            String requestId =
+                response.getRequestId() == null || response.getRequestId().isBlank() ? "sketch-extraction" : response.getRequestId();
+            String fileName = sanitizeImageFileName(requestId) + ".json";
+            String relativePath = "sketch-extractions/" + session.getSessionCode() + "/" + Instant.now().toEpochMilli() + "-" + fileName;
+            writeOutputFile(relativePath, artifactBytes);
 
-        designImageRepository.save(image);
+            DesignArtifact artifact = new DesignArtifact()
+                .session(session)
+                .artifactType(ArtifactType.SKETCH_EXTRACTION_JSON)
+                .fileName(fileName)
+                .filePath(relativePath)
+                .mimeType("application/json")
+                .fileSizeKb(Math.max(1L, (long) Math.ceil(artifactBytes.length / 1024.0)))
+                .checksum(sha256Hex(artifactBytes))
+                .metadataJson(extractionJson)
+                .createdAt(Instant.now());
+
+            designArtifactRepository.save(artifact);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Sketch extraction could not be serialized", e);
+        }
     }
 
     private String normalizeImageMimeType(String mimeType) {
@@ -467,6 +527,32 @@ public class DesignChatServiceImpl implements DesignChatService {
             base64 = base64.substring(commaIndex + 1);
         }
         return Base64.getDecoder().decode(base64).length;
+    }
+
+    private byte[] decodeBase64(String imageBase64) {
+        if (imageBase64 == null || imageBase64.isBlank()) {
+            return new byte[0];
+        }
+        return Base64.getDecoder().decode(imageBase64);
+    }
+
+    private void writeOutputFile(String relativePath, byte[] bytes) {
+        try {
+            Path target = outputDir.resolve(relativePath).normalize();
+            Files.createDirectories(target.getParent());
+            Files.write(target, bytes);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not write design artifact file", e);
+        }
+    }
+
+    private String sha256Hex(byte[] bytes) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(digest.digest(bytes));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 digest is not available", e);
+        }
     }
 
     private String sanitizeImageFileName(String fileName) {

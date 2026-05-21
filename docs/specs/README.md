@@ -61,6 +61,7 @@ docs/specs/
     61-convert-confirmed-sketch-cabinets-to-editable-cabinet-plan.md
     62-convert-confirmed-sketch-extraction-to-measured-layout.md
     63-review-extracted-layout-before-saving.md
+    87-persist-sketch-image-and-extraction-artifacts.md
 ```
 
 ## Rules
