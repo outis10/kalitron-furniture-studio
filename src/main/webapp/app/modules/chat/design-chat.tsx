@@ -13,6 +13,13 @@ import {
   getCatalogStyles,
   resumeChatSession,
   sendChatMessage,
+  SketchCabinetCandidate,
+  SketchExtractionResponse,
+  SketchField,
+  SketchMeasurement,
+  SketchObstacleCandidate,
+  SketchWallCandidate,
+  SketchZoneCandidate,
   startChatSession,
 } from 'app/shared/api/design-chat-api';
 import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
@@ -31,6 +38,81 @@ interface SelectedReferenceImage {
 }
 
 type SelectedSketchImage = SelectedReferenceImage;
+
+interface SketchReviewWall {
+  wallCode: string;
+  wallConfidence: string;
+  length: string;
+  lengthConfidence: string;
+  height: string;
+  heightConfidence: string;
+  angleDeg: string;
+  angleConfidence: string;
+}
+
+interface SketchReviewZone {
+  zoneCode: string;
+  zoneConfidence: string;
+  zoneType: string;
+  typeConfidence: string;
+  wallCode: string;
+  wallConfidence: string;
+  x: string;
+  xConfidence: string;
+  width: string;
+  widthConfidence: string;
+}
+
+interface SketchReviewObstacle {
+  obstacleType: string;
+  typeConfidence: string;
+  label: string;
+  labelConfidence: string;
+  wallCode: string;
+  wallConfidence: string;
+  x: string;
+  xConfidence: string;
+  width: string;
+  widthConfidence: string;
+}
+
+interface SketchReviewCabinet {
+  candidateCode: string;
+  category: string;
+  categoryConfidence: string;
+  label: string;
+  labelConfidence: string;
+  wallCode: string;
+  wallConfidence: string;
+  x: string;
+  xConfidence: string;
+  width: string;
+  widthConfidence: string;
+  height: string;
+  heightConfidence: string;
+  depth: string;
+  depthConfidence: string;
+  doors: string;
+  doorsConfidence: string;
+  drawers: string;
+  drawersConfidence: string;
+}
+
+interface SketchReviewState {
+  projectType: string;
+  projectTypeConfidence: string;
+  layout: string;
+  layoutConfidence: string;
+  unit: string;
+  unitConfidence: string;
+  walls: SketchReviewWall[];
+  zones: SketchReviewZone[];
+  obstacles: SketchReviewObstacle[];
+  cabinets: SketchReviewCabinet[];
+  missingInfo: string[];
+  questions: string[];
+  warnings: string[];
+}
 
 const formatPriceRange = (priceRange?: string | null) => {
   if (!priceRange) {
@@ -71,6 +153,83 @@ const formatSketchValue = (value?: string | null) => value?.replaceAll('_', ' ')
 
 const sketchCountLabel = (count: number, singular: string, plural: string) => `${count} ${count === 1 ? singular : plural}`;
 
+const fieldValue = <T,>(field?: SketchField<T> | null, fallback = '') => `${field?.value ?? fallback}`;
+
+const fieldConfidence = <T,>(field?: SketchField<T> | null) => field?.confidence ?? 'MISSING';
+
+const measurementValue = (measurement?: SketchMeasurement | null) => `${measurement?.value ?? ''}`;
+
+const measurementConfidence = (measurement?: SketchMeasurement | null) => measurement?.confidence ?? 'MISSING';
+
+const toSketchReview = (extraction: SketchExtractionResponse): SketchReviewState => ({
+  projectType: fieldValue(extraction.projectType),
+  projectTypeConfidence: fieldConfidence(extraction.projectType),
+  layout: fieldValue(extraction.layout),
+  layoutConfidence: fieldConfidence(extraction.layout),
+  unit: fieldValue(extraction.unit),
+  unitConfidence: fieldConfidence(extraction.unit),
+  walls: (extraction.walls ?? []).map((wall: SketchWallCandidate, index) => ({
+    wallCode: fieldValue(wall.wallCode, `A-${index + 1}`),
+    wallConfidence: fieldConfidence(wall.wallCode),
+    length: measurementValue(wall.length),
+    lengthConfidence: measurementConfidence(wall.length),
+    height: measurementValue(wall.height),
+    heightConfidence: measurementConfidence(wall.height),
+    angleDeg: fieldValue(wall.angleDeg, '0'),
+    angleConfidence: fieldConfidence(wall.angleDeg),
+  })),
+  zones: (extraction.zones ?? []).map((zone: SketchZoneCandidate, index) => ({
+    zoneCode: fieldValue(zone.zoneCode, `ZONE-${index + 1}`),
+    zoneConfidence: fieldConfidence(zone.zoneCode),
+    zoneType: fieldValue(zone.zoneType),
+    typeConfidence: fieldConfidence(zone.zoneType),
+    wallCode: fieldValue(zone.wallCode),
+    wallConfidence: fieldConfidence(zone.wallCode),
+    x: measurementValue(zone.x),
+    xConfidence: measurementConfidence(zone.x),
+    width: measurementValue(zone.width),
+    widthConfidence: measurementConfidence(zone.width),
+  })),
+  obstacles: (extraction.obstacles ?? []).map((obstacle: SketchObstacleCandidate) => ({
+    obstacleType: fieldValue(obstacle.obstacleType),
+    typeConfidence: fieldConfidence(obstacle.obstacleType),
+    label: fieldValue(obstacle.label),
+    labelConfidence: fieldConfidence(obstacle.label),
+    wallCode: fieldValue(obstacle.wallCode),
+    wallConfidence: fieldConfidence(obstacle.wallCode),
+    x: measurementValue(obstacle.x),
+    xConfidence: measurementConfidence(obstacle.x),
+    width: measurementValue(obstacle.width),
+    widthConfidence: measurementConfidence(obstacle.width),
+  })),
+  cabinets: (extraction.cabinetCandidates ?? []).map((cabinet: SketchCabinetCandidate, index) => ({
+    candidateCode: cabinet.candidateCode ?? `CAB-${index + 1}`,
+    category: fieldValue(cabinet.category),
+    categoryConfidence: fieldConfidence(cabinet.category),
+    label: fieldValue(cabinet.label),
+    labelConfidence: fieldConfidence(cabinet.label),
+    wallCode: fieldValue(cabinet.wallCode),
+    wallConfidence: fieldConfidence(cabinet.wallCode),
+    x: measurementValue(cabinet.x),
+    xConfidence: measurementConfidence(cabinet.x),
+    width: measurementValue(cabinet.width),
+    widthConfidence: measurementConfidence(cabinet.width),
+    height: measurementValue(cabinet.height),
+    heightConfidence: measurementConfidence(cabinet.height),
+    depth: measurementValue(cabinet.depth),
+    depthConfidence: measurementConfidence(cabinet.depth),
+    doors: fieldValue(cabinet.doors),
+    doorsConfidence: fieldConfidence(cabinet.doors),
+    drawers: fieldValue(cabinet.drawers),
+    drawersConfidence: fieldConfidence(cabinet.drawers),
+  })),
+  missingInfo: (extraction.missingInfo ?? []).map(item => item.message).filter((message): message is string => !!message),
+  questions: extraction.questions ?? [],
+  warnings: extraction.warnings ?? [],
+});
+
+const confidenceClass = (confidence?: string | null) => `design-chat__confidence--${(confidence ?? 'MISSING').toLowerCase()}`;
+
 const DesignChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sketchInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +242,8 @@ const DesignChat = () => {
   const [selectedStyle, setSelectedStyle] = useState<ICatalogStyle | null>(null);
   const [selectedReferenceImage, setSelectedReferenceImage] = useState<SelectedReferenceImage | null>(null);
   const [selectedSketchImage, setSelectedSketchImage] = useState<SelectedSketchImage | null>(null);
+  const [sketchReview, setSketchReview] = useState<SketchReviewState | null>(null);
+  const [isSketchReviewConfirmed, setIsSketchReviewConfirmed] = useState(false);
   const [referenceImageBase64, setReferenceImageBase64] = useState<string | null>(null);
   const [visualStyle, setVisualStyle] = useState('');
   const [visualLayout, setVisualLayout] = useState('');
@@ -259,6 +420,8 @@ const DesignChat = () => {
     setSelectedStyle(null);
     setSelectedReferenceImage(null);
     setSelectedSketchImage(null);
+    setSketchReview(null);
+    setIsSketchReviewConfirmed(false);
     setReferenceImageBase64(null);
     setHasGeneratedConcept(false);
     setStyleSkipped(false);
@@ -432,6 +595,8 @@ const DesignChat = () => {
           createdAt: new Date().toISOString(),
         },
       ]);
+      setSketchReview(toSketchReview(extraction));
+      setIsSketchReviewConfirmed(false);
       setSelectedSketchImage(null);
     } catch {
       setDraft(sketchPrompt);
@@ -439,6 +604,56 @@ const DesignChat = () => {
     } finally {
       setIsAnalyzingSketch(false);
     }
+  };
+
+  const updateSketchReview = <K extends keyof SketchReviewState>(field: K, value: SketchReviewState[K]) => {
+    setSketchReview(currentReview => (currentReview ? { ...currentReview, [field]: value } : currentReview));
+    setIsSketchReviewConfirmed(false);
+  };
+
+  const updateSketchReviewItem = <K extends 'walls' | 'zones' | 'obstacles' | 'cabinets'>(
+    collection: K,
+    index: number,
+    field: keyof SketchReviewState[K][number],
+    value: string,
+  ) => {
+    setSketchReview(currentReview => {
+      if (!currentReview) {
+        return currentReview;
+      }
+      const updatedCollection = [...currentReview[collection]];
+      updatedCollection[index] = { ...updatedCollection[index], [field]: value };
+      return { ...currentReview, [collection]: updatedCollection };
+    });
+    setIsSketchReviewConfirmed(false);
+  };
+
+  const handleConfirmSketchReview = () => {
+    if (!sketchReview) {
+      return;
+    }
+    setIsSketchReviewConfirmed(true);
+    setMessages(currentMessages => [
+      ...currentMessages,
+      {
+        role: 'ASSISTANT',
+        content: 'Extracción revisada y confirmada como borrador. Aún no se ha guardado como layout medido ni como plan de muebles.',
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+  };
+
+  const handleRejectSketchReview = () => {
+    setSketchReview(null);
+    setIsSketchReviewConfirmed(false);
+    setMessages(currentMessages => [
+      ...currentMessages,
+      {
+        role: 'ASSISTANT',
+        content: 'Extracción descartada. Puedes capturar el layout manualmente desde Layout medido.',
+        createdAt: new Date().toISOString(),
+      },
+    ]);
   };
 
   const handleDragReferenceImage = (event: React.DragEvent<HTMLElement>) => {
@@ -486,6 +701,175 @@ const DesignChat = () => {
   };
 
   const getStyleKey = (style: ICatalogStyle) => style.id ?? style.name ?? 'style';
+
+  const renderConfidenceBadge = (confidence: string) => (
+    <span className={`design-chat__confidence ${confidenceClass(confidence)}`}>{confidence.toLowerCase()}</span>
+  );
+
+  const renderReviewInput = (
+    label: string,
+    value: string,
+    confidence: string,
+    onChange: (value: string) => void,
+    inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'],
+  ) => (
+    <Form.Group className={`design-chat__review-field ${confidenceClass(confidence)}`}>
+      <div className="design-chat__review-label">
+        <Form.Label>{label}</Form.Label>
+        {renderConfidenceBadge(confidence)}
+      </div>
+      <Form.Control size="sm" value={value} onChange={event => onChange(event.target.value)} inputMode={inputMode} />
+    </Form.Group>
+  );
+
+  const renderSketchReview = () => {
+    if (!sketchReview) {
+      return null;
+    }
+
+    return (
+      <section className="design-chat__review" aria-label="Revisión de extracción de boceto">
+        <div className="design-chat__review-header">
+          <div>
+            <h3 className="h6 mb-1">Revisión del boceto</h3>
+            <p className="design-chat__meta mb-0">Corrige los datos antes de usarlos como layout o muebles. Nada se guarda todavía.</p>
+          </div>
+          <span className={`design-chat__review-status ${isSketchReviewConfirmed ? 'design-chat__review-status--confirmed' : ''}`}>
+            {isSketchReviewConfirmed ? 'Confirmado como borrador' : 'Pendiente de confirmar'}
+          </span>
+        </div>
+
+        <div className="design-chat__review-grid">
+          {renderReviewInput('Proyecto', sketchReview.projectType, sketchReview.projectTypeConfidence, value =>
+            updateSketchReview('projectType', value),
+          )}
+          {renderReviewInput('Layout', sketchReview.layout, sketchReview.layoutConfidence, value => updateSketchReview('layout', value))}
+          {renderReviewInput('Unidad', sketchReview.unit, sketchReview.unitConfidence, value => updateSketchReview('unit', value))}
+        </div>
+
+        <section className="design-chat__review-section">
+          <h4>Paredes</h4>
+          {sketchReview.walls.length === 0 ? <p className="design-chat__meta mb-0">No se detectaron paredes.</p> : null}
+          {sketchReview.walls.map((wall, index) => (
+            <div className="design-chat__review-card" key={`wall-${index}`}>
+              {renderReviewInput('Código', wall.wallCode, wall.wallConfidence, value =>
+                updateSketchReviewItem('walls', index, 'wallCode', value),
+              )}
+              {renderReviewInput('Largo mm', wall.length, wall.lengthConfidence, value =>
+                updateSketchReviewItem('walls', index, 'length', value),
+              )}
+              {renderReviewInput('Alto mm', wall.height, wall.heightConfidence, value =>
+                updateSketchReviewItem('walls', index, 'height', value),
+              )}
+              {renderReviewInput('Ángulo', wall.angleDeg, wall.angleConfidence, value =>
+                updateSketchReviewItem('walls', index, 'angleDeg', value),
+              )}
+            </div>
+          ))}
+        </section>
+
+        <section className="design-chat__review-section">
+          <h4>Zonas</h4>
+          {sketchReview.zones.length === 0 ? <p className="design-chat__meta mb-0">No se detectaron zonas.</p> : null}
+          {sketchReview.zones.map((zone, index) => (
+            <div className="design-chat__review-card" key={`zone-${index}`}>
+              {renderReviewInput('Código', zone.zoneCode, zone.zoneConfidence, value =>
+                updateSketchReviewItem('zones', index, 'zoneCode', value),
+              )}
+              {renderReviewInput('Tipo', zone.zoneType, zone.typeConfidence, value =>
+                updateSketchReviewItem('zones', index, 'zoneType', value),
+              )}
+              {renderReviewInput('Pared', zone.wallCode, zone.wallConfidence, value =>
+                updateSketchReviewItem('zones', index, 'wallCode', value),
+              )}
+              {renderReviewInput('X mm', zone.x, zone.xConfidence, value => updateSketchReviewItem('zones', index, 'x', value))}
+              {renderReviewInput('Ancho mm', zone.width, zone.widthConfidence, value =>
+                updateSketchReviewItem('zones', index, 'width', value),
+              )}
+            </div>
+          ))}
+        </section>
+
+        <section className="design-chat__review-section">
+          <h4>Obstáculos</h4>
+          {sketchReview.obstacles.length === 0 ? <p className="design-chat__meta mb-0">No se detectaron obstáculos.</p> : null}
+          {sketchReview.obstacles.map((obstacle, index) => (
+            <div className="design-chat__review-card" key={`obstacle-${index}`}>
+              {renderReviewInput('Tipo', obstacle.obstacleType, obstacle.typeConfidence, value =>
+                updateSketchReviewItem('obstacles', index, 'obstacleType', value),
+              )}
+              {renderReviewInput('Etiqueta', obstacle.label, obstacle.labelConfidence, value =>
+                updateSketchReviewItem('obstacles', index, 'label', value),
+              )}
+              {renderReviewInput('Pared', obstacle.wallCode, obstacle.wallConfidence, value =>
+                updateSketchReviewItem('obstacles', index, 'wallCode', value),
+              )}
+              {renderReviewInput('X mm', obstacle.x, obstacle.xConfidence, value => updateSketchReviewItem('obstacles', index, 'x', value))}
+              {renderReviewInput('Ancho mm', obstacle.width, obstacle.widthConfidence, value =>
+                updateSketchReviewItem('obstacles', index, 'width', value),
+              )}
+            </div>
+          ))}
+        </section>
+
+        <section className="design-chat__review-section">
+          <h4>Muebles candidatos</h4>
+          {sketchReview.cabinets.length === 0 ? <p className="design-chat__meta mb-0">No se detectaron muebles.</p> : null}
+          {sketchReview.cabinets.map((cabinet, index) => (
+            <div className="design-chat__review-card" key={cabinet.candidateCode || `cabinet-${index}`}>
+              {renderReviewInput('Código', cabinet.candidateCode, 'HIGH', value =>
+                updateSketchReviewItem('cabinets', index, 'candidateCode', value),
+              )}
+              {renderReviewInput('Tipo', cabinet.category, cabinet.categoryConfidence, value =>
+                updateSketchReviewItem('cabinets', index, 'category', value),
+              )}
+              {renderReviewInput('Etiqueta', cabinet.label, cabinet.labelConfidence, value =>
+                updateSketchReviewItem('cabinets', index, 'label', value),
+              )}
+              {renderReviewInput('Pared', cabinet.wallCode, cabinet.wallConfidence, value =>
+                updateSketchReviewItem('cabinets', index, 'wallCode', value),
+              )}
+              {renderReviewInput('X mm', cabinet.x, cabinet.xConfidence, value => updateSketchReviewItem('cabinets', index, 'x', value))}
+              {renderReviewInput('Ancho mm', cabinet.width, cabinet.widthConfidence, value =>
+                updateSketchReviewItem('cabinets', index, 'width', value),
+              )}
+              {renderReviewInput('Alto mm', cabinet.height, cabinet.heightConfidence, value =>
+                updateSketchReviewItem('cabinets', index, 'height', value),
+              )}
+              {renderReviewInput('Fondo mm', cabinet.depth, cabinet.depthConfidence, value =>
+                updateSketchReviewItem('cabinets', index, 'depth', value),
+              )}
+            </div>
+          ))}
+        </section>
+
+        {sketchReview.missingInfo.length > 0 || sketchReview.questions.length > 0 || sketchReview.warnings.length > 0 ? (
+          <section className="design-chat__review-section">
+            <h4>Notas de revisión</h4>
+            {[...sketchReview.missingInfo, ...sketchReview.questions, ...sketchReview.warnings].slice(0, 8).map((item, index) => (
+              <Alert className="mb-2" key={`${item}-${index}`} variant="warning">
+                {item}
+              </Alert>
+            ))}
+          </section>
+        ) : null}
+
+        <div className="design-chat__review-actions">
+          <Button onClick={handleConfirmSketchReview} type="button" disabled={isSketchReviewConfirmed}>
+            Confirmar extracción
+          </Button>
+          <Button onClick={handleRejectSketchReview} type="button" variant="outline-secondary">
+            Descartar extracción
+          </Button>
+          {session ? (
+            <Button as={Link as any} to={`/design-layout/${session.sessionId}`} type="button" variant="outline-primary">
+              Captura manual
+            </Button>
+          ) : null}
+        </div>
+      </section>
+    );
+  };
 
   return (
     <main className="design-chat">
@@ -711,6 +1095,8 @@ const DesignChat = () => {
               {error}
             </Alert>
           )}
+
+          {renderSketchReview()}
 
           <Form className="design-chat__composer" onSubmit={handleSend}>
             {canGenerateConcept ? (

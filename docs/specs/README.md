@@ -58,6 +58,7 @@ docs/specs/
     58-ai-gateway-sketch-analysis-endpoint.md
     59-sketch-extraction-contract.md
     60-upload-sketch-image-for-extraction.md
+    63-review-extracted-layout-before-saving.md
 ```
 
 ## Rules
