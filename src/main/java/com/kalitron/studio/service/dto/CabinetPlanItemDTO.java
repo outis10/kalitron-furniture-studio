@@ -1,5 +1,6 @@
 package com.kalitron.studio.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kalitron.studio.domain.enumeration.CabinetCategory;
 import com.kalitron.studio.domain.enumeration.FinishType;
 import jakarta.validation.constraints.*;
@@ -51,12 +52,15 @@ public class CabinetPlanItemDTO implements Serializable {
     private String wallCode;
 
     @NotNull
+    @JsonProperty("xMm")
     private Integer xMm;
 
     @NotNull
+    @JsonProperty("yMm")
     private Integer yMm;
 
     @NotNull
+    @JsonProperty("zMm")
     private Integer zMm;
 
     private Integer rotationDeg;

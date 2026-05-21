@@ -182,6 +182,47 @@ export interface MeasuredLayout {
   notes?: string | null;
 }
 
+export interface CabinetPlanItem {
+  cabinetCode?: string | null;
+  templateCode?: string | null;
+  category: string;
+  label: string;
+  widthMm: number;
+  heightMm: number;
+  depthMm: number;
+  doors?: number | null;
+  drawers?: number | null;
+  shelves?: number | null;
+  finish?: string | null;
+  wallCode: string;
+  xMm: number;
+  yMm: number;
+  zMm: number;
+  rotationDeg?: number | null;
+  positionSeq?: number | null;
+  materialCode?: string | null;
+  notes?: string | null;
+}
+
+export interface CabinetPlanValidationMessage {
+  severity: 'INFO' | 'WARNING' | 'ERROR';
+  code: string;
+  message: string;
+  wallCode?: string | null;
+  cabinetCode?: string | null;
+}
+
+export interface CabinetPlan {
+  sessionId: number;
+  sessionCode: string;
+  layout: MeasuredKitchenLayout;
+  valid: boolean;
+  cabinetCount: number;
+  totalOccupiedLengthMm?: number | null;
+  cabinets: CabinetPlanItem[];
+  validationMessages: CabinetPlanValidationMessage[];
+}
+
 export const getMeasuredLayout = async (sessionId: number): Promise<MeasuredLayout> => {
   const response = await axios.get<MeasuredLayout>(`/api/design-sessions/${sessionId}/measured-layout`);
   return response.data;
@@ -189,5 +230,15 @@ export const getMeasuredLayout = async (sessionId: number): Promise<MeasuredLayo
 
 export const saveMeasuredLayout = async (sessionId: number, layout: MeasuredLayout): Promise<MeasuredLayout> => {
   const response = await axios.put<MeasuredLayout>(`/api/design-sessions/${sessionId}/measured-layout`, layout);
+  return response.data;
+};
+
+export const getCabinetPlan = async (sessionId: number): Promise<CabinetPlan> => {
+  const response = await axios.get<CabinetPlan>(`/api/design-sessions/${sessionId}/cabinet-plan`);
+  return response.data;
+};
+
+export const generateCabinetPlan = async (sessionId: number): Promise<CabinetPlan> => {
+  const response = await axios.post<CabinetPlan>(`/api/design-sessions/${sessionId}/cabinet-plan`);
   return response.data;
 };

@@ -1,6 +1,8 @@
 package com.kalitron.studio.repository;
 
 import com.kalitron.studio.domain.CabinetTemplate;
+import com.kalitron.studio.domain.enumeration.CabinetCategory;
+import java.util.List;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -9,4 +11,6 @@ import org.springframework.stereotype.Repository;
  */
 @SuppressWarnings("unused")
 @Repository
-public interface CabinetTemplateRepository extends JpaRepository<CabinetTemplate, Long>, JpaSpecificationExecutor<CabinetTemplate> {}
+public interface CabinetTemplateRepository extends JpaRepository<CabinetTemplate, Long>, JpaSpecificationExecutor<CabinetTemplate> {
+    List<CabinetTemplate> findByCategoryAndIsActiveTrueOrderBySortOrderAsc(CabinetCategory category);
+}
