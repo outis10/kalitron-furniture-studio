@@ -386,6 +386,69 @@ const toOptionalInteger = (value: string): number | null => {
   return Number.isFinite(numericValue) ? Math.round(numericValue) : null;
 };
 
+const cabinetReviewNotes = (cabinet: SketchReviewCabinet): string => {
+  const fieldsToReview = [
+    ['tipo', cabinet.categoryConfidence],
+    ['etiqueta', cabinet.labelConfidence],
+    ['pared', cabinet.wallConfidence],
+    ['x', cabinet.xConfidence],
+    ['y', cabinet.yConfidence],
+    ['z', cabinet.zConfidence],
+    ['ancho', cabinet.widthConfidence],
+    ['alto', cabinet.heightConfidence],
+    ['fondo', cabinet.depthConfidence],
+    ['rotación', cabinet.rotationConfidence],
+    ['puertas', cabinet.doorsConfidence],
+    ['cajones', cabinet.drawersConfidence],
+  ]
+    .filter(([, confidence]) => ['LOW', 'MISSING'].includes(confidence))
+    .map(([field]) => field);
+
+  if (fieldsToReview.length === 0) {
+    return 'Origen: extracción de boceto confirmada.';
+  }
+  return `Origen: extracción de boceto confirmada. Revisar: ${fieldsToReview.join(', ')}.`;
+};
+
+const renderPersistedArtifactsInfo = (
+  savedLayoutInfo: { wallCount: number; zoneCount: number } | null,
+  savedCabinetPlanInfo: { cabinetCount: number } | null,
+) => {
+  if (!savedLayoutInfo && !savedCabinetPlanInfo) return null;
+  return (
+    <div className="design-chat__saved-info mt-3">
+      {savedLayoutInfo ? (
+        <p className="design-chat__meta mb-1">
+          <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
+          Layout guardado — {savedLayoutInfo.wallCount} {savedLayoutInfo.wallCount === 1 ? 'pared' : 'paredes'}
+          {savedLayoutInfo.zoneCount > 0 ? `, ${savedLayoutInfo.zoneCount} zonas` : ''}
+        </p>
+      ) : null}
+      {savedCabinetPlanInfo ? (
+        <p className="design-chat__meta mb-0">
+          <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
+          {savedCabinetPlanInfo.cabinetCount === 1 ? '1 mueble guardado' : `${savedCabinetPlanInfo.cabinetCount} muebles guardados`}
+        </p>
+      ) : null}
+    </div>
+  );
+};
+
+const loadPersistedArtifacts = (
+  sessionId: number,
+  setSavedLayoutInfo: React.Dispatch<React.SetStateAction<{ wallCount: number; zoneCount: number } | null>>,
+  setSavedCabinetPlanInfo: React.Dispatch<React.SetStateAction<{ cabinetCount: number } | null>>,
+) => {
+  Promise.allSettled([getMeasuredLayout(sessionId), getCabinetPlan(sessionId)]).then(([layoutResult, planResult]) => {
+    if (layoutResult.status === 'fulfilled') {
+      setSavedLayoutInfo({ wallCount: layoutResult.value.walls?.length ?? 0, zoneCount: layoutResult.value.zones?.length ?? 0 });
+    }
+    if (planResult.status === 'fulfilled') {
+      setSavedCabinetPlanInfo({ cabinetCount: planResult.value.cabinetCount });
+    }
+  });
+};
+
 const DesignChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sketchInputRef = useRef<HTMLInputElement>(null);
@@ -458,19 +521,7 @@ const DesignChat = () => {
           setSelectedStyle({ name: resumedSession.selectedStyle, isActive: true });
           setStyleSkipped(false);
         }
-        Promise.allSettled([getMeasuredLayout(resumedSession.sessionId), getCabinetPlan(resumedSession.sessionId)]).then(
-          ([layoutResult, planResult]) => {
-            if (layoutResult.status === 'fulfilled') {
-              setSavedLayoutInfo({
-                wallCount: layoutResult.value.walls?.length ?? 0,
-                zoneCount: layoutResult.value.zones?.length ?? 0,
-              });
-            }
-            if (planResult.status === 'fulfilled') {
-              setSavedCabinetPlanInfo({ cabinetCount: planResult.value.cabinetCount });
-            }
-          },
-        );
+        loadPersistedArtifacts(resumedSession.sessionId, setSavedLayoutInfo, setSavedCabinetPlanInfo);
       })
       .catch(() => {
         window.localStorage.removeItem(STORAGE_KEY);
@@ -933,30 +984,6 @@ const DesignChat = () => {
     };
   };
 
-  const cabinetReviewNotes = (cabinet: SketchReviewCabinet) => {
-    const fieldsToReview = [
-      ['tipo', cabinet.categoryConfidence],
-      ['etiqueta', cabinet.labelConfidence],
-      ['pared', cabinet.wallConfidence],
-      ['x', cabinet.xConfidence],
-      ['y', cabinet.yConfidence],
-      ['z', cabinet.zConfidence],
-      ['ancho', cabinet.widthConfidence],
-      ['alto', cabinet.heightConfidence],
-      ['fondo', cabinet.depthConfidence],
-      ['rotación', cabinet.rotationConfidence],
-      ['puertas', cabinet.doorsConfidence],
-      ['cajones', cabinet.drawersConfidence],
-    ]
-      .filter(([, confidence]) => ['LOW', 'MISSING'].includes(confidence))
-      .map(([field]) => field);
-
-    if (fieldsToReview.length === 0) {
-      return 'Origen: extracción de boceto confirmada.';
-    }
-    return `Origen: extracción de boceto confirmada. Revisar: ${fieldsToReview.join(', ')}.`;
-  };
-
   const buildCabinetPlanFromReview = (): CabinetPlan => {
     if (!session || !sketchReview) {
       throw new Error('No hay muebles candidatos confirmados para guardar.');
@@ -1346,24 +1373,7 @@ const DesignChat = () => {
               <Button as={Link as any} to={`/design-layout/${session.sessionId}`} className="ms-2" variant="outline-primary" size="sm">
                 Layout medido
               </Button>
-              {savedLayoutInfo || savedCabinetPlanInfo ? (
-                <div className="design-chat__saved-info mt-3">
-                  {savedLayoutInfo ? (
-                    <p className="design-chat__meta mb-1">
-                      <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
-                      Layout guardado — {savedLayoutInfo.wallCount} {savedLayoutInfo.wallCount === 1 ? 'pared' : 'paredes'}
-                      {savedLayoutInfo.zoneCount > 0 ? `, ${savedLayoutInfo.zoneCount} zonas` : ''}
-                    </p>
-                  ) : null}
-                  {savedCabinetPlanInfo ? (
-                    <p className="design-chat__meta mb-0">
-                      <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
-                      {savedCabinetPlanInfo.cabinetCount}{' '}
-                      {savedCabinetPlanInfo.cabinetCount === 1 ? 'mueble guardado' : 'muebles guardados'}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
+              {renderPersistedArtifactsInfo(savedLayoutInfo, savedCabinetPlanInfo)}
               <section className="design-chat__sketch-panel" aria-label="Boceto para extracción">
                 <div>
                   <h2 className="h6 mb-1">Boceto</h2>
