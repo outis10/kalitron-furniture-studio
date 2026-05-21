@@ -5,12 +5,15 @@ import { Alert, Button, Form, Spinner } from 'react-bootstrap';
 import { Link, useParams } from 'react-router';
 
 import {
+  CabinetPlan,
   LayoutObstacle,
   LayoutObstacleType,
   LayoutZone,
   MeasuredKitchenLayout,
   MeasuredLayout,
   MeasuredWallSegment,
+  generateCabinetPlan,
+  getCabinetPlan,
   getMeasuredLayout,
   saveMeasuredLayout,
 } from 'app/shared/api/design-chat-api';
@@ -120,6 +123,8 @@ const MeasuredLayoutPage = () => {
   const [layout, setLayout] = useState<MeasuredLayout | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [cabinetPlan, setCabinetPlan] = useState<CabinetPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
@@ -130,8 +135,17 @@ const MeasuredLayoutPage = () => {
       return;
     }
 
-    getMeasuredLayout(sessionId)
-      .then(savedLayout => setLayout(savedLayout))
+    Promise.allSettled([getMeasuredLayout(sessionId), getCabinetPlan(sessionId)])
+      .then(([layoutResult, planResult]) => {
+        if (layoutResult.status === 'fulfilled') {
+          setLayout(layoutResult.value);
+        } else {
+          setLayout(buildDefaultLayout(sessionId));
+        }
+        if (planResult.status === 'fulfilled') {
+          setCabinetPlan(planResult.value);
+        }
+      })
       .catch(() => setLayout(buildDefaultLayout(sessionId)))
       .finally(() => setIsLoading(false));
   }, [sessionId]);
@@ -270,6 +284,26 @@ const MeasuredLayoutPage = () => {
       setError('No se pudo guardar el layout medido. Revisa las medidas e intenta de nuevo.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleGenerateCabinetPlan = async () => {
+    if (!layout) {
+      return;
+    }
+
+    setError(null);
+    setSavedMessage(null);
+    setIsGeneratingPlan(true);
+    try {
+      await saveMeasuredLayout(sessionId, layout);
+      const generatedPlan = await generateCabinetPlan(sessionId);
+      setCabinetPlan(generatedPlan);
+      setSavedMessage('Lista de muebles generada.');
+    } catch {
+      setError('No se pudo generar la lista de muebles. Revisa layout, zonas y obstáculos.');
+    } finally {
+      setIsGeneratingPlan(false);
     }
   };
 
@@ -497,6 +531,15 @@ const MeasuredLayoutPage = () => {
           <Button className="mt-3" type="submit" disabled={isSaving}>
             {isSaving ? <Spinner size="sm" /> : 'Guardar layout'}
           </Button>
+          <Button
+            className="mt-3 ms-2"
+            type="button"
+            variant="primary"
+            disabled={isSaving || isGeneratingPlan}
+            onClick={handleGenerateCabinetPlan}
+          >
+            {isGeneratingPlan ? <Spinner size="sm" /> : 'Generar muebles'}
+          </Button>
         </Form>
 
         <section className="measured-layout__preview" aria-label="Vista previa 2D del layout">
@@ -546,6 +589,42 @@ const MeasuredLayoutPage = () => {
           </dl>
         </section>
       </div>
+
+      {cabinetPlan ? (
+        <section className="measured-layout__cabinet-plan" aria-label="Lista de muebles generada">
+          <div className="measured-layout__section-heading">
+            <div>
+              <p className="design-chat__meta mb-1">Lista generada</p>
+              <h2 className="h5 mb-0">{cabinetPlan.cabinetCount} muebles</h2>
+            </div>
+            <strong>{cabinetPlan.valid ? 'Válida' : 'Revisar advertencias'}</strong>
+          </div>
+          {cabinetPlan.validationMessages.length > 0 ? (
+            <div className="measured-layout__messages">
+              {cabinetPlan.validationMessages.map(message => (
+                <Alert variant={message.severity === 'ERROR' ? 'danger' : 'warning'} key={`${message.code}-${message.wallCode ?? ''}`}>
+                  {message.message}
+                </Alert>
+              ))}
+            </div>
+          ) : null}
+          <div className="measured-layout__cabinet-list">
+            {cabinetPlan.cabinets.map(cabinet => (
+              <article className="measured-layout__cabinet-item" key={cabinet.cabinetCode ?? `${cabinet.wallCode}-${cabinet.xMm}`}>
+                <div>
+                  <strong>{cabinet.label}</strong>
+                  <p className="design-chat__meta mb-0">
+                    {cabinet.category} · Pared {cabinet.wallCode} · X {mmToCm(cabinet.xMm)} cm
+                  </p>
+                </div>
+                <div>
+                  {mmToCm(cabinet.widthMm)} x {mmToCm(cabinet.heightMm)} x {mmToCm(cabinet.depthMm)} cm
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 };

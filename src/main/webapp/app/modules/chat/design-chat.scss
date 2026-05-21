@@ -506,6 +506,7 @@
 
 .measured-layout__header,
 .measured-layout__shell,
+.measured-layout__cabinet-plan,
 .measured-layout__empty {
   margin-bottom: 1rem;
   border: 1px solid #d8dee4;
@@ -595,6 +596,37 @@
   padding: 1.25rem;
 }
 
+.measured-layout__cabinet-plan {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.measured-layout__messages {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.measured-layout__messages .alert {
+  margin-bottom: 0;
+}
+
+.measured-layout__cabinet-list {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.measured-layout__cabinet-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
 @media (max-width: 720px) {
   .design-proposal__hero,
   .design-proposal__details,
@@ -606,6 +638,7 @@
 
   .measured-layout__wall-list,
   .measured-layout__row,
+  .measured-layout__cabinet-item,
   .measured-layout__preview dl {
     grid-template-columns: 1fr;
   }

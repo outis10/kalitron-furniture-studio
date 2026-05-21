@@ -16,6 +16,10 @@ import org.springframework.stereotype.Repository;
 public interface CabinetRepository extends JpaRepository<Cabinet, Long>, JpaSpecificationExecutor<Cabinet> {
     long countBySpecId(Long specId);
 
+    List<Cabinet> findBySpecIdOrderByPositionSeqAsc(Long specId);
+
+    void deleteBySpecId(Long specId);
+
     default Optional<Cabinet> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }

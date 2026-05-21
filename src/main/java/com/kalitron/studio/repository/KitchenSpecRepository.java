@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface KitchenSpecRepository extends JpaRepository<KitchenSpec, Long>, JpaSpecificationExecutor<KitchenSpec> {
+    Optional<KitchenSpec> findBySessionId(Long sessionId);
+
     default Optional<KitchenSpec> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }
