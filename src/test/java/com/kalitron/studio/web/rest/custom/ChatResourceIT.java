@@ -14,13 +14,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kalitron.studio.IntegrationTest;
 import com.kalitron.studio.domain.ChatMessage;
+import com.kalitron.studio.domain.DesignArtifact;
 import com.kalitron.studio.domain.DesignImage;
 import com.kalitron.studio.domain.DesignSession;
+import com.kalitron.studio.domain.enumeration.ArtifactType;
 import com.kalitron.studio.domain.enumeration.ImageType;
 import com.kalitron.studio.domain.enumeration.MessageRole;
 import com.kalitron.studio.domain.enumeration.ProjectType;
 import com.kalitron.studio.domain.enumeration.SessionStatus;
 import com.kalitron.studio.repository.ChatMessageRepository;
+import com.kalitron.studio.repository.DesignArtifactRepository;
 import com.kalitron.studio.repository.DesignImageRepository;
 import com.kalitron.studio.repository.DesignSessionRepository;
 import com.kalitron.studio.service.FastApiGateway;
@@ -42,12 +45,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @IntegrationTest
 @AutoConfigureMockMvc
+@TestPropertySource(properties = "app.output.dir=build/test-outputs/chat-resource")
 class ChatResourceIT {
 
     @Autowired
@@ -65,11 +70,15 @@ class ChatResourceIT {
     @Autowired
     private DesignImageRepository designImageRepository;
 
+    @Autowired
+    private DesignArtifactRepository designArtifactRepository;
+
     @MockitoBean
     private FastApiGateway fastApiGateway;
 
     @AfterEach
     void cleanup() {
+        designArtifactRepository.deleteAll();
         designImageRepository.deleteAll();
         chatMessageRepository.deleteAll();
         designSessionRepository.deleteAll();
@@ -681,7 +690,19 @@ class ChatResourceIT {
         assertThat(image.getFileName()).isEqualTo("boceto.png");
         assertThat(image.getMimeType()).isEqualTo("image/png");
         assertThat(image.getFilePath()).contains("sketch-images/KD-2026-792");
-        assertThat(image.getImageDataBase64()).isEqualTo("Ym9jZXRv");
+        assertThat(image.getImageDataBase64()).isNull();
+
+        assertThat(designArtifactRepository.findAll())
+            .extracting(DesignArtifact::getArtifactType)
+            .containsExactly(ArtifactType.SKETCH_EXTRACTION_JSON);
+        DesignArtifact extractionArtifact = designArtifactRepository.findAll().getFirst();
+        assertThat(extractionArtifact.getSession().getId()).isEqualTo(session.getId());
+        assertThat(extractionArtifact.getFileName()).isEqualTo("sketch-test-001.json");
+        assertThat(extractionArtifact.getFilePath()).contains("sketch-extractions/KD-2026-792");
+        assertThat(extractionArtifact.getMimeType()).isEqualTo("application/json");
+        assertThat(extractionArtifact.getChecksum()).isNotBlank();
+        assertThat(extractionArtifact.getMetadataJson()).contains("\"schemaVersion\":\"1.0\"");
+        assertThat(extractionArtifact.getMetadataJson()).contains("\"requestId\":\"sketch-test-001\"");
 
         ArgumentCaptor<GatewaySketchAnalysisRequest> gatewayRequest = ArgumentCaptor.forClass(GatewaySketchAnalysisRequest.class);
         verify(fastApiGateway).analyzeSketch(gatewayRequest.capture());
