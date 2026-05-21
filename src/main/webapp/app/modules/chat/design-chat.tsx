@@ -440,10 +440,10 @@ const loadPersistedArtifacts = (
   setSavedCabinetPlanInfo: React.Dispatch<React.SetStateAction<{ cabinetCount: number } | null>>,
 ) => {
   Promise.allSettled([getMeasuredLayout(sessionId), getCabinetPlan(sessionId)]).then(([layoutResult, planResult]) => {
-    if (layoutResult.status === 'fulfilled') {
+    if (layoutResult.status === 'fulfilled' && layoutResult.value) {
       setSavedLayoutInfo({ wallCount: layoutResult.value.walls?.length ?? 0, zoneCount: layoutResult.value.zones?.length ?? 0 });
     }
-    if (planResult.status === 'fulfilled') {
+    if (planResult.status === 'fulfilled' && planResult.value) {
       setSavedCabinetPlanInfo({ cabinetCount: planResult.value.cabinetCount });
     }
   });
