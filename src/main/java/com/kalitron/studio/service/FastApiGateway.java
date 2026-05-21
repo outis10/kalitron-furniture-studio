@@ -3,6 +3,7 @@ package com.kalitron.studio.service;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
+import com.kalitron.studio.service.dto.SketchExtractionResponseDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.net.URI;
 import java.time.Duration;
@@ -81,6 +82,27 @@ public class FastApiGateway {
         }
     }
 
+    public SketchExtractionResponseDTO analyzeSketch(GatewaySketchAnalysisRequest request) {
+        try {
+            SketchExtractionResponseDTO gatewayResponse = restClient
+                .post()
+                .uri("/api/v1/sketch/analyze")
+                .body(request)
+                .retrieve()
+                .body(SketchExtractionResponseDTO.class);
+
+            if (gatewayResponse == null || gatewayResponse.getSchemaVersion() == null || gatewayResponse.getSchemaVersion().isBlank()) {
+                throw new FastApiGatewayException("AI Gateway returned an invalid sketch extraction response");
+            }
+
+            gatewayResponse.setSessionId(request.studioSessionId());
+            gatewayResponse.setSessionCode(request.sessionCode());
+            return gatewayResponse;
+        } catch (RestClientException e) {
+            throw new FastApiGatewayException("AI Gateway sketch analysis is unavailable", e);
+        }
+    }
+
     public record GatewayChatRequest(
         @JsonProperty("session_id") String sessionId,
         String message,
@@ -113,6 +135,18 @@ public class FastApiGateway {
         @JsonProperty("image_url") String imageUrl,
         @JsonProperty("prompt_used") String promptUsed,
         String pipeline
+    ) {}
+
+    public record GatewaySketchAnalysisRequest(
+        @JsonProperty("session_id") String sessionId,
+        @JsonProperty("image_b64") String imageBase64,
+        @JsonProperty("image_mime_type") String imageMimeType,
+        @JsonProperty("image_file_name") String imageFileName,
+        @JsonProperty("project_type_hint") String projectTypeHint,
+        @JsonProperty("unit_hint") String unitHint,
+        @JsonProperty("user_prompt") String userPrompt,
+        @JsonIgnore Long studioSessionId,
+        @JsonIgnore String sessionCode
     ) {}
 
     private String resolveReply(GatewayChatResponse gatewayResponse) {

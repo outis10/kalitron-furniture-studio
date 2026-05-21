@@ -26,10 +26,14 @@ import com.kalitron.studio.repository.DesignSessionRepository;
 import com.kalitron.studio.service.FastApiGateway;
 import com.kalitron.studio.service.FastApiGateway.GatewayChatRequest;
 import com.kalitron.studio.service.FastApiGateway.GatewayGenerateRequest;
+import com.kalitron.studio.service.FastApiGateway.GatewaySketchAnalysisRequest;
 import com.kalitron.studio.service.FastApiGatewayException;
 import com.kalitron.studio.service.dto.ChatResponseDTO;
+import com.kalitron.studio.service.dto.SketchExtractionResponseDTO;
+import com.kalitron.studio.service.dto.SketchFieldDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -79,6 +83,10 @@ class ChatResourceIT {
 
         mockMvc
             .perform(post("/api/chat/message").contentType(MediaType.APPLICATION_JSON).content("{}"))
+            .andExpect(status().isUnauthorized());
+
+        mockMvc
+            .perform(post("/api/chat/sketch-analysis").contentType(MediaType.APPLICATION_JSON).content("{}"))
             .andExpect(status().isUnauthorized());
     }
 
@@ -626,6 +634,129 @@ class ChatResourceIT {
             .andExpect(status().isServiceUnavailable());
     }
 
+    @Test
+    @Transactional
+    @WithMockUser
+    void analyzeSketchPersistsSketchAndReturnsExtraction() throws Exception {
+        DesignSession session = saveSession("KD-2026-792", SessionStatus.CHATTING);
+        when(fastApiGateway.analyzeSketch(any())).thenReturn(sketchExtractionResponse(session));
+
+        mockMvc
+            .perform(
+                post("/api/chat/sketch-analysis")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of(
+                                "sessionId",
+                                session.getId(),
+                                "imageBase64",
+                                "Ym9jZXRv",
+                                "imageFileName",
+                                "boceto.png",
+                                "imageMimeType",
+                                "image/png",
+                                "imageSizeBytes",
+                                6,
+                                "projectTypeHint",
+                                "KITCHEN",
+                                "unitHint",
+                                "MM",
+                                "userPrompt",
+                                "Cocina lineal con tarja al centro"
+                            )
+                        )
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.schemaVersion").value("1.0"))
+            .andExpect(jsonPath("$.sessionId").value(session.getId()))
+            .andExpect(jsonPath("$.sessionCode").value("KD-2026-792"))
+            .andExpect(jsonPath("$.projectType.value").value("KITCHEN"))
+            .andExpect(jsonPath("$.layout.value").value("LINEAR"))
+            .andExpect(jsonPath("$.warnings[0]").value("Confirma medidas antes de guardar."));
+
+        assertThat(designImageRepository.findAll()).extracting(DesignImage::getImageType).containsExactly(ImageType.SKETCH);
+        DesignImage image = designImageRepository.findAll().getFirst();
+        assertThat(image.getFileName()).isEqualTo("boceto.png");
+        assertThat(image.getMimeType()).isEqualTo("image/png");
+        assertThat(image.getFilePath()).contains("sketch-images/KD-2026-792");
+        assertThat(image.getImageDataBase64()).isEqualTo("Ym9jZXRv");
+
+        ArgumentCaptor<GatewaySketchAnalysisRequest> gatewayRequest = ArgumentCaptor.forClass(GatewaySketchAnalysisRequest.class);
+        verify(fastApiGateway).analyzeSketch(gatewayRequest.capture());
+        assertThat(gatewayRequest.getValue().sessionId()).isEqualTo("KD-2026-792");
+        assertThat(gatewayRequest.getValue().imageBase64()).isEqualTo("Ym9jZXRv");
+        assertThat(gatewayRequest.getValue().imageMimeType()).isEqualTo("image/png");
+        assertThat(gatewayRequest.getValue().imageFileName()).isEqualTo("boceto.png");
+        assertThat(gatewayRequest.getValue().projectTypeHint()).isEqualTo("KITCHEN");
+        assertThat(gatewayRequest.getValue().unitHint()).isEqualTo("MM");
+        assertThat(gatewayRequest.getValue().userPrompt()).isEqualTo("Cocina lineal con tarja al centro");
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void analyzeSketchRejectsInvalidImageType() throws Exception {
+        DesignSession session = saveSession("KD-2026-793", SessionStatus.CHATTING);
+
+        mockMvc
+            .perform(
+                post("/api/chat/sketch-analysis")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of(
+                                "sessionId",
+                                session.getId(),
+                                "imageBase64",
+                                "Ym9jZXRv",
+                                "imageFileName",
+                                "boceto.gif",
+                                "imageMimeType",
+                                "image/gif",
+                                "imageSizeBytes",
+                                6
+                            )
+                        )
+                    )
+            )
+            .andExpect(status().isBadRequest());
+
+        assertThat(designImageRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser
+    void analyzeSketchHandlesGatewayUnavailable() throws Exception {
+        DesignSession session = saveSession("KD-2026-794", SessionStatus.CHATTING);
+        when(fastApiGateway.analyzeSketch(any())).thenThrow(new FastApiGatewayException("down"));
+
+        mockMvc
+            .perform(
+                post("/api/chat/sketch-analysis")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsBytes(
+                            Map.of(
+                                "sessionId",
+                                session.getId(),
+                                "imageBase64",
+                                "Ym9jZXRv",
+                                "imageFileName",
+                                "boceto.jpg",
+                                "imageMimeType",
+                                "image/jpeg",
+                                "imageSizeBytes",
+                                6
+                            )
+                        )
+                    )
+            )
+            .andExpect(status().isServiceUnavailable());
+    }
+
     private DesignSession saveSession(String sessionCode) {
         return saveSession(sessionCode, SessionStatus.CHATTING);
     }
@@ -662,6 +793,19 @@ class ChatResourceIT {
         response.setPromptUsed("kitchen interior design");
         response.setPipeline(pipeline);
         response.setBadge("img2img".equals(pipeline) ? "Based on your photo" : "Generated from description");
+        return response;
+    }
+
+    private SketchExtractionResponseDTO sketchExtractionResponse(DesignSession session) {
+        SketchExtractionResponseDTO response = new SketchExtractionResponseDTO();
+        response.setSchemaVersion("1.0");
+        response.setRequestId("sketch-test-001");
+        response.setSessionId(session.getId());
+        response.setSessionCode(session.getSessionCode());
+        response.setProjectType(new SketchFieldDTO<>("KITCHEN", "HIGH", "cocina"));
+        response.setLayout(new SketchFieldDTO<>("LINEAR", "MEDIUM", "vista frontal"));
+        response.setUnit(new SketchFieldDTO<>("MM", "MEDIUM", "600"));
+        response.setWarnings(List.of("Confirma medidas antes de guardar."));
         return response;
     }
 }

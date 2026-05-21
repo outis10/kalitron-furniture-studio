@@ -6,6 +6,8 @@ import com.kalitron.studio.service.dto.ChatSessionDTO;
 import com.kalitron.studio.service.dto.ChatSessionStartRequestDTO;
 import com.kalitron.studio.service.dto.ChatSessionSummaryDTO;
 import com.kalitron.studio.service.dto.DesignProposalDTO;
+import com.kalitron.studio.service.dto.SketchAnalysisRequestDTO;
+import com.kalitron.studio.service.dto.SketchExtractionResponseDTO;
 import com.kalitron.studio.service.dto.VisualConceptRequestDTO;
 import com.kalitron.studio.service.dto.VisualConceptResponseDTO;
 import java.util.List;
@@ -23,4 +25,6 @@ public interface DesignChatService {
     ChatResponseDTO sendMessage(ChatRequestDTO request);
 
     VisualConceptResponseDTO generateVisualConcept(VisualConceptRequestDTO request);
+
+    SketchExtractionResponseDTO analyzeSketch(SketchAnalysisRequestDTO request);
 }

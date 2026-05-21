@@ -55,6 +55,7 @@ docs/specs/
     43-cabinet-layout-validation-rules.md
     44-generate-cabinet-list.md
   e7-sketch-to-layout-extraction/
+    58-ai-gateway-sketch-analysis-endpoint.md
     59-sketch-extraction-contract.md
 ```
 
