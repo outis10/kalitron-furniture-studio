@@ -172,9 +172,12 @@ export interface SketchCabinetCandidate {
   label?: SketchField<string> | null;
   wallCode?: SketchField<string> | null;
   x?: SketchMeasurement | null;
+  y?: SketchMeasurement | null;
+  z?: SketchMeasurement | null;
   width?: SketchMeasurement | null;
   height?: SketchMeasurement | null;
   depth?: SketchMeasurement | null;
+  rotationDeg?: SketchField<number> | null;
   doors?: SketchField<number> | null;
   drawers?: SketchField<number> | null;
 }
