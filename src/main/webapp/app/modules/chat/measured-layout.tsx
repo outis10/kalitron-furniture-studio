@@ -133,6 +133,23 @@ const previewPoint = (layout: MeasuredKitchenLayout, walls: MeasuredWallSegment[
   return { x: 222, y: 180 - ratio * 124 };
 };
 
+const reflowCabinetPositions = (cabinets: CabinetPlanItem[]) => {
+  const sortedCabinets = [...cabinets].sort(
+    (first, second) =>
+      first.wallCode.localeCompare(second.wallCode) || first.xMm - second.xMm || (first.positionSeq ?? 0) - (second.positionSeq ?? 0),
+  );
+  const wallCursors = new Map<string, number>();
+  return sortedCabinets.map((cabinet, index) => {
+    const xMm = wallCursors.get(cabinet.wallCode) ?? 0;
+    wallCursors.set(cabinet.wallCode, xMm + cabinet.widthMm);
+    return {
+      ...cabinet,
+      xMm,
+      positionSeq: index + 1,
+    };
+  });
+};
+
 const MeasuredLayoutPage = () => {
   const { sessionId: sessionIdParam = '' } = useParams();
   const sessionId = Number(sessionIdParam);
@@ -337,11 +354,12 @@ const MeasuredLayoutPage = () => {
       const cabinets = currentPlan.cabinets.map((cabinet, cabinetIndex) =>
         cabinetIndex === index ? { ...cabinet, ...nextCabinet } : cabinet,
       );
+      const reflowedCabinets = reflowCabinetPositions(cabinets);
       return {
         ...currentPlan,
-        cabinets,
-        cabinetCount: cabinets.length,
-        totalOccupiedLengthMm: cabinets.reduce((total, cabinet) => total + cabinet.widthMm, 0),
+        cabinets: reflowedCabinets,
+        cabinetCount: reflowedCabinets.length,
+        totalOccupiedLengthMm: reflowedCabinets.reduce((total, cabinet) => total + cabinet.widthMm, 0),
         validationMessages: [],
         valid: true,
       };

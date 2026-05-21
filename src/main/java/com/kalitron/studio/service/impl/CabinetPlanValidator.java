@@ -202,7 +202,7 @@ public class CabinetPlanValidator {
                 .stream()
                 .filter(cabinet -> Objects.equals(cabinet.getWallCode(), zone.getWallCode()))
                 .filter(cabinet -> expectedCategory == null || cabinet.getCategory() == expectedCategory)
-                .anyMatch(cabinet -> cabinet.getxMm() <= zoneStart && cabinet.getxMm() + cabinet.getWidthMm() >= zoneEnd);
+                .anyMatch(cabinet -> representsZone(cabinet, expectedCategory, zoneStart, zoneEnd));
             if (!represented) {
                 messages.add(
                     message(
@@ -226,6 +226,19 @@ public class CabinetPlanValidator {
                 );
             }
         }
+    }
+
+    private boolean representsZone(CabinetPlanItemDTO cabinet, CabinetCategory expectedCategory, int zoneStart, int zoneEnd) {
+        int cabinetStart = cabinet.getxMm();
+        int cabinetEnd = cabinetStart + cabinet.getWidthMm();
+        if (expectedCategory == CabinetCategory.SINK) {
+            int zoneCenter = zoneStart + ((zoneEnd - zoneStart) / 2);
+            return cabinetStart <= zoneCenter && cabinetEnd >= zoneCenter;
+        }
+        if (expectedCategory == CabinetCategory.APPLIANCE) {
+            return cabinetStart <= zoneStart && cabinetEnd >= zoneEnd;
+        }
+        return overlaps(cabinetStart, cabinetEnd, zoneStart, zoneEnd);
     }
 
     private void validateObstacles(
