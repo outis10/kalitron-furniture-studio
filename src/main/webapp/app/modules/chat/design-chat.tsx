@@ -7,6 +7,8 @@ import { faCheck, faImage, faPaperPlane, faRotateRight, faXmark } from '@fortawe
 
 import {
   analyzeSketch,
+  CabinetCategory,
+  CabinetPlan,
   ChatMessageView,
   ChatSession,
   generateVisualConcept,
@@ -14,6 +16,7 @@ import {
   LayoutObstacleType,
   MeasuredKitchenLayout,
   resumeChatSession,
+  saveCabinetPlan,
   saveMeasuredLayout,
   sendChatMessage,
   SketchCabinetCandidate,
@@ -89,12 +92,18 @@ interface SketchReviewCabinet {
   wallConfidence: string;
   x: string;
   xConfidence: string;
+  y: string;
+  yConfidence: string;
+  z: string;
+  zConfidence: string;
   width: string;
   widthConfidence: string;
   height: string;
   heightConfidence: string;
   depth: string;
   depthConfidence: string;
+  rotationDeg: string;
+  rotationConfidence: string;
   doors: string;
   doorsConfidence: string;
   drawers: string;
@@ -164,6 +173,63 @@ const measurementValue = (measurement?: SketchMeasurement | null) => `${measurem
 
 const measurementConfidence = (measurement?: SketchMeasurement | null) => measurement?.confidence ?? 'MISSING';
 
+const normalizeCabinetCategory = (category: string): CabinetCategory | null => {
+  const normalized = category.trim().toUpperCase().replaceAll(' ', '_').replaceAll('-', '_');
+  const aliases: Record<string, CabinetCategory> = {
+    BASE: 'LOWER',
+    BASE_CABINET: 'LOWER',
+    LOWER_CABINET: 'LOWER',
+    WALL: 'UPPER',
+    WALL_CABINET: 'UPPER',
+    UPPER_CABINET: 'UPPER',
+    TOWER: 'TALL',
+    TALL_CABINET: 'TALL',
+    SINK_BASE: 'SINK',
+    DRAWER: 'DRAWER_BASE',
+    DRAWER_BANK: 'DRAWER_BASE',
+    DRAWER_CABINET: 'DRAWER_BASE',
+    APPLIANCE_CABINET: 'APPLIANCE',
+  };
+  const supportedCategories: CabinetCategory[] = [
+    'UPPER',
+    'LOWER',
+    'CORNER',
+    'TALL',
+    'SINK',
+    'ISLAND',
+    'DRAWER_BASE',
+    'APPLIANCE',
+    'FILLER',
+    'PANEL',
+  ];
+  if (supportedCategories.includes(normalized as CabinetCategory)) {
+    return normalized as CabinetCategory;
+  }
+  return aliases[normalized] ?? null;
+};
+
+const cabinetDefaults = (category?: string | null) => {
+  const normalizedCategory = normalizeCabinetCategory(category ?? '');
+  if (normalizedCategory === 'UPPER') {
+    return { height: '720', depth: '350', z: '1400' };
+  }
+  if (normalizedCategory === 'TALL') {
+    return { height: '2100', depth: '600', z: '0' };
+  }
+  if (normalizedCategory === 'FILLER') {
+    return { height: '720', depth: '60', z: '0' };
+  }
+  if (normalizedCategory === 'PANEL') {
+    return { height: '720', depth: '18', z: '0' };
+  }
+  return { height: '720', depth: '600', z: '0' };
+};
+
+const valueOrDefault = (value: string, fallback: string) => (value.trim() ? value : fallback);
+
+const confidenceOrDefault = (confidence: string, value: string, fallbackConfidence: string) =>
+  value.trim() ? confidence : fallbackConfidence;
+
 const toSketchReview = (extraction: SketchExtractionResponse): SketchReviewState => ({
   projectType: fieldValue(extraction.projectType),
   projectTypeConfidence: fieldConfidence(extraction.projectType),
@@ -205,27 +271,42 @@ const toSketchReview = (extraction: SketchExtractionResponse): SketchReviewState
     width: measurementValue(obstacle.width),
     widthConfidence: measurementConfidence(obstacle.width),
   })),
-  cabinets: (extraction.cabinetCandidates ?? []).map((cabinet: SketchCabinetCandidate, index) => ({
-    candidateCode: cabinet.candidateCode ?? `CAB-${index + 1}`,
-    category: fieldValue(cabinet.category),
-    categoryConfidence: fieldConfidence(cabinet.category),
-    label: fieldValue(cabinet.label),
-    labelConfidence: fieldConfidence(cabinet.label),
-    wallCode: fieldValue(cabinet.wallCode),
-    wallConfidence: fieldConfidence(cabinet.wallCode),
-    x: measurementValue(cabinet.x),
-    xConfidence: measurementConfidence(cabinet.x),
-    width: measurementValue(cabinet.width),
-    widthConfidence: measurementConfidence(cabinet.width),
-    height: measurementValue(cabinet.height),
-    heightConfidence: measurementConfidence(cabinet.height),
-    depth: measurementValue(cabinet.depth),
-    depthConfidence: measurementConfidence(cabinet.depth),
-    doors: fieldValue(cabinet.doors),
-    doorsConfidence: fieldConfidence(cabinet.doors),
-    drawers: fieldValue(cabinet.drawers),
-    drawersConfidence: fieldConfidence(cabinet.drawers),
-  })),
+  cabinets: (extraction.cabinetCandidates ?? []).map((cabinet: SketchCabinetCandidate, index) => {
+    const category = fieldValue(cabinet.category);
+    const defaults = cabinetDefaults(category);
+    const height = measurementValue(cabinet.height);
+    const depth = measurementValue(cabinet.depth);
+    const z = measurementValue(cabinet.z);
+    const y = measurementValue(cabinet.y);
+    const rotationDeg = fieldValue(cabinet.rotationDeg);
+    return {
+      candidateCode: cabinet.candidateCode ?? `CAB-${index + 1}`,
+      category,
+      categoryConfidence: fieldConfidence(cabinet.category),
+      label: fieldValue(cabinet.label),
+      labelConfidence: fieldConfidence(cabinet.label),
+      wallCode: fieldValue(cabinet.wallCode),
+      wallConfidence: fieldConfidence(cabinet.wallCode),
+      x: measurementValue(cabinet.x),
+      xConfidence: measurementConfidence(cabinet.x),
+      y: valueOrDefault(y, '0'),
+      yConfidence: confidenceOrDefault(measurementConfidence(cabinet.y), y, 'LOW'),
+      z: valueOrDefault(z, defaults.z),
+      zConfidence: confidenceOrDefault(measurementConfidence(cabinet.z), z, 'LOW'),
+      width: measurementValue(cabinet.width),
+      widthConfidence: measurementConfidence(cabinet.width),
+      height: valueOrDefault(height, defaults.height),
+      heightConfidence: confidenceOrDefault(measurementConfidence(cabinet.height), height, 'LOW'),
+      depth: valueOrDefault(depth, defaults.depth),
+      depthConfidence: confidenceOrDefault(measurementConfidence(cabinet.depth), depth, 'LOW'),
+      rotationDeg: valueOrDefault(rotationDeg, '0'),
+      rotationConfidence: confidenceOrDefault(fieldConfidence(cabinet.rotationDeg), rotationDeg, 'LOW'),
+      doors: fieldValue(cabinet.doors),
+      doorsConfidence: fieldConfidence(cabinet.doors),
+      drawers: fieldValue(cabinet.drawers),
+      drawersConfidence: fieldConfidence(cabinet.drawers),
+    };
+  }),
   missingInfo: (extraction.missingInfo ?? []).map(item => item.message).filter((message): message is string => !!message),
   questions: extraction.questions ?? [],
   warnings: extraction.warnings ?? [],
@@ -323,6 +404,7 @@ const DesignChat = () => {
   const [isSending, setIsSending] = useState(false);
   const [isAnalyzingSketch, setIsAnalyzingSketch] = useState(false);
   const [isSavingMeasuredLayout, setIsSavingMeasuredLayout] = useState(false);
+  const [isSavingCabinetPlan, setIsSavingCabinetPlan] = useState(false);
   const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
@@ -380,12 +462,29 @@ const DesignChat = () => {
       !isSending &&
       !isGeneratingConcept &&
       !isAnalyzingSketch &&
-      !isSavingMeasuredLayout,
-    [draft, isAnalyzingSketch, isGeneratingConcept, isSavingMeasuredLayout, isSending, selectedReferenceImage, session],
+      !isSavingMeasuredLayout &&
+      !isSavingCabinetPlan,
+    [
+      draft,
+      isAnalyzingSketch,
+      isGeneratingConcept,
+      isSavingCabinetPlan,
+      isSavingMeasuredLayout,
+      isSending,
+      selectedReferenceImage,
+      session,
+    ],
   );
   const canAnalyzeSketch = useMemo(
-    () => !!session && !!selectedSketchImage && !isAnalyzingSketch && !isSending && !isGeneratingConcept && !isSavingMeasuredLayout,
-    [isAnalyzingSketch, isGeneratingConcept, isSavingMeasuredLayout, isSending, selectedSketchImage, session],
+    () =>
+      !!session &&
+      !!selectedSketchImage &&
+      !isAnalyzingSketch &&
+      !isSending &&
+      !isGeneratingConcept &&
+      !isSavingMeasuredLayout &&
+      !isSavingCabinetPlan,
+    [isAnalyzingSketch, isGeneratingConcept, isSavingCabinetPlan, isSavingMeasuredLayout, isSending, selectedSketchImage, session],
   );
   const canGenerateConcept = useMemo(
     () => !!session && ['SPECS_READY', 'VISUAL_GENERATED'].includes(session.status) && !isGeneratingConcept,
@@ -500,6 +599,7 @@ const DesignChat = () => {
     setHasGeneratedConcept(false);
     setStyleSkipped(false);
     setIsSavingMeasuredLayout(false);
+    setIsSavingCabinetPlan(false);
     setError(null);
   };
 
@@ -806,6 +906,95 @@ const DesignChat = () => {
     };
   };
 
+  const cabinetReviewNotes = (cabinet: SketchReviewCabinet) => {
+    const fieldsToReview = [
+      ['tipo', cabinet.categoryConfidence],
+      ['etiqueta', cabinet.labelConfidence],
+      ['pared', cabinet.wallConfidence],
+      ['x', cabinet.xConfidence],
+      ['y', cabinet.yConfidence],
+      ['z', cabinet.zConfidence],
+      ['ancho', cabinet.widthConfidence],
+      ['alto', cabinet.heightConfidence],
+      ['fondo', cabinet.depthConfidence],
+      ['rotación', cabinet.rotationConfidence],
+      ['puertas', cabinet.doorsConfidence],
+      ['cajones', cabinet.drawersConfidence],
+    ]
+      .filter(([, confidence]) => ['LOW', 'MISSING'].includes(confidence))
+      .map(([field]) => field);
+
+    if (fieldsToReview.length === 0) {
+      return 'Origen: extracción de boceto confirmada.';
+    }
+    return `Origen: extracción de boceto confirmada. Revisar: ${fieldsToReview.join(', ')}.`;
+  };
+
+  const buildCabinetPlanFromReview = (): CabinetPlan => {
+    if (!session || !sketchReview) {
+      throw new Error('No hay muebles candidatos confirmados para guardar.');
+    }
+
+    const layout = normalizeLayout(sketchReview.layout);
+    if (!layout) {
+      throw new Error('Confirma un layout válido antes de guardar muebles.');
+    }
+
+    if (sketchReview.cabinets.length === 0) {
+      throw new Error('No hay muebles candidatos para guardar.');
+    }
+
+    const cabinets = sketchReview.cabinets.map((cabinet, index) => {
+      const category = normalizeCabinetCategory(cabinet.category);
+      const xMm = toOptionalMm(cabinet.x, sketchReview.unit);
+      const yMm = toOptionalMm(cabinet.y, sketchReview.unit) ?? 0;
+      const zMm = toOptionalMm(cabinet.z, sketchReview.unit) ?? 0;
+      const widthMm = toMm(cabinet.width, sketchReview.unit);
+      const heightMm = toMm(cabinet.height, sketchReview.unit);
+      const depthMm = toMm(cabinet.depth, sketchReview.unit);
+      const rotationDeg = toOptionalInteger(cabinet.rotationDeg) ?? 0;
+      if (!category) {
+        throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita un tipo compatible.`);
+      }
+      if (!cabinet.wallCode.trim() || xMm === null || !widthMm || !heightMm || !depthMm) {
+        throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita pared, X, ancho, alto y fondo.`);
+      }
+
+      return {
+        cabinetCode: (cabinet.candidateCode || `SK-${index + 1}`).trim(),
+        templateCode: null,
+        category,
+        label: cabinet.label.trim() || `${category.replaceAll('_', ' ').toLowerCase()} ${index + 1}`,
+        widthMm,
+        heightMm,
+        depthMm,
+        doors: toOptionalInteger(cabinet.doors),
+        drawers: toOptionalInteger(cabinet.drawers),
+        shelves: null,
+        finish: null,
+        wallCode: cabinet.wallCode.trim(),
+        xMm,
+        yMm,
+        zMm,
+        rotationDeg,
+        positionSeq: index + 1,
+        materialCode: null,
+        notes: cabinetReviewNotes(cabinet),
+      };
+    });
+
+    return {
+      sessionId: session.sessionId,
+      sessionCode: session.sessionCode,
+      layout,
+      valid: false,
+      cabinetCount: cabinets.length,
+      totalOccupiedLengthMm: cabinets.reduce((total, cabinet) => total + cabinet.widthMm, 0),
+      cabinets,
+      validationMessages: [],
+    };
+  };
+
   const handleSaveMeasuredLayoutFromSketch = async () => {
     if (!session || !sketchReview) {
       return;
@@ -832,6 +1021,41 @@ const DesignChat = () => {
       setError(saveError instanceof Error ? saveError.message : 'No se pudo guardar el layout medido.');
     } finally {
       setIsSavingMeasuredLayout(false);
+    }
+  };
+
+  const handleSaveCabinetPlanFromSketch = async () => {
+    if (!session || !sketchReview) {
+      return;
+    }
+    if (!isSketchReviewConfirmed) {
+      setError('Confirma la extracción antes de guardar los muebles.');
+      return;
+    }
+
+    setError(null);
+    setIsSavingCabinetPlan(true);
+    try {
+      const measuredLayout = buildMeasuredLayoutFromReview();
+      await saveMeasuredLayout(session.sessionId, measuredLayout);
+      const cabinetPlan = buildCabinetPlanFromReview();
+      const savedPlan = await saveCabinetPlan(session.sessionId, cabinetPlan);
+      const blockingMessages = savedPlan.validationMessages.filter(message => message.severity === 'ERROR');
+      setMessages(currentMessages => [
+        ...currentMessages,
+        {
+          role: 'ASSISTANT',
+          content:
+            blockingMessages.length > 0
+              ? `Plan de muebles revisado con ${blockingMessages.length} error(es) bloqueante(s). Corrige la revisión antes de guardarlo.`
+              : 'Muebles guardados como plan editable. Puedes abrir Layout medido para ajustar posiciones, medidas y validaciones.',
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'No se pudieron guardar los muebles detectados.');
+    } finally {
+      setIsSavingCabinetPlan(false);
     }
   };
 
@@ -1009,6 +1233,8 @@ const DesignChat = () => {
                 updateSketchReviewItem('cabinets', index, 'wallCode', value),
               )}
               {renderReviewInput('X mm', cabinet.x, cabinet.xConfidence, value => updateSketchReviewItem('cabinets', index, 'x', value))}
+              {renderReviewInput('Y mm', cabinet.y, cabinet.yConfidence, value => updateSketchReviewItem('cabinets', index, 'y', value))}
+              {renderReviewInput('Z mm', cabinet.z, cabinet.zConfidence, value => updateSketchReviewItem('cabinets', index, 'z', value))}
               {renderReviewInput('Ancho mm', cabinet.width, cabinet.widthConfidence, value =>
                 updateSketchReviewItem('cabinets', index, 'width', value),
               )}
@@ -1017,6 +1243,9 @@ const DesignChat = () => {
               )}
               {renderReviewInput('Fondo mm', cabinet.depth, cabinet.depthConfidence, value =>
                 updateSketchReviewItem('cabinets', index, 'depth', value),
+              )}
+              {renderReviewInput('Rotación', cabinet.rotationDeg, cabinet.rotationConfidence, value =>
+                updateSketchReviewItem('cabinets', index, 'rotationDeg', value),
               )}
             </div>
           ))}
@@ -1039,6 +1268,13 @@ const DesignChat = () => {
           </Button>
           <Button onClick={handleSaveMeasuredLayoutFromSketch} type="button" disabled={!isSketchReviewConfirmed || isSavingMeasuredLayout}>
             {isSavingMeasuredLayout ? <Spinner size="sm" /> : 'Guardar layout medido'}
+          </Button>
+          <Button
+            onClick={handleSaveCabinetPlanFromSketch}
+            type="button"
+            disabled={!isSketchReviewConfirmed || sketchReview.cabinets.length === 0 || isSavingCabinetPlan}
+          >
+            {isSavingCabinetPlan ? <Spinner size="sm" /> : 'Guardar muebles'}
           </Button>
           <Button onClick={handleRejectSketchReview} type="button" variant="outline-secondary">
             Descartar extracción
