@@ -436,7 +436,6 @@ public class DesignChatServiceImpl implements DesignChatService {
     }
 
     private void saveSketchImage(DesignSession session, SketchAnalysisRequestDTO request) {
-        validateSketchImage(request);
         String mimeType = normalizeImageMimeType(request.getImageMimeType());
         long imageSizeBytes = resolveSketchImageSizeBytes(request);
         String fileName = sanitizeImageFileName(request.getImageFileName());
