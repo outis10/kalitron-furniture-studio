@@ -51,6 +51,7 @@ docs/specs/
     39-measured-room-layout.md
     40-layout-zones-obstacles.md
     41-layout-cabinet-planning-contracts.md
+    43-cabinet-layout-validation-rules.md
     44-generate-cabinet-list.md
 ```
 

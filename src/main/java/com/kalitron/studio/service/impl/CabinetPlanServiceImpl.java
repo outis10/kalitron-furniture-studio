@@ -56,6 +56,7 @@ public class CabinetPlanServiceImpl implements CabinetPlanService {
     private final MaterialRepository materialRepository;
     private final DesignArtifactRepository designArtifactRepository;
     private final MeasuredLayoutService measuredLayoutService;
+    private final CabinetPlanValidator cabinetPlanValidator;
     private final ObjectMapper objectMapper;
 
     public CabinetPlanServiceImpl(
@@ -66,6 +67,7 @@ public class CabinetPlanServiceImpl implements CabinetPlanService {
         MaterialRepository materialRepository,
         DesignArtifactRepository designArtifactRepository,
         MeasuredLayoutService measuredLayoutService,
+        CabinetPlanValidator cabinetPlanValidator,
         ObjectMapper objectMapper
     ) {
         this.designSessionRepository = designSessionRepository;
@@ -75,6 +77,7 @@ public class CabinetPlanServiceImpl implements CabinetPlanService {
         this.materialRepository = materialRepository;
         this.designArtifactRepository = designArtifactRepository;
         this.measuredLayoutService = measuredLayoutService;
+        this.cabinetPlanValidator = cabinetPlanValidator;
         this.objectMapper = objectMapper;
     }
 
@@ -100,6 +103,8 @@ public class CabinetPlanServiceImpl implements CabinetPlanService {
             cabinets.addAll(wallPlan.cabinets());
             sequence += wallPlan.cabinets().size();
         }
+
+        messages.addAll(cabinetPlanValidator.validate(layout, cabinets));
 
         int totalOccupiedLengthMm = cabinets.stream().map(CabinetPlanItemDTO::getWidthMm).reduce(0, Integer::sum);
         response.setCabinets(cabinets);
