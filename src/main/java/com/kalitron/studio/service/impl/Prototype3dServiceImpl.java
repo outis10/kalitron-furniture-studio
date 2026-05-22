@@ -51,10 +51,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class Prototype3dServiceImpl implements Prototype3dService {
 
     private static final int CANVAS_W = 1400;
-    private static final int CANVAS_H = 1000;
+    private static final int CANVAS_H = 1400;
+    private static final int FLOOR_PLAN_H = 950;
     private static final int PADDING = 100;
     private static final int LEGEND_W = 180;
     private static final float WALL_STROKE = 8f;
+    // Cabinets mounted at or above this height are shown as overhead (dashed) in the floor plan
+    private static final int OVERHEAD_THRESHOLD_MM = 900;
     private static final float OBSTACLE_STROKE = 2f;
 
     private final DesignSessionRepository designSessionRepository;
@@ -96,14 +99,6 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         CabinetPlanResponseDTO cabinetPlan = cabinetPlanService
             .findCabinetPlan(sessionId)
             .orElseThrow(() -> new IllegalArgumentException("Cabinet plan not found"));
-
-        boolean hasErrors = cabinetPlan
-            .getValidationMessages()
-            .stream()
-            .anyMatch(m -> "ERROR".equals(m.getSeverity()));
-        if (hasErrors) {
-            throw new IllegalArgumentException("Cabinet plan has validation errors — fix them before generating the prototype");
-        }
 
         GenerationJob job = new GenerationJob()
             .session(session)
@@ -155,8 +150,14 @@ public class Prototype3dServiceImpl implements Prototype3dService {
                 .stream()
                 .anyMatch(c -> c.getNotes() != null && c.getNotes().contains("boceto"));
             if (fromSketch) {
-                warnings.add("Prototype generated from sketch-confirmed cabinet data. Review dimensions before fabrication.");
+                warnings.add("Prototipo generado desde extracción de boceto. Revisar dimensiones antes de fabricación.");
             }
+            cabinetPlan
+                .getValidationMessages()
+                .stream()
+                .filter(m -> "ERROR".equals(m.getSeverity()))
+                .map(m -> "Advertencia de validación: " + m.getMessage())
+                .forEach(warnings::add);
 
             return toJobDTO(job, session, artifacts, warnings, request.getPrototypeMode());
         } catch (Exception e) {
@@ -239,7 +240,7 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         double roomW = Math.max(maxX - minX, 1);
         double roomH = Math.max(maxY - minY, 1);
         int drawW = CANVAS_W - PADDING * 2 - LEGEND_W;
-        int drawH = CANVAS_H - PADDING * 2;
+        int drawH = FLOOR_PLAN_H - PADDING * 2;
         double scale = Math.min(drawW / roomW, drawH / roomH);
 
         BufferedImage img = new BufferedImage(CANVAS_W, CANVAS_H, BufferedImage.TYPE_INT_RGB);
@@ -272,8 +273,15 @@ public class Prototype3dServiceImpl implements Prototype3dService {
             }
         }
 
-        // Cabinets
+        // Cabinets — floor-level first, overhead last (dashed = mounted above OVERHEAD_THRESHOLD_MM)
         for (CabinetPlanItemDTO cabinet : plan.getCabinets()) {
+            if (isOverhead(cabinet)) continue;
+            WallData wall = findWall(walls, cabinet.getWallCode());
+            if (wall == null || cabinet.getxMm() == null || cabinet.getWidthMm() == null || cabinet.getDepthMm() == null) continue;
+            drawCabinet(g, wall, cabinet, minX, minY, scale, req.isIncludeLabels());
+        }
+        for (CabinetPlanItemDTO cabinet : plan.getCabinets()) {
+            if (!isOverhead(cabinet)) continue;
             WallData wall = findWall(walls, cabinet.getWallCode());
             if (wall == null || cabinet.getxMm() == null || cabinet.getWidthMm() == null || cabinet.getDepthMm() == null) continue;
             drawCabinet(g, wall, cabinet, minX, minY, scale, req.isIncludeLabels());
@@ -310,7 +318,7 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         int scaleMm = 500;
         int scalePx = (int) (scaleMm * scale);
         int scaleX = PADDING;
-        int scaleY = CANVAS_H - 30;
+        int scaleY = FLOOR_PLAN_H - 30;
         g.setStroke(new BasicStroke(2));
         g.setColor(new Color(80, 80, 80));
         g.setFont(new Font("SansSerif", Font.PLAIN, 11));
@@ -320,7 +328,10 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         g.drawString("500 mm", scaleX + scalePx / 2 - 20, scaleY - 6);
 
         // Legend
-        drawLegend(g, plan.getCabinets());
+        drawLegend(g, plan.getCabinets(), layout.getZones());
+
+        // Elevation views below the floor plan
+        drawElevations(g, walls, plan.getCabinets(), layout, req.isIncludeLabels());
 
         g.dispose();
 
@@ -352,6 +363,11 @@ public class Prototype3dServiceImpl implements Prototype3dService {
             curY = ey;
         }
         return result;
+    }
+
+    private boolean isOverhead(CabinetPlanItemDTO cabinet) {
+        if (cabinet.getzMm() != null && cabinet.getzMm() >= OVERHEAD_THRESHOLD_MM) return true;
+        return cabinet.getCategory() == CabinetCategory.UPPER;
     }
 
     private WallData findWall(List<WallData> walls, String wallCode) {
@@ -412,11 +428,21 @@ public class Prototype3dServiceImpl implements Prototype3dService {
             toCanvasY(sy + depth * py, minY, scale),
         };
 
+        boolean isUpper = isOverhead(cabinet);
         Color fill = categoryColor(cabinet.getCategory());
-        g.setColor(fill);
-        g.fillPolygon(xp, yp, 4);
-        g.setColor(fill.darker());
-        g.setStroke(new BasicStroke(1.5f));
+        if (isUpper) {
+            // Upper cabinets: semi-transparent fill + dashed border (architectural convention for overhead elements)
+            g.setColor(new Color(fill.getRed(), fill.getGreen(), fill.getBlue(), 90));
+            g.fillPolygon(xp, yp, 4);
+            g.setColor(fill.darker());
+            float[] dash = { 6f, 4f };
+            g.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, dash, 0f));
+        } else {
+            g.setColor(fill);
+            g.fillPolygon(xp, yp, 4);
+            g.setColor(fill.darker());
+            g.setStroke(new BasicStroke(1.5f));
+        }
         g.drawPolygon(xp, yp, 4);
 
         if (showLabels && cabinet.getCabinetCode() != null) {
@@ -456,9 +482,8 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         Color zoneColor = zoneColor(zone.getZoneType());
         g.setColor(new Color(zoneColor.getRed(), zoneColor.getGreen(), zoneColor.getBlue(), 60));
         g.fillPolygon(xp, yp, 4);
-        g.setColor(zoneColor);
-        float[] dash = { 6f, 4f };
-        g.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, dash, 0f));
+        g.setColor(zoneColor.darker());
+        g.setStroke(new BasicStroke(1f));
         g.drawPolygon(xp, yp, 4);
 
         if (showLabels) {
@@ -521,7 +546,7 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         double x = Math.floor(minX / gridStep) * gridStep;
         while (x <= minX + roomW + gridStep) {
             int cx = toCanvasX(x, minX, scale);
-            g.drawLine(cx, padding, cx, CANVAS_H - padding);
+            g.drawLine(cx, padding, cx, FLOOR_PLAN_H - padding);
             x += gridStep;
         }
         double y = Math.floor(minY / gridStep) * gridStep;
@@ -532,7 +557,192 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         }
     }
 
-    private void drawLegend(Graphics2D g, List<CabinetPlanItemDTO> cabinets) {
+    private void drawElevations(
+        Graphics2D g,
+        List<WallData> walls,
+        List<CabinetPlanItemDTO> cabinets,
+        MeasuredLayoutRequestDTO layout,
+        boolean showLabels
+    ) {
+        List<WallData> wallsWithCabinets = walls
+            .stream()
+            .filter(w -> cabinets.stream().anyMatch(c -> w.code().equalsIgnoreCase(c.getWallCode())))
+            .toList();
+        if (wallsWithCabinets.isEmpty()) return;
+
+        int elevStart = FLOOR_PLAN_H + 10;
+
+        // Section separator and title
+        g.setColor(new Color(180, 180, 180));
+        g.setStroke(new BasicStroke(1f));
+        g.drawLine(PADDING / 2, FLOOR_PLAN_H + 2, CANVAS_W - PADDING / 2, FLOOR_PLAN_H + 2);
+        g.setFont(new Font("SansSerif", Font.BOLD, 12));
+        g.setColor(new Color(30, 30, 30));
+        g.drawString("Alzadas por pared (vista frontal)", PADDING, elevStart + 13);
+
+        int panelTopY = elevStart + 22;
+        int panelH = CANVAS_H - panelTopY - 8;
+        int totalDrawW = CANVAS_W - PADDING * 2;
+        int gapBetween = 14;
+        int n = wallsWithCabinets.size();
+        int panelW = (totalDrawW - gapBetween * (n - 1)) / n;
+
+        int roomHeightMm = (layout.getRoomHeightMm() != null && layout.getRoomHeightMm() > 0) ? layout.getRoomHeightMm() : 2400;
+
+        for (int i = 0; i < n; i++) {
+            WallData wall = wallsWithCabinets.get(i);
+            int panelX = PADDING + i * (panelW + gapBetween);
+            drawWallElevation(g, wall, cabinets, panelX, panelTopY, panelW, panelH, roomHeightMm, showLabels);
+        }
+    }
+
+    private void drawWallElevation(
+        Graphics2D g,
+        WallData wall,
+        List<CabinetPlanItemDTO> allCabinets,
+        int panelX,
+        int panelY,
+        int panelW,
+        int panelH,
+        int roomHeightMm,
+        boolean showLabels
+    ) {
+        List<CabinetPlanItemDTO> wallCabinets = allCabinets
+            .stream()
+            .filter(c -> wall.code().equalsIgnoreCase(c.getWallCode()))
+            .toList();
+        if (wallCabinets.isEmpty()) return;
+
+        double wallLengthMm = Math.sqrt(Math.pow(wall.endX() - wall.startX(), 2) + Math.pow(wall.endY() - wall.startY(), 2));
+
+        // Panel background and border
+        g.setColor(new Color(248, 248, 246));
+        g.fillRect(panelX, panelY, panelW, panelH);
+        g.setColor(new Color(190, 190, 190));
+        g.setStroke(new BasicStroke(1f));
+        g.drawRect(panelX, panelY, panelW, panelH);
+
+        // Panel title
+        g.setFont(new Font("SansSerif", Font.BOLD, 10));
+        g.setColor(new Color(40, 40, 40));
+        g.drawString("Pared " + wall.code() + "  (" + (int) wallLengthMm + " mm)", panelX + 4, panelY + 12);
+
+        // Drawing area within panel
+        int leftMargin = 28; // space for height axis labels
+        int bottomMargin = showLabels ? 18 : 6;
+        int topPad = 16;
+        int rightPad = 4;
+        int drawX = panelX + leftMargin;
+        int drawY = panelY + topPad;
+        int drawW = panelW - leftMargin - rightPad;
+        int drawH = panelH - topPad - bottomMargin;
+        if (drawW <= 0 || drawH <= 0) return;
+
+        double xScale = drawW / wallLengthMm;
+        double zScale = (double) drawH / roomHeightMm;
+        double scale = Math.min(xScale, zScale);
+
+        int floorY = drawY + drawH;
+        int wallEndX = drawX + (int) (wallLengthMm * scale);
+
+        // Light horizontal grid every 500 mm
+        g.setColor(new Color(225, 225, 220));
+        g.setStroke(new BasicStroke(0.5f));
+        for (int hMm = 0; hMm <= roomHeightMm; hMm += 500) {
+            int hy = floorY - (int) (hMm * scale);
+            if (hy < drawY) break;
+            g.drawLine(drawX, hy, wallEndX, hy);
+        }
+
+        // Counter-height reference at 900 mm (dashed)
+        int counterY = floorY - (int) (900 * scale);
+        if (counterY > drawY) {
+            float[] dash = { 6f, 3f };
+            g.setColor(new Color(160, 150, 100, 180));
+            g.setStroke(new BasicStroke(0.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, dash, 0f));
+            g.drawLine(drawX, counterY, wallEndX, counterY);
+            g.setFont(new Font("SansSerif", Font.PLAIN, 7));
+            g.setColor(new Color(140, 130, 80));
+            g.drawString("900", panelX + 1, counterY + 3);
+        }
+
+        // Ceiling reference (long-dash)
+        int ceilingY = floorY - (int) (roomHeightMm * scale);
+        if (ceilingY >= drawY) {
+            float[] dashLong = { 10f, 5f };
+            g.setColor(new Color(130, 130, 180, 160));
+            g.setStroke(new BasicStroke(0.8f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, dashLong, 0f));
+            g.drawLine(drawX, ceilingY, wallEndX, ceilingY);
+            g.setFont(new Font("SansSerif", Font.PLAIN, 7));
+            g.setColor(new Color(100, 100, 160));
+            g.drawString(roomHeightMm + "", panelX + 1, ceilingY + 3);
+        }
+
+        // Cabinets
+        g.setStroke(new BasicStroke(1f));
+        for (CabinetPlanItemDTO cabinet : wallCabinets) {
+            if (cabinet.getxMm() == null || cabinet.getWidthMm() == null || cabinet.getHeightMm() == null) continue;
+            int zStart = cabinet.getzMm() != null ? cabinet.getzMm() : 0;
+            int cx1 = drawX + (int) (cabinet.getxMm() * scale);
+            int cz1 = floorY - (int) ((zStart + cabinet.getHeightMm()) * scale);
+            int cw = Math.max((int) (cabinet.getWidthMm() * scale), 2);
+            int ch = Math.max((int) (cabinet.getHeightMm() * scale), 2);
+            cz1 = Math.max(cz1, drawY);
+
+            Color fill = categoryColor(cabinet.getCategory());
+            g.setColor(fill);
+            g.fillRect(cx1, cz1, cw, ch);
+            g.setColor(fill.darker());
+            g.drawRect(cx1, cz1, cw, ch);
+
+            if (showLabels && cabinet.getCabinetCode() != null) {
+                g.setFont(new Font("SansSerif", Font.PLAIN, 8));
+                g.setColor(Color.BLACK);
+                FontMetrics fm = g.getFontMetrics();
+                String label = cabinet.getCabinetCode();
+                if (fm.stringWidth(label) <= cw - 2 && ch >= fm.getHeight()) {
+                    g.drawString(label, cx1 + cw / 2 - fm.stringWidth(label) / 2, cz1 + ch / 2 + fm.getAscent() / 2);
+                }
+            }
+        }
+
+        // Floor line and wall boundary
+        g.setColor(new Color(80, 80, 80));
+        g.setStroke(new BasicStroke(2f));
+        g.drawLine(drawX, floorY, wallEndX, floorY);
+        g.drawLine(drawX, drawY, drawX, floorY);
+        g.drawLine(wallEndX, drawY, wallEndX, floorY);
+
+        // X-axis ticks
+        if (showLabels) {
+            g.setFont(new Font("SansSerif", Font.PLAIN, 7));
+            g.setColor(new Color(100, 100, 100));
+            g.setStroke(new BasicStroke(0.5f));
+            for (double xMm = 0; xMm <= wallLengthMm + 1; xMm += 500) {
+                int tx = drawX + (int) (xMm * scale);
+                FontMetrics fm = g.getFontMetrics();
+                g.drawLine(tx, floorY, tx, floorY + 4);
+                String tickLabel = (int) xMm + "";
+                g.drawString(tickLabel, tx - fm.stringWidth(tickLabel) / 2, floorY + 13);
+            }
+        }
+
+        // Height labels on left margin
+        if (showLabels) {
+            g.setFont(new Font("SansSerif", Font.PLAIN, 7));
+            g.setColor(new Color(100, 100, 100));
+            g.setStroke(new BasicStroke(0.5f));
+            for (int hMm = 0; hMm <= roomHeightMm; hMm += 500) {
+                int hy = floorY - (int) (hMm * scale);
+                if (hy < drawY) break;
+                g.drawLine(drawX - 3, hy, drawX, hy);
+                FontMetrics fm = g.getFontMetrics();
+                g.drawString(hMm + "", panelX + 1, hy + 3);
+            }
+        }
+    }
+
+    private void drawLegend(Graphics2D g, List<CabinetPlanItemDTO> cabinets, List<LayoutZoneDTO> zones) {
         int lx = CANVAS_W - LEGEND_W + 10;
         int ly = PADDING;
         g.setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -546,36 +756,49 @@ public class Prototype3dServiceImpl implements Prototype3dService {
         }
         g.setFont(new Font("SansSerif", Font.PLAIN, 11));
         for (CabinetCategory cat : seen) {
-            g.setColor(categoryColor(cat));
+            Color c = categoryColor(cat);
+            boolean isUpper = cat == CabinetCategory.UPPER;
+            g.setColor(isUpper ? new Color(c.getRed(), c.getGreen(), c.getBlue(), 90) : c);
             g.fillRect(lx, ly - 10, 14, 14);
-            g.setColor(categoryColor(cat).darker());
+            g.setColor(c.darker());
+            if (isUpper) {
+                float[] dash = { 4f, 3f };
+                g.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, dash, 0f));
+            } else {
+                g.setStroke(new BasicStroke(1f));
+            }
             g.drawRect(lx, ly - 10, 14, 14);
+            g.setStroke(new BasicStroke(1f));
             g.setColor(new Color(40, 40, 40));
-            g.drawString(cat.name().replace('_', ' '), lx + 18, ly);
+            String label = cat.name().replace('_', ' ') + (isUpper ? " (aéreo)" : "");
+            g.drawString(label, lx + 18, ly);
             ly += 18;
         }
 
-        ly += 10;
-        g.setFont(new Font("SansSerif", Font.BOLD, 12));
-        g.drawString("Zonas", lx, ly);
-        ly += 18;
-        g.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        for (Color c : new Color[] { zoneColor("SINK"), zoneColor("STOVE"), zoneColor("REFRIGERATOR"), zoneColor("WORK") }) {
-            String label =
-                c == zoneColor("SINK")
-                    ? "SINK"
-                    : c == zoneColor("STOVE")
-                        ? "STOVE/GAS"
-                        : c == zoneColor("REFRIGERATOR")
-                            ? "FRIDGE"
-                            : "WORK";
-            g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 120));
-            g.fillRect(lx, ly - 10, 14, 14);
-            g.setColor(c);
-            g.drawRect(lx, ly - 10, 14, 14);
+        if (zones != null && !zones.isEmpty()) {
+            ly += 10;
+            g.setFont(new Font("SansSerif", Font.BOLD, 12));
             g.setColor(new Color(40, 40, 40));
-            g.drawString(label, lx + 18, ly);
+            g.drawString("Zonas", lx, ly);
             ly += 18;
+            g.setFont(new Font("SansSerif", Font.PLAIN, 11));
+            java.util.LinkedHashMap<String, Color> seenZones = new java.util.LinkedHashMap<>();
+            for (LayoutZoneDTO zone : zones) {
+                if (zone.getZoneType() != null) {
+                    seenZones.putIfAbsent(zone.getZoneType(), zoneColor(zone.getZoneType()));
+                }
+            }
+            g.setStroke(new BasicStroke(1f));
+            for (java.util.Map.Entry<String, Color> entry : seenZones.entrySet()) {
+                Color c = entry.getValue();
+                g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 120));
+                g.fillRect(lx, ly - 10, 14, 14);
+                g.setColor(c);
+                g.drawRect(lx, ly - 10, 14, 14);
+                g.setColor(new Color(40, 40, 40));
+                g.drawString(entry.getKey(), lx + 18, ly);
+                ly += 18;
+            }
         }
     }
 
@@ -584,7 +807,7 @@ public class Prototype3dServiceImpl implements Prototype3dService {
     }
 
     private int toCanvasY(double roomY, double minY, double scale) {
-        return CANVAS_H - PADDING - (int) ((roomY - minY) * scale);
+        return FLOOR_PLAN_H - PADDING - (int) ((roomY - minY) * scale);
     }
 
     private Color categoryColor(CabinetCategory cat) {

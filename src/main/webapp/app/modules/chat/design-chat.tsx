@@ -1042,7 +1042,12 @@ const DesignChat = () => {
           createdAt: new Date().toISOString(),
         },
       ]);
-      setSketchReview(toSketchReview(extraction));
+      const review = toSketchReview(extraction);
+      if (!review.projectType && session.projectType) {
+        review.projectType = session.projectType;
+        review.projectTypeConfidence = 'LOW';
+      }
+      setSketchReview(review);
       setIsSketchReviewConfirmed(false);
       setSelectedSketchImage(null);
     } catch {
@@ -1194,7 +1199,7 @@ const DesignChat = () => {
 
     const cabinets = sketchReview.cabinets.map((cabinet, index) => {
       const category = normalizeCabinetCategory(cabinet.category);
-      const xMm = toOptionalMm(cabinet.x, sketchReview.unit);
+      const xMm = toOptionalMm(cabinet.x, sketchReview.unit) ?? 0;
       const yMm = toOptionalMm(cabinet.y, sketchReview.unit) ?? 0;
       const zMm = toOptionalMm(cabinet.z, sketchReview.unit) ?? 0;
       const widthMm = toMm(cabinet.width, sketchReview.unit);
@@ -1204,8 +1209,8 @@ const DesignChat = () => {
       if (!category) {
         throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita un tipo compatible.`);
       }
-      if (!cabinet.wallCode.trim() || xMm === null || !widthMm || !heightMm || !depthMm) {
-        throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita pared, X, ancho, alto y fondo.`);
+      if (!widthMm || !heightMm || !depthMm) {
+        throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita ancho, alto y fondo.`);
       }
 
       return {
@@ -1220,7 +1225,7 @@ const DesignChat = () => {
         drawers: toOptionalInteger(cabinet.drawers),
         shelves: null,
         finish: null,
-        wallCode: cabinet.wallCode.trim(),
+        wallCode: cabinet.wallCode.trim() || 'A',
         xMm,
         yMm,
         zMm,

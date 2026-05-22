@@ -132,6 +132,8 @@ public class CabinetPlanServiceImpl implements CabinetPlanService {
 
         if (response.isValid()) {
             persistValidCabinetPlan(session, layout, response);
+        } else {
+            persistCabinetPlanSnapshot(session, response);
         }
         return response;
     }
