@@ -171,12 +171,12 @@ const MeasuredLayoutPage = () => {
 
     Promise.allSettled([getMeasuredLayout(sessionId), getCabinetPlan(sessionId)])
       .then(([layoutResult, planResult]) => {
-        if (layoutResult.status === 'fulfilled') {
+        if (layoutResult.status === 'fulfilled' && layoutResult.value) {
           setLayout(layoutResult.value);
         } else {
           setLayout(buildDefaultLayout(sessionId));
         }
-        if (planResult.status === 'fulfilled') {
+        if (planResult.status === 'fulfilled' && planResult.value) {
           setCabinetPlan(planResult.value);
         }
       })

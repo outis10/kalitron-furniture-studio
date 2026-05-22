@@ -12,9 +12,13 @@ import {
   ChatMessageView,
   ChatSession,
   generateVisualConcept,
+  getCabinetPlan,
   getCatalogStyles,
+  getMeasuredLayout,
+  getSketchImage,
   LayoutObstacleType,
   MeasuredKitchenLayout,
+  MeasuredLayout,
   resumeChatSession,
   saveCabinetPlan,
   saveMeasuredLayout,
@@ -29,7 +33,16 @@ import {
   startChatSession,
 } from 'app/shared/api/design-chat-api';
 import { ICatalogStyle } from 'app/shared/model/catalog-style.model';
+import axios from 'axios';
 import { Link, useSearchParams } from 'react-router';
+
+const extractApiError = (error: unknown, fallback: string): string => {
+  if (axios.isAxiosError(error)) {
+    const title: unknown = error.response?.data?.title;
+    if (typeof title === 'string' && title.trim()) return title.trim();
+  }
+  return error instanceof Error ? error.message : fallback;
+};
 
 const STORAGE_KEY = 'kalitron.designChat.sessionCode';
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -345,29 +358,26 @@ const normalizeObstacleType = (obstacleType: string): LayoutObstacleType => {
 
 const normalizeUnit = (unit: string) => unit.trim().toUpperCase();
 
-const toMm = (value: string, unit: string): number | null => {
-  if (!value.trim()) {
-    return null;
-  }
-  const numericValue = Number(value);
-  if (!Number.isFinite(numericValue) || numericValue <= 0) {
-    return null;
-  }
+const applyUnitConversion = (numericValue: number, unit: string): number => {
   const normalizedUnit = normalizeUnit(unit);
-  if (normalizedUnit === 'CM') {
-    return Math.round(numericValue * 10);
-  }
-  if (normalizedUnit === 'IN') {
-    return Math.round(numericValue * 25.4);
-  }
+  if (normalizedUnit === 'CM') return Math.round(numericValue * 10);
+  if (normalizedUnit === 'IN') return Math.round(numericValue * 25.4);
   return Math.round(numericValue);
 };
 
+const toMm = (value: string, unit: string): number | null => {
+  if (!value.trim()) return null;
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue <= 0) return null;
+  return applyUnitConversion(numericValue, unit);
+};
+
+// For position fields (x, y, z) where 0 is a valid coordinate (floor level, wall start, etc.)
 const toOptionalMm = (value: string, unit: string): number | null => {
-  if (!value.trim()) {
-    return null;
-  }
-  return toMm(value, unit);
+  if (!value.trim()) return null;
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue) || numericValue < 0) return null;
+  return applyUnitConversion(numericValue, unit);
 };
 
 const toOptionalInteger = (value: string): number | null => {
@@ -377,6 +387,150 @@ const toOptionalInteger = (value: string): number | null => {
   const numericValue = Number(value);
   return Number.isFinite(numericValue) ? Math.round(numericValue) : null;
 };
+
+const cabinetReviewNotes = (cabinet: SketchReviewCabinet): string => {
+  const fieldsToReview = [
+    ['tipo', cabinet.categoryConfidence],
+    ['etiqueta', cabinet.labelConfidence],
+    ['pared', cabinet.wallConfidence],
+    ['x', cabinet.xConfidence],
+    ['y', cabinet.yConfidence],
+    ['z', cabinet.zConfidence],
+    ['ancho', cabinet.widthConfidence],
+    ['alto', cabinet.heightConfidence],
+    ['fondo', cabinet.depthConfidence],
+    ['rotación', cabinet.rotationConfidence],
+    ['puertas', cabinet.doorsConfidence],
+    ['cajones', cabinet.drawersConfidence],
+  ]
+    .filter(([, confidence]) => ['LOW', 'MISSING'].includes(confidence))
+    .map(([field]) => field);
+
+  if (fieldsToReview.length === 0) {
+    return 'Origen: extracción de boceto confirmada.';
+  }
+  return `Origen: extracción de boceto confirmada. Revisar: ${fieldsToReview.join(', ')}.`;
+};
+
+const renderPersistedArtifactsInfo = (
+  savedLayoutInfo: { wallCount: number; zoneCount: number } | null,
+  savedCabinetPlanInfo: { cabinetCount: number } | null,
+  hasSketchReview: boolean,
+  onLoadSavedData: () => void,
+) => {
+  if (!savedLayoutInfo && !savedCabinetPlanInfo) return null;
+  const showLoadButton = !!savedLayoutInfo && !hasSketchReview;
+  return (
+    <div className="design-chat__saved-info mt-3">
+      {savedLayoutInfo ? (
+        <p className="design-chat__meta mb-1">
+          <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
+          Layout guardado — {savedLayoutInfo.wallCount} {savedLayoutInfo.wallCount === 1 ? 'pared' : 'paredes'}
+          {savedLayoutInfo.zoneCount > 0 ? `, ${savedLayoutInfo.zoneCount} zonas` : ''}
+        </p>
+      ) : null}
+      {savedCabinetPlanInfo ? (
+        <p className="design-chat__meta mb-0">
+          <FontAwesomeIcon icon={faCheck} className="text-success me-1" />
+          {savedCabinetPlanInfo.cabinetCount === 1 ? '1 mueble guardado' : `${savedCabinetPlanInfo.cabinetCount} muebles guardados`}
+        </p>
+      ) : null}
+      {showLoadButton ? (
+        <Button className="mt-2" onClick={onLoadSavedData} size="sm" type="button" variant="outline-secondary">
+          Ver / Editar guardado
+        </Button>
+      ) : null}
+    </div>
+  );
+};
+
+const loadPersistedArtifacts = async (
+  sessionId: number,
+): Promise<{ layout: MeasuredLayout | null; cabinetPlan: CabinetPlan | null; sketchPreviewUrl: string | null }> => {
+  const [layoutResult, planResult, sketchResult] = await Promise.allSettled([
+    getMeasuredLayout(sessionId),
+    getCabinetPlan(sessionId),
+    getSketchImage(sessionId),
+  ]);
+  return {
+    layout: layoutResult.status === 'fulfilled' ? layoutResult.value : null,
+    cabinetPlan: planResult.status === 'fulfilled' ? planResult.value : null,
+    sketchPreviewUrl: sketchResult.status === 'fulfilled' ? sketchResult.value : null,
+  };
+};
+
+const savedDataToSketchReview = (layout: MeasuredLayout, cabinetPlan: CabinetPlan | null): SketchReviewState => ({
+  projectType: '',
+  projectTypeConfidence: 'MISSING',
+  layout: layout.layout,
+  layoutConfidence: 'HIGH',
+  unit: 'MM',
+  unitConfidence: 'HIGH',
+  walls: layout.walls.map(wall => ({
+    wallCode: wall.wallCode,
+    wallConfidence: 'HIGH',
+    length: String(wall.lengthMm),
+    lengthConfidence: 'HIGH',
+    height: String(wall.heightMm ?? layout.roomHeightMm),
+    heightConfidence: 'HIGH',
+    angleDeg: String(wall.angleDeg ?? 0),
+    angleConfidence: wall.angleDeg != null ? 'HIGH' : 'LOW',
+  })),
+  zones: (layout.zones ?? []).map(zone => ({
+    zoneCode: zone.zoneCode,
+    zoneConfidence: 'HIGH',
+    zoneType: zone.zoneType,
+    typeConfidence: 'HIGH',
+    wallCode: zone.wallCode,
+    wallConfidence: 'HIGH',
+    x: String(zone.xMm),
+    xConfidence: 'HIGH',
+    width: String(zone.widthMm ?? ''),
+    widthConfidence: zone.widthMm != null ? 'HIGH' : 'LOW',
+  })),
+  obstacles: (layout.obstacles ?? []).map(obstacle => ({
+    obstacleType: obstacle.obstacleType,
+    typeConfidence: 'HIGH',
+    label: obstacle.label ?? '',
+    labelConfidence: 'HIGH',
+    wallCode: obstacle.wallCode,
+    wallConfidence: 'HIGH',
+    x: String(obstacle.xMm),
+    xConfidence: 'HIGH',
+    width: String(obstacle.widthMm ?? ''),
+    widthConfidence: obstacle.widthMm != null ? 'HIGH' : 'LOW',
+  })),
+  cabinets: (cabinetPlan?.cabinets ?? []).map(cabinet => ({
+    candidateCode: cabinet.cabinetCode ?? '',
+    category: cabinet.category,
+    categoryConfidence: 'HIGH',
+    label: cabinet.label,
+    labelConfidence: 'HIGH',
+    wallCode: cabinet.wallCode,
+    wallConfidence: 'HIGH',
+    x: String(cabinet.xMm),
+    xConfidence: 'HIGH',
+    y: String(cabinet.yMm),
+    yConfidence: 'HIGH',
+    z: String(cabinet.zMm),
+    zConfidence: 'HIGH',
+    width: String(cabinet.widthMm),
+    widthConfidence: 'HIGH',
+    height: String(cabinet.heightMm),
+    heightConfidence: 'HIGH',
+    depth: String(cabinet.depthMm),
+    depthConfidence: 'HIGH',
+    rotationDeg: String(cabinet.rotationDeg ?? 0),
+    rotationConfidence: 'HIGH',
+    doors: String(cabinet.doors ?? ''),
+    doorsConfidence: cabinet.doors != null ? 'HIGH' : 'LOW',
+    drawers: String(cabinet.drawers ?? ''),
+    drawersConfidence: cabinet.drawers != null ? 'HIGH' : 'LOW',
+  })),
+  missingInfo: [],
+  questions: [],
+  warnings: [],
+});
 
 const DesignChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -407,6 +561,11 @@ const DesignChat = () => {
   const [isSavingCabinetPlan, setIsSavingCabinetPlan] = useState(false);
   const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
+  const [savedLayoutInfo, setSavedLayoutInfo] = useState<{ wallCount: number; zoneCount: number } | null>(null);
+  const [savedCabinetPlanInfo, setSavedCabinetPlanInfo] = useState<{ cabinetCount: number } | null>(null);
+  const [savedLayout, setSavedLayout] = useState<MeasuredLayout | null>(null);
+  const [savedCabinetPlan, setSavedCabinetPlan] = useState<CabinetPlan | null>(null);
+  const [savedSketchPreviewUrl, setSavedSketchPreviewUrl] = useState<string | null>(null);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
@@ -429,6 +588,10 @@ const DesignChat = () => {
 
   useEffect(() => {
     const querySessionCode = searchParams.get('sessionCode');
+    if (searchParams.get('new') === 'true') {
+      window.localStorage.removeItem(STORAGE_KEY);
+      return;
+    }
     const storedSessionCode = querySessionCode || window.localStorage.getItem(STORAGE_KEY);
     if (!storedSessionCode) {
       return;
@@ -444,6 +607,17 @@ const DesignChat = () => {
           setSelectedStyle({ name: resumedSession.selectedStyle, isActive: true });
           setStyleSkipped(false);
         }
+        loadPersistedArtifacts(resumedSession.sessionId).then(({ layout, cabinetPlan, sketchPreviewUrl }) => {
+          if (layout) {
+            setSavedLayoutInfo({ wallCount: layout.walls.length, zoneCount: layout.zones?.length ?? 0 });
+            setSavedLayout(layout);
+          }
+          if (cabinetPlan) {
+            setSavedCabinetPlanInfo({ cabinetCount: cabinetPlan.cabinetCount });
+            setSavedCabinetPlan(cabinetPlan);
+          }
+          if (sketchPreviewUrl) setSavedSketchPreviewUrl(sketchPreviewUrl);
+        });
       })
       .catch(() => {
         window.localStorage.removeItem(STORAGE_KEY);
@@ -585,6 +759,12 @@ const DesignChat = () => {
     }
   };
 
+  const handleLoadSavedData = () => {
+    if (!savedLayout) return;
+    setSketchReview(savedDataToSketchReview(savedLayout, savedCabinetPlan));
+    setIsSketchReviewConfirmed(false);
+  };
+
   const handleRestart = () => {
     window.localStorage.removeItem(STORAGE_KEY);
     setSession(null);
@@ -600,6 +780,10 @@ const DesignChat = () => {
     setStyleSkipped(false);
     setIsSavingMeasuredLayout(false);
     setIsSavingCabinetPlan(false);
+    setSavedLayout(null);
+    setSavedCabinetPlan(null);
+    if (savedSketchPreviewUrl) URL.revokeObjectURL(savedSketchPreviewUrl);
+    setSavedSketchPreviewUrl(null);
     setError(null);
   };
 
@@ -906,30 +1090,6 @@ const DesignChat = () => {
     };
   };
 
-  const cabinetReviewNotes = (cabinet: SketchReviewCabinet) => {
-    const fieldsToReview = [
-      ['tipo', cabinet.categoryConfidence],
-      ['etiqueta', cabinet.labelConfidence],
-      ['pared', cabinet.wallConfidence],
-      ['x', cabinet.xConfidence],
-      ['y', cabinet.yConfidence],
-      ['z', cabinet.zConfidence],
-      ['ancho', cabinet.widthConfidence],
-      ['alto', cabinet.heightConfidence],
-      ['fondo', cabinet.depthConfidence],
-      ['rotación', cabinet.rotationConfidence],
-      ['puertas', cabinet.doorsConfidence],
-      ['cajones', cabinet.drawersConfidence],
-    ]
-      .filter(([, confidence]) => ['LOW', 'MISSING'].includes(confidence))
-      .map(([field]) => field);
-
-    if (fieldsToReview.length === 0) {
-      return 'Origen: extracción de boceto confirmada.';
-    }
-    return `Origen: extracción de boceto confirmada. Revisar: ${fieldsToReview.join(', ')}.`;
-  };
-
   const buildCabinetPlanFromReview = (): CabinetPlan => {
     if (!session || !sketchReview) {
       throw new Error('No hay muebles candidatos confirmados para guardar.');
@@ -1008,7 +1168,9 @@ const DesignChat = () => {
     setIsSavingMeasuredLayout(true);
     try {
       const measuredLayout = buildMeasuredLayoutFromReview();
-      await saveMeasuredLayout(session.sessionId, measuredLayout);
+      const savedLayoutResult = await saveMeasuredLayout(session.sessionId, measuredLayout);
+      setSavedLayoutInfo({ wallCount: measuredLayout.walls.length, zoneCount: measuredLayout.zones?.length ?? 0 });
+      setSavedLayout(savedLayoutResult);
       setMessages(currentMessages => [
         ...currentMessages,
         {
@@ -1018,7 +1180,7 @@ const DesignChat = () => {
         },
       ]);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'No se pudo guardar el layout medido.');
+      setError(extractApiError(saveError, 'No se pudo guardar el layout medido.'));
     } finally {
       setIsSavingMeasuredLayout(false);
     }
@@ -1037,9 +1199,13 @@ const DesignChat = () => {
     setIsSavingCabinetPlan(true);
     try {
       const measuredLayout = buildMeasuredLayoutFromReview();
-      await saveMeasuredLayout(session.sessionId, measuredLayout);
+      const savedLayoutResult = await saveMeasuredLayout(session.sessionId, measuredLayout);
+      setSavedLayoutInfo({ wallCount: measuredLayout.walls.length, zoneCount: measuredLayout.zones?.length ?? 0 });
+      setSavedLayout(savedLayoutResult);
       const cabinetPlan = buildCabinetPlanFromReview();
       const savedPlan = await saveCabinetPlan(session.sessionId, cabinetPlan);
+      setSavedCabinetPlanInfo({ cabinetCount: savedPlan.cabinetCount });
+      setSavedCabinetPlan(savedPlan);
       const blockingMessages = savedPlan.validationMessages.filter(message => message.severity === 'ERROR');
       setMessages(currentMessages => [
         ...currentMessages,
@@ -1053,7 +1219,7 @@ const DesignChat = () => {
         },
       ]);
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'No se pudieron guardar los muebles detectados.');
+      setError(extractApiError(saveError, 'No se pudieron guardar los muebles detectados.'));
     } finally {
       setIsSavingCabinetPlan(false);
     }
@@ -1263,24 +1429,49 @@ const DesignChat = () => {
         ) : null}
 
         <div className="design-chat__review-actions">
-          <Button onClick={handleConfirmSketchReview} type="button" disabled={isSketchReviewConfirmed}>
-            Confirmar extracción
+          <p className="design-chat__meta mb-2">
+            Flujo: <strong>1. Corrige los datos</strong> → <strong>2. Confirma</strong> → <strong>3. Guarda lo que necesites</strong>
+          </p>
+          <Button
+            onClick={handleConfirmSketchReview}
+            type="button"
+            disabled={isSketchReviewConfirmed}
+            title="Marca la extracción como revisada. Requerido antes de guardar. No persiste datos todavía."
+          >
+            {isSketchReviewConfirmed ? '✓ Extracción confirmada' : 'Confirmar extracción'}
           </Button>
-          <Button onClick={handleSaveMeasuredLayoutFromSketch} type="button" disabled={!isSketchReviewConfirmed || isSavingMeasuredLayout}>
+          <Button
+            onClick={handleSaveMeasuredLayoutFromSketch}
+            type="button"
+            disabled={!isSketchReviewConfirmed || isSavingMeasuredLayout}
+            title="Persiste paredes, zonas y obstáculos como layout medido de la sesión. No incluye muebles."
+          >
             {isSavingMeasuredLayout ? <Spinner size="sm" /> : 'Guardar layout medido'}
           </Button>
           <Button
             onClick={handleSaveCabinetPlanFromSketch}
             type="button"
             disabled={!isSketchReviewConfirmed || sketchReview.cabinets.length === 0 || isSavingCabinetPlan}
+            title="Persiste el layout medido y los muebles candidatos como plan editable. Requiere al menos un mueble."
           >
-            {isSavingCabinetPlan ? <Spinner size="sm" /> : 'Guardar muebles'}
+            {isSavingCabinetPlan ? <Spinner size="sm" /> : 'Guardar layout + muebles'}
           </Button>
-          <Button onClick={handleRejectSketchReview} type="button" variant="outline-secondary">
+          <Button
+            onClick={handleRejectSketchReview}
+            type="button"
+            variant="outline-secondary"
+            title="Descarta la extracción actual. No borra datos ya guardados en sesiones anteriores."
+          >
             Descartar extracción
           </Button>
           {session ? (
-            <Button as={Link as any} to={`/design-layout/${session.sessionId}`} type="button" variant="outline-primary">
+            <Button
+              as={Link as any}
+              to={`/design-layout/${session.sessionId}`}
+              type="button"
+              variant="outline-primary"
+              title="Abre el editor de layout para capturar paredes y muebles manualmente, sin boceto."
+            >
               Captura manual
             </Button>
           ) : null}
@@ -1314,13 +1505,22 @@ const DesignChat = () => {
                 <FontAwesomeIcon icon={faRotateRight} /> Nueva sesión
               </Button>
               <Button as={Link as any} to={`/design-layout/${session.sessionId}`} className="ms-2" variant="outline-primary" size="sm">
-                Layout medido
+                Editor de layout
               </Button>
+              {renderPersistedArtifactsInfo(savedLayoutInfo, savedCabinetPlanInfo, !!sketchReview, handleLoadSavedData)}
               <section className="design-chat__sketch-panel" aria-label="Boceto para extracción">
                 <div>
                   <h2 className="h6 mb-1">Boceto</h2>
                   <p className="design-chat__meta mb-2">Sube una foto del dibujo. Se analizará como borrador, no como plano confirmado.</p>
                 </div>
+                {savedSketchPreviewUrl && !selectedSketchImage ? (
+                  <div className="design-chat__sketch-preview design-chat__sketch-preview--saved">
+                    <a href={savedSketchPreviewUrl} target="_blank" rel="noopener noreferrer">
+                      <img src={savedSketchPreviewUrl} alt="Boceto guardado" />
+                    </a>
+                    <span className="design-chat__meta">Boceto guardado — clic para ampliar</span>
+                  </div>
+                ) : null}
                 {selectedSketchImage ? (
                   <div className="design-chat__sketch-preview">
                     <img src={selectedSketchImage.previewUrl} alt={selectedSketchImage.fileName} />

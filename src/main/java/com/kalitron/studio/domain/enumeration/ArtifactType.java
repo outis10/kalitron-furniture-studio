@@ -11,6 +11,7 @@ public enum ArtifactType {
     DXF,
     PDF,
     BOM_JSON("BOM JSON"),
+    SKETCH_EXTRACTION_JSON("Extracción de boceto JSON"),
     QUOTE_PDF("PDF de cotización"),
     OTHER("Otro");
 
