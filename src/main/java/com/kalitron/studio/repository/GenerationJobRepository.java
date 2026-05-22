@@ -1,6 +1,7 @@
 package com.kalitron.studio.repository;
 
 import com.kalitron.studio.domain.GenerationJob;
+import com.kalitron.studio.domain.enumeration.GenerationJobType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -41,4 +42,8 @@ public interface GenerationJobRepository extends JpaRepository<GenerationJob, Lo
         "select generationJob from GenerationJob generationJob left join fetch generationJob.artifact left join fetch generationJob.session where generationJob.id =:id"
     )
     Optional<GenerationJob> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Optional<GenerationJob> findFirstBySessionIdAndJobTypeOrderByCreatedAtDesc(Long sessionId, GenerationJobType jobType);
+
+    Optional<GenerationJob> findBySessionIdAndJobTypeAndId(Long sessionId, GenerationJobType jobType, Long id);
 }

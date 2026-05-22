@@ -340,6 +340,45 @@ export const saveCabinetPlan = async (sessionId: number, cabinetPlan: CabinetPla
   return response.data;
 };
 
+export interface Prototype3dArtifactItem {
+  artifactId: number;
+  artifactType: string;
+  fileName: string;
+  mimeType: string;
+}
+
+export interface Prototype3dJob {
+  jobId: number;
+  sessionId: number;
+  sessionCode: string;
+  status: 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED' | 'CANCELLED';
+  prototypeMode: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  artifacts: Prototype3dArtifactItem[];
+  warnings: string[];
+}
+
+export const generatePrototype = async (sessionId: number): Promise<Prototype3dJob> => {
+  const response = await axios.post<Prototype3dJob>(`/api/design-sessions/${sessionId}/prototype-3d`);
+  return response.data;
+};
+
+export const getLatestPrototypeJob = async (sessionId: number): Promise<Prototype3dJob | null> => {
+  const response = await axios.get<Prototype3dJob>(`/api/design-sessions/${sessionId}/prototype-3d/latest`);
+  return response.status === 204 ? null : response.data;
+};
+
+export const getPrototypePreview = async (sessionId: number): Promise<string | null> => {
+  try {
+    const response = await axios.get<Blob>(`/api/design-sessions/${sessionId}/prototype-3d/preview`, { responseType: 'blob' });
+    if (response.status === 204 || response.data.size === 0) return null;
+    return URL.createObjectURL(response.data);
+  } catch {
+    return null;
+  }
+};
+
 export const getSketchImage = async (sessionId: number): Promise<string | null> => {
   const response = await axios.get<Blob>(`/api/design-sessions/${sessionId}/sketch-image`, { responseType: 'blob' });
   if (response.status === 204 || response.data.size === 0) return null;

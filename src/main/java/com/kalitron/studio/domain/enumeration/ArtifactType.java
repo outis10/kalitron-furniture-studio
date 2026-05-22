@@ -13,6 +13,8 @@ public enum ArtifactType {
     BOM_JSON("BOM JSON"),
     SKETCH_EXTRACTION_JSON("Extracción de boceto JSON"),
     QUOTE_PDF("PDF de cotización"),
+    PROTOTYPE_PREVIEW("Vista previa prototipo"),
+    PROTOTYPE_METADATA("Metadatos prototipo"),
     OTHER("Otro");
 
     private String value;

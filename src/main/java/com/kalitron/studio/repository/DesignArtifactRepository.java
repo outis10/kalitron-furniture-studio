@@ -1,6 +1,7 @@
 package com.kalitron.studio.repository;
 
 import com.kalitron.studio.domain.DesignArtifact;
+import com.kalitron.studio.domain.enumeration.ArtifactType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DesignArtifactRepository extends JpaRepository<DesignArtifact, Long> {
     Optional<DesignArtifact> findFirstBySessionIdAndFileNameOrderByCreatedAtDesc(Long sessionId, String fileName);
+
+    List<DesignArtifact> findBySessionIdAndArtifactTypeInOrderByCreatedAtDesc(Long sessionId, List<ArtifactType> artifactTypes);
 
     default Optional<DesignArtifact> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);

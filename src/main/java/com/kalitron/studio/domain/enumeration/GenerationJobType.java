@@ -10,6 +10,7 @@ public enum GenerationJobType {
     BOM,
     QUOTE("Cotización"),
     FUSION_MODEL("Modelo Fusion 360"),
+    PROTOTYPE_3D("Prototipo 3D"),
     EXPORT("Exportación");
 
     private String value;
