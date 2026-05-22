@@ -62,6 +62,10 @@ docs/specs/
     62-convert-confirmed-sketch-extraction-to-measured-layout.md
     63-review-extracted-layout-before-saving.md
     87-persist-sketch-image-and-extraction-artifacts.md
+    89-load-persisted-layout-on-resume.md
+  e8-3d-prototype-from-confirmed-cabinet-plan/
+    epic.md
+    65-3d-prototype-generation-contract.md
 ```
 
 ## Rules
