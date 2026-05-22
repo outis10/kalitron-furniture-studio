@@ -339,3 +339,9 @@ export const saveCabinetPlan = async (sessionId: number, cabinetPlan: CabinetPla
   const response = await axios.put<CabinetPlan>(`/api/design-sessions/${sessionId}/cabinet-plan`, cabinetPlan);
   return response.data;
 };
+
+export const getSketchImage = async (sessionId: number): Promise<string | null> => {
+  const response = await axios.get<Blob>(`/api/design-sessions/${sessionId}/sketch-image`, { responseType: 'blob' });
+  if (response.status === 204 || response.data.size === 0) return null;
+  return URL.createObjectURL(response.data);
+};
