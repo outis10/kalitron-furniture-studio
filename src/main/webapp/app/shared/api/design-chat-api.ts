@@ -315,9 +315,9 @@ export interface CabinetPlan {
   validationMessages: CabinetPlanValidationMessage[];
 }
 
-export const getMeasuredLayout = async (sessionId: number): Promise<MeasuredLayout> => {
+export const getMeasuredLayout = async (sessionId: number): Promise<MeasuredLayout | null> => {
   const response = await axios.get<MeasuredLayout>(`/api/design-sessions/${sessionId}/measured-layout`);
-  return response.data;
+  return response.status === 204 ? null : response.data;
 };
 
 export const saveMeasuredLayout = async (sessionId: number, layout: MeasuredLayout): Promise<MeasuredLayout> => {
@@ -325,9 +325,9 @@ export const saveMeasuredLayout = async (sessionId: number, layout: MeasuredLayo
   return response.data;
 };
 
-export const getCabinetPlan = async (sessionId: number): Promise<CabinetPlan> => {
+export const getCabinetPlan = async (sessionId: number): Promise<CabinetPlan | null> => {
   const response = await axios.get<CabinetPlan>(`/api/design-sessions/${sessionId}/cabinet-plan`);
-  return response.data;
+  return response.status === 204 ? null : response.data;
 };
 
 export const generateCabinetPlan = async (sessionId: number): Promise<CabinetPlan> => {
@@ -338,4 +338,10 @@ export const generateCabinetPlan = async (sessionId: number): Promise<CabinetPla
 export const saveCabinetPlan = async (sessionId: number, cabinetPlan: CabinetPlan): Promise<CabinetPlan> => {
   const response = await axios.put<CabinetPlan>(`/api/design-sessions/${sessionId}/cabinet-plan`, cabinetPlan);
   return response.data;
+};
+
+export const getSketchImage = async (sessionId: number): Promise<string | null> => {
+  const response = await axios.get<Blob>(`/api/design-sessions/${sessionId}/sketch-image`, { responseType: 'blob' });
+  if (response.status === 204 || response.data.size === 0) return null;
+  return URL.createObjectURL(response.data);
 };

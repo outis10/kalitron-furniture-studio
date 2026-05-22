@@ -43,9 +43,6 @@ public class MeasuredLayoutResource {
 
     @GetMapping("/{sessionId}/measured-layout")
     public ResponseEntity<MeasuredLayoutRequestDTO> getMeasuredLayout(@PathVariable Long sessionId) {
-        return measuredLayoutService
-            .findMeasuredLayout(sessionId)
-            .map(ResponseEntity::ok)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Measured layout not found"));
+        return measuredLayoutService.findMeasuredLayout(sessionId).map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 }

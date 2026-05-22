@@ -4,6 +4,7 @@ Status: Implemented
 Issue: #87
 Epic: #57
 Depends on: #58, #59, #60, #61, #62, #63
+See also: #89 (retrieval and display of saved sketch on resume)
 
 ## Problem
 

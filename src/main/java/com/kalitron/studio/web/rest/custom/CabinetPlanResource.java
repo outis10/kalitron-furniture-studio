@@ -56,9 +56,6 @@ public class CabinetPlanResource {
 
     @GetMapping("/{sessionId}/cabinet-plan")
     public ResponseEntity<CabinetPlanResponseDTO> getCabinetPlan(@PathVariable Long sessionId) {
-        return cabinetPlanService
-            .findCabinetPlan(sessionId)
-            .map(ResponseEntity::ok)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cabinet plan not found"));
+        return cabinetPlanService.findCabinetPlan(sessionId).map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
     }
 }
