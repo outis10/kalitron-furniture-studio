@@ -1210,7 +1210,7 @@ const DesignChat = () => {
         throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita un tipo compatible.`);
       }
       if (!widthMm || !heightMm || !depthMm) {
-        throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita ancho, alto y fondo.`);
+        throw new Error(`El mueble ${cabinet.candidateCode || index + 1} necesita ancho, alto y fondo para guardarse.`);
       }
 
       return {
