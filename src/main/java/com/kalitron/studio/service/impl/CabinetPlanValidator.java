@@ -101,33 +101,45 @@ public class CabinetPlanValidator {
         for (Map.Entry<String, List<CabinetPlanItemDTO>> entry : cabinetsByWall.entrySet()) {
             List<CabinetPlanItemDTO> wallCabinets = entry.getValue();
             wallCabinets.sort(Comparator.comparing(CabinetPlanItemDTO::getxMm));
-            int occupiedWidth = wallCabinets.stream().map(CabinetPlanItemDTO::getWidthMm).reduce(0, Integer::sum);
             Integer wallLength = wallsByCode.get(entry.getKey()).getLengthMm();
-            if (occupiedWidth > wallLength) {
+            for (int i = 0; i < wallCabinets.size(); i++) {
+                for (int j = i + 1; j < wallCabinets.size(); j++) {
+                    CabinetPlanItemDTO a = wallCabinets.get(i);
+                    CabinetPlanItemDTO b = wallCabinets.get(j);
+                    boolean xOverlap = a.getxMm() + a.getWidthMm() > b.getxMm() && b.getxMm() + b.getWidthMm() > a.getxMm();
+                    if (!xOverlap) continue;
+                    int aZStart = a.getzMm() != null ? a.getzMm() : 0;
+                    int bZStart = b.getzMm() != null ? b.getzMm() : 0;
+                    boolean zOverlap = aZStart + a.getHeightMm() > bZStart && bZStart + b.getHeightMm() > aZStart;
+                    if (zOverlap) {
+                        messages.add(
+                            message(
+                                "ERROR",
+                                "CABINET_OVERLAP",
+                                "Los muebles " + a.getCabinetCode() + " y " + b.getCabinetCode() + " se traslapan.",
+                                entry.getKey(),
+                                b.getCabinetCode()
+                            )
+                        );
+                    }
+                }
+            }
+            // WALL_OVERFILLED: check horizontal coverage per z-layer by projecting intervals onto x-axis
+            int maxXEnd = wallCabinets
+                .stream()
+                .mapToInt(c -> c.getxMm() + c.getWidthMm())
+                .max()
+                .orElse(0);
+            if (maxXEnd > wallLength) {
                 messages.add(
                     message(
                         "ERROR",
                         "WALL_OVERFILLED",
-                        "La suma de módulos excede el largo disponible de pared " + entry.getKey() + ".",
+                        "Un módulo supera el largo disponible de pared " + entry.getKey() + ".",
                         entry.getKey(),
                         null
                     )
                 );
-            }
-            for (int index = 1; index < wallCabinets.size(); index++) {
-                CabinetPlanItemDTO previous = wallCabinets.get(index - 1);
-                CabinetPlanItemDTO current = wallCabinets.get(index);
-                if (previous.getxMm() + previous.getWidthMm() > current.getxMm()) {
-                    messages.add(
-                        message(
-                            "ERROR",
-                            "CABINET_OVERLAP",
-                            "Los muebles " + previous.getCabinetCode() + " y " + current.getCabinetCode() + " se traslapan.",
-                            entry.getKey(),
-                            current.getCabinetCode()
-                        )
-                    );
-                }
             }
         }
     }

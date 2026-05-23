@@ -66,6 +66,9 @@ docs/specs/
   e8-3d-prototype-from-confirmed-cabinet-plan/
     epic.md
     65-3d-prototype-generation-contract.md
+    66-generate-blockout-prototype.md
+    67-store-prototype-artifacts.md
+    68-frontend-prototype-preview.md
 ```
 
 ## Rules

@@ -11,11 +11,15 @@ import {
   CabinetPlan,
   ChatMessageView,
   ChatSession,
+  generatePrototype,
   generateVisualConcept,
   getCabinetPlan,
   getCatalogStyles,
   getMeasuredLayout,
+  getLatestPrototypeJob,
+  getPrototypePreview,
   getSketchImage,
+  Prototype3dJob,
   LayoutObstacleType,
   MeasuredKitchenLayout,
   MeasuredLayout,
@@ -532,6 +536,56 @@ const savedDataToSketchReview = (layout: MeasuredLayout, cabinetPlan: CabinetPla
   warnings: [],
 });
 
+const renderPrototypeSection = (
+  savedCabinetPlanInfo: { cabinetCount: number } | null,
+  prototypeJob: Prototype3dJob | null,
+  prototypePreviewUrl: string | null,
+  isGeneratingPrototype: boolean,
+  onGenerate: () => void,
+) => {
+  if (!savedCabinetPlanInfo) return null;
+  return (
+    <section className="design-chat__prototype-panel mt-3" aria-label="Prototipo de planta">
+      <h2 className="h6 mb-1">Prototipo</h2>
+      <p className="design-chat__meta mb-2">Plano en planta generado desde el plan de muebles confirmado.</p>
+      {prototypePreviewUrl ? (
+        <div className="design-chat__sketch-preview design-chat__sketch-preview--saved mb-2">
+          <a href={prototypePreviewUrl} target="_blank" rel="noopener noreferrer">
+            <img src={prototypePreviewUrl} alt="Prototipo de planta" />
+          </a>
+          <span className="design-chat__meta">Clic para ampliar</span>
+        </div>
+      ) : null}
+      {prototypeJob?.status === 'FAILED' ? (
+        <p className="design-chat__meta text-danger mb-2">La generación falló. Puedes volver a intentarlo.</p>
+      ) : null}
+      <Button
+        disabled={isGeneratingPrototype}
+        onClick={onGenerate}
+        size="sm"
+        title="Genera un plano en planta 2D con paredes, zonas y muebles posicionados."
+        type="button"
+        variant="outline-primary"
+      >
+        {isGeneratingPrototype ? (
+          <>
+            <Spinner size="sm" className="me-1" /> Generando...
+          </>
+        ) : prototypePreviewUrl ? (
+          'Regenerar prototipo'
+        ) : (
+          'Generar prototipo'
+        )}
+      </Button>
+      {prototypeJob?.warnings && prototypeJob.warnings.length > 0 ? (
+        <p className="design-chat__meta mt-1" style={{ fontSize: '0.75rem' }}>
+          {prototypeJob.warnings[0]}
+        </p>
+      ) : null}
+    </section>
+  );
+};
+
 const DesignChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sketchInputRef = useRef<HTMLInputElement>(null);
@@ -566,6 +620,9 @@ const DesignChat = () => {
   const [savedLayout, setSavedLayout] = useState<MeasuredLayout | null>(null);
   const [savedCabinetPlan, setSavedCabinetPlan] = useState<CabinetPlan | null>(null);
   const [savedSketchPreviewUrl, setSavedSketchPreviewUrl] = useState<string | null>(null);
+  const [prototypeJob, setPrototypeJob] = useState<Prototype3dJob | null>(null);
+  const [prototypePreviewUrl, setPrototypePreviewUrl] = useState<string | null>(null);
+  const [isGeneratingPrototype, setIsGeneratingPrototype] = useState(false);
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
@@ -617,6 +674,16 @@ const DesignChat = () => {
             setSavedCabinetPlan(cabinetPlan);
           }
           if (sketchPreviewUrl) setSavedSketchPreviewUrl(sketchPreviewUrl);
+        });
+        getLatestPrototypeJob(resumedSession.sessionId).then(job => {
+          if (job) {
+            setPrototypeJob(job);
+            if (job.status === 'DONE') {
+              getPrototypePreview(resumedSession.sessionId).then(url => {
+                if (url) setPrototypePreviewUrl(url);
+              });
+            }
+          }
         });
       })
       .catch(() => {
@@ -759,6 +826,24 @@ const DesignChat = () => {
     }
   };
 
+  const handleGeneratePrototype = async () => {
+    if (!session) return;
+    setIsGeneratingPrototype(true);
+    setError(null);
+    try {
+      const job = await generatePrototype(session.sessionId);
+      setPrototypeJob(job);
+      if (job.status === 'DONE') {
+        const url = await getPrototypePreview(session.sessionId);
+        if (url) setPrototypePreviewUrl(url);
+      }
+    } catch (err) {
+      setError(extractApiError(err, 'No se pudo generar el prototipo.'));
+    } finally {
+      setIsGeneratingPrototype(false);
+    }
+  };
+
   const handleLoadSavedData = () => {
     if (!savedLayout) return;
     setSketchReview(savedDataToSketchReview(savedLayout, savedCabinetPlan));
@@ -784,6 +869,9 @@ const DesignChat = () => {
     setSavedCabinetPlan(null);
     if (savedSketchPreviewUrl) URL.revokeObjectURL(savedSketchPreviewUrl);
     setSavedSketchPreviewUrl(null);
+    if (prototypePreviewUrl) URL.revokeObjectURL(prototypePreviewUrl);
+    setPrototypePreviewUrl(null);
+    setPrototypeJob(null);
     setError(null);
   };
 
@@ -954,7 +1042,12 @@ const DesignChat = () => {
           createdAt: new Date().toISOString(),
         },
       ]);
-      setSketchReview(toSketchReview(extraction));
+      const review = toSketchReview(extraction);
+      if (!review.projectType && session.projectType) {
+        review.projectType = session.projectType;
+        review.projectTypeConfidence = 'LOW';
+      }
+      setSketchReview(review);
       setIsSketchReviewConfirmed(false);
       setSelectedSketchImage(null);
     } catch {
@@ -1508,6 +1601,13 @@ const DesignChat = () => {
                 Editor de layout
               </Button>
               {renderPersistedArtifactsInfo(savedLayoutInfo, savedCabinetPlanInfo, !!sketchReview, handleLoadSavedData)}
+              {renderPrototypeSection(
+                savedCabinetPlanInfo,
+                prototypeJob,
+                prototypePreviewUrl,
+                isGeneratingPrototype,
+                handleGeneratePrototype,
+              )}
               <section className="design-chat__sketch-panel" aria-label="Boceto para extracción">
                 <div>
                   <h2 className="h6 mb-1">Boceto</h2>
