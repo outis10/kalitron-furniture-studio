@@ -12,14 +12,18 @@ import {
   ChatMessageView,
   ChatSession,
   generatePrototype,
+  generateStyledRender,
   generateVisualConcept,
   getCabinetPlan,
   getCatalogStyles,
   getMeasuredLayout,
   getLatestPrototypeJob,
+  getLatestStyledRenderJob,
   getPrototypePreview,
   getSketchImage,
+  getStyledRenderImage,
   Prototype3dJob,
+  StyledRenderJob,
   LayoutObstacleType,
   MeasuredKitchenLayout,
   MeasuredLayout,
@@ -586,6 +590,107 @@ const renderPrototypeSection = (
   );
 };
 
+const STYLE_OPTIONS = ['moderno', 'rustico', 'minimalista', 'clasico', 'industrial'];
+const FINISH_OPTIONS = ['white matte', 'oak wood', 'gray matte', 'black matte'];
+
+const renderStyledRenderSection = (
+  prototypePreviewUrl: string | null,
+  styledRenderJob: StyledRenderJob | null,
+  styledRenderUrl: string | null,
+  isGenerating: boolean,
+  selectedStyle: string,
+  selectedFinish: string,
+  onStyleChange: (v: string) => void,
+  onFinishChange: (v: string) => void,
+  onGenerate: () => void,
+) => {
+  if (!prototypePreviewUrl) return null;
+  return (
+    <section className="design-chat__prototype-panel mt-3" aria-label="Render estilizado">
+      <h2 className="h6 mb-1">Render estilizado</h2>
+      <p className="design-chat__meta mb-2">Aplica un estilo visual al prototipo confirmado usando IA (img2img).</p>
+      <div className="d-flex gap-2 flex-wrap mb-2">
+        <Form.Select
+          size="sm"
+          style={{ maxWidth: 160 }}
+          value={selectedStyle}
+          onChange={e => onStyleChange(e.target.value)}
+          aria-label="Estilo visual"
+        >
+          {STYLE_OPTIONS.map(s => (
+            <option key={s} value={s}>
+              {s.charAt(0).toUpperCase() + s.slice(1)}
+            </option>
+          ))}
+        </Form.Select>
+        <Form.Select
+          size="sm"
+          style={{ maxWidth: 160 }}
+          value={selectedFinish}
+          onChange={e => onFinishChange(e.target.value)}
+          aria-label="Acabado"
+        >
+          <option value="">Acabado (opcional)</option>
+          {FINISH_OPTIONS.map(f => (
+            <option key={f} value={f}>
+              {f}
+            </option>
+          ))}
+        </Form.Select>
+        <Button disabled={isGenerating} onClick={onGenerate} size="sm" type="button" variant="outline-success">
+          {isGenerating ? (
+            <>
+              <Spinner size="sm" className="me-1" /> Generando render...
+            </>
+          ) : styledRenderUrl ? (
+            'Regenerar render'
+          ) : (
+            'Generar render estilizado'
+          )}
+        </Button>
+      </div>
+      {styledRenderJob?.status === 'FAILED' ? (
+        <p className="design-chat__meta text-danger mb-2">La generación falló. Verifica que el AI Gateway y ComfyUI estén activos.</p>
+      ) : null}
+      {styledRenderUrl || prototypePreviewUrl ? (
+        <div className="d-flex gap-3 flex-wrap mt-2">
+          <div className="text-center">
+            <p className="design-chat__meta mb-1" style={{ fontSize: '0.7rem' }}>
+              Prototipo base
+            </p>
+            <a href={prototypePreviewUrl!} target="_blank" rel="noopener noreferrer">
+              <img
+                src={prototypePreviewUrl!}
+                alt="Prototipo base"
+                style={{ maxHeight: 180, maxWidth: 260, objectFit: 'contain', border: '1px solid #ddd', borderRadius: 4 }}
+              />
+            </a>
+          </div>
+          {styledRenderUrl ? (
+            <div className="text-center">
+              <p className="design-chat__meta mb-1" style={{ fontSize: '0.7rem' }}>
+                Render estilizado
+              </p>
+              <a href={styledRenderUrl} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={styledRenderUrl}
+                  alt="Render estilizado"
+                  style={{ maxHeight: 180, maxWidth: 260, objectFit: 'contain', border: '1px solid #ddd', borderRadius: 4 }}
+                />
+              </a>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {styledRenderJob?.warnings && styledRenderJob.warnings.length > 0 ? (
+        <p className="design-chat__meta mt-1" style={{ fontSize: '0.75rem' }}>
+          {styledRenderJob.warnings[0]}
+        </p>
+      ) : null}
+    </section>
+  );
+};
+
 const DesignChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sketchInputRef = useRef<HTMLInputElement>(null);
@@ -623,6 +728,11 @@ const DesignChat = () => {
   const [prototypeJob, setPrototypeJob] = useState<Prototype3dJob | null>(null);
   const [prototypePreviewUrl, setPrototypePreviewUrl] = useState<string | null>(null);
   const [isGeneratingPrototype, setIsGeneratingPrototype] = useState(false);
+  const [styledRenderJob, setStyledRenderJob] = useState<StyledRenderJob | null>(null);
+  const [styledRenderUrl, setStyledRenderUrl] = useState<string | null>(null);
+  const [isGeneratingStyledRender, setIsGeneratingStyledRender] = useState(false);
+  const [styledRenderStyle, setStyledRenderStyle] = useState('moderno');
+  const [styledRenderFinish, setStyledRenderFinish] = useState('');
   const [isDraggingReferenceImage, setIsDraggingReferenceImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
@@ -681,6 +791,16 @@ const DesignChat = () => {
             if (job.status === 'DONE') {
               getPrototypePreview(resumedSession.sessionId).then(url => {
                 if (url) setPrototypePreviewUrl(url);
+              });
+            }
+          }
+        });
+        getLatestStyledRenderJob(resumedSession.sessionId).then(job => {
+          if (job) {
+            setStyledRenderJob(job);
+            if (job.status === 'DONE' && job.artifacts.length > 0) {
+              getStyledRenderImage(resumedSession.sessionId, job.artifacts[0].artifactId).then(url => {
+                if (url) setStyledRenderUrl(url);
               });
             }
           }
@@ -841,6 +961,27 @@ const DesignChat = () => {
       setError(extractApiError(err, 'No se pudo generar el prototipo.'));
     } finally {
       setIsGeneratingPrototype(false);
+    }
+  };
+
+  const handleGenerateStyledRender = async () => {
+    if (!session) return;
+    setIsGeneratingStyledRender(true);
+    setError(null);
+    try {
+      const job = await generateStyledRender(session.sessionId, {
+        style: styledRenderStyle,
+        finish: styledRenderFinish || undefined,
+      });
+      setStyledRenderJob(job);
+      if (job.status === 'DONE' && job.artifacts.length > 0) {
+        const url = await getStyledRenderImage(session.sessionId, job.artifacts[0].artifactId);
+        if (url) setStyledRenderUrl(url);
+      }
+    } catch (err) {
+      setError(extractApiError(err, 'No se pudo generar el render estilizado. Verifica que el AI Gateway y ComfyUI estén activos.'));
+    } finally {
+      setIsGeneratingStyledRender(false);
     }
   };
 
@@ -1607,6 +1748,17 @@ const DesignChat = () => {
                 prototypePreviewUrl,
                 isGeneratingPrototype,
                 handleGeneratePrototype,
+              )}
+              {renderStyledRenderSection(
+                prototypePreviewUrl,
+                styledRenderJob,
+                styledRenderUrl,
+                isGeneratingStyledRender,
+                styledRenderStyle,
+                styledRenderFinish,
+                setStyledRenderStyle,
+                setStyledRenderFinish,
+                handleGenerateStyledRender,
               )}
               <section className="design-chat__sketch-panel" aria-label="Boceto para extracción">
                 <div>

@@ -15,6 +15,7 @@ public enum ArtifactType {
     QUOTE_PDF("PDF de cotización"),
     PROTOTYPE_PREVIEW("Vista previa prototipo"),
     PROTOTYPE_METADATA("Metadatos prototipo"),
+    STYLED_RENDER("Render estilizado"),
     OTHER("Otro");
 
     private String value;

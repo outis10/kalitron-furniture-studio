@@ -379,6 +379,64 @@ export const getPrototypePreview = async (sessionId: number): Promise<string | n
   }
 };
 
+// ── Styled render (E9) ────────────────────────────────────────────────────────
+
+export interface StyledRenderRequest {
+  style: string;
+  finish?: string;
+  countertopMaterial?: string;
+  backsplashNotes?: string;
+  handleStyle?: string;
+  wallColor?: string;
+  notes?: string;
+}
+
+export interface StyledRenderArtifactItem {
+  artifactId: number;
+  artifactType: string;
+  fileName: string;
+  mimeType: string;
+}
+
+export interface StyledRenderJob {
+  jobId: number;
+  sessionId: number;
+  sessionCode: string;
+  status: 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED' | 'CANCELLED';
+  promptUsed?: string | null;
+  pipeline?: string | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  warnings: string[];
+  artifacts: StyledRenderArtifactItem[];
+}
+
+export const generateStyledRender = async (sessionId: number, request: StyledRenderRequest): Promise<StyledRenderJob> => {
+  const response = await axios.post<StyledRenderJob>(`/api/design-sessions/${sessionId}/styled-render`, request);
+  return response.data;
+};
+
+export const getLatestStyledRenderJob = async (sessionId: number): Promise<StyledRenderJob | null> => {
+  try {
+    const response = await axios.get<StyledRenderJob>(`/api/design-sessions/${sessionId}/styled-render/latest`);
+    return response.status === 204 ? null : response.data;
+  } catch {
+    return null;
+  }
+};
+
+export const getStyledRenderImage = async (sessionId: number, artifactId: number): Promise<string | null> => {
+  try {
+    const response = await axios.get<Blob>(`/api/design-sessions/${sessionId}/styled-render/${artifactId}/image`, {
+      responseType: 'blob',
+    });
+    if (response.status === 204 || response.data.size === 0) return null;
+    return URL.createObjectURL(response.data);
+  } catch {
+    return null;
+  }
+};
+
 export const getSketchImage = async (sessionId: number): Promise<string | null> => {
   const response = await axios.get<Blob>(`/api/design-sessions/${sessionId}/sketch-image`, { responseType: 'blob' });
   if (response.status === 204 || response.data.size === 0) return null;
