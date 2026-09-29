@@ -57,8 +57,10 @@ mobile v0, AI proposals and cabinet materialization.
 
 | Code | Rule | Severity | Kind |
 | --- | --- | --- | --- |
-| `DIST_AISLE_NARROW` | Distance between facing runs (wall↔island, island↔island, galley/U) < `aisle.errorMm` / `aisle.warningMm` | ERROR / WARNING | `MIN_DISTANCE_BETWEEN_RUNS` |
-| `DIST_ISLAND_CLEARANCE` | Non-working side walkway < `island.walkwayMm` | WARNING | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_WORK_AISLE_NARROW` | Work aisle between facing wall runs (galley/U) < `aisle.workMinMm` (or `aisle.workMultiCookMinMm` when `multiCook`) | WARNING | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_WALKWAY_NARROW` | Walkway between wall runs < `aisle.walkwayMinMm` | ERROR | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_ISLAND_WORK_AISLE_NARROW` | Island/peninsula work aisle < `island.workAisleMinMm` (or `island.multiCookAisleMinMm`) | WARNING | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_ISLAND_WALKWAY_NARROW` | Island/peninsula side without work zone < `island.walkwayMinMm` | ERROR | `MIN_DISTANCE_BETWEEN_RUNS` |
 | `DIST_OUTSIDE_ROOM` | Freestanding run outside the room polygon | ERROR | `INSIDE_ROOM` |
 | `DIST_PENINSULA_BLOCKS_OPENING` | Peninsula anchored over a door or low window | ERROR | `NO_COLLISION` |
 | `DIST_ISLAND_SERVICE_REQUIRED` | Sink/cooktop on an island/peninsula (needs floor services) | WARNING, ack. | `CONTAINS_POINT` (none) |

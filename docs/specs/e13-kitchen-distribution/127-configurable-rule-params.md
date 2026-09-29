@@ -18,10 +18,11 @@ Ship industry-standard **proposed defaults** in the catalog, and let admins
 override them from Studio; the effective values flow to the app through the
 catalog version.
 
-## Proposed defaults (mm) — to be confirmed by Kalitron
+## Defaults (mm) — reviewed by Kalitron (2026-09-29)
 
-Based on common kitchen design practice (NKBA-style guidelines, rounded to
-metric) and cabinet manufacturing practice.
+Based on common kitchen design practice (NKBA guidelines; aisles use the
+exact metric equivalents of 42 in = 1067 mm and 48 in = 1219 mm) and cabinet
+manufacturing practice.
 
 | Key | Default | Severity | Used by | Rationale |
 | --- | --- | --- | --- | --- |
@@ -36,7 +37,8 @@ metric) and cabinet manufacturing practice.
 | `filler.maxMm` | 150 | WARNING | `DIST_FILLER_TOO_WIDE` | Larger fillers → use a module |
 | `clearance.fridgeSideMm` | 20 | WARNING | `DIST_CLEARANCE_FRIDGE` | Ventilation/installation gap |
 | `clearance.fridgeHingeWallMm` | 100 | WARNING | `DIST_CLEARANCE_FRIDGE` | Door opening ≥ 90° next to wall/tall |
-| `clearance.cookingLandingMm` | 300 | WARNING | `DIST_CLEARANCE_COOKING` | Countertop each side of cooktop/range (≈ 12–15 in) |
+| `clearance.cookingLandingMinMm` | 300 | WARNING | `DIST_CLEARANCE_COOKING` | Minimum countertop each side of cooktop/range (≈ 12 in) |
+| `clearance.cookingLandingPreferredMm` | 450 | INFO | `DIST_CLEARANCE_COOKING_PREFERRED` | Preferred landing on the main side (≈ 15–18 in) |
 | `clearance.cookingToTallMm` | 300 | WARNING | `DIST_CLEARANCE_COOKING` | Heat/safety next to tall units or fridge |
 | `clearance.sinkLandingPrimaryMm` | 450 | WARNING | `DIST_CLEARANCE_SINK` | ≈ 18–24 in on one side |
 | `clearance.sinkLandingSecondaryMm` | 300 | INFO | `DIST_CLEARANCE_SINK` | Other side |
@@ -45,9 +47,23 @@ metric) and cabinet manufacturing practice.
 | `upper.windowClearanceMm` | 50 | ERROR | `DIST_UPPER_COLLISION` | Side clearance to window frame |
 | `upper.beamClearanceMm` | 10 | ERROR | `DIST_UPPER_COLLISION` | Top of uppers below beam |
 | `hood.minHeightAboveCookingMm` | 650 | WARNING | `DIST_HOOD_HEIGHT` | Typical for gas (600 electric) |
-| `aisle.warningMm` | 1000 | WARNING | `DIST_AISLE_NARROW` | Work aisle (≈ 42 in = 1067) |
-| `aisle.errorMm` | 900 | ERROR | `DIST_AISLE_NARROW` | Minimum passage |
-| `island.walkwayMm` | 900 | WARNING | `DIST_ISLAND_CLEARANCE` | Non-working sides |
+| `aisle.workMinMm` | 1067 | WARNING | `DIST_WORK_AISLE_NARROW` | Work aisle between facing wall runs, one cook (42 in) |
+| `aisle.workMultiCookMinMm` | 1219 | WARNING | `DIST_WORK_AISLE_NARROW` | Same, when `multiCook = true` (48 in) |
+| `aisle.walkwayMinMm` | 900 | ERROR | `DIST_WALKWAY_NARROW` | Passage without work zone (36 in) |
+| `island.workAisleMinMm` | 1067 | WARNING | `DIST_ISLAND_WORK_AISLE_NARROW` | Island/peninsula ↔ facing run, work side, one cook |
+| `island.multiCookAisleMinMm` | 1219 | WARNING | `DIST_ISLAND_WORK_AISLE_NARROW` | Same, when `multiCook = true` |
+| `island.walkwayMinMm` | 900 | ERROR | `DIST_ISLAND_WALKWAY_NARROW` | Island/peninsula sides without work zone |
+
+## Aisle definitions
+
+- **Work aisle**: space between two facing runs where at least one side has a
+  work item facing the aisle (sink, cooktop/range, fridge slot, dishwasher).
+- **Walkway**: facing runs (or run ↔ wall/opening) with no work item on either side.
+- `multiCook` (boolean, default `false`) is part of the distribution payload,
+  set in the app (quick chip "Cocinan 2 o más personas") or in the Studio
+  editor; when `true` the `…MultiCook…` params replace the one-cook minimums.
+- Wall run ↔ wall run (galley, U) uses `aisle.*`; any aisle involving an island
+  or peninsula uses `island.*`.
 
 ## Configuration model
 
@@ -83,4 +99,4 @@ metric) and cabinet manufacturing practice.
 
 ## Open Questions
 
-- [ ] Kalitron review of every default (especially fridge, cooking, aisle).
+- [x] Kalitron review of defaults (2026-09-29).

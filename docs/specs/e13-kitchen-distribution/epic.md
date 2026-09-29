@@ -88,6 +88,7 @@ modules" (ripple) a property of the model.
     }
   ],
   "acknowledgements": [ { "ruleCode": "DIST_SINK_NOT_OVER_SERVICES", "itemUuid": "u3", "reason": "Se reubica drenaje", "by": "ana", "at": "…" } ],
+  "multiCook": false,
   "clientNotes": "Quiere cajones cerca de la estufa"
 }
 ```
@@ -131,7 +132,8 @@ checked by shared conformance vectors. Studio web validates through the server
 | `DIST_SINK_NOT_OVER_SERVICES` | Sink module X-range doesn't contain water and drain (± tol.) | ERROR, acknowledgeable | `CONTAINS_POINT` |
 | `DIST_COOKING_NOT_OVER_GAS` | Range/cooktop item doesn't contain the gas point (± tol.) | ERROR, acknowledgeable | `CONTAINS_POINT` |
 | `DIST_CLEARANCE_FRIDGE` | Clearance beside fridge < min | WARNING | `MIN_CLEARANCE` |
-| `DIST_CLEARANCE_COOKING` | Clearance beside range/cooktop < min | WARNING | `MIN_CLEARANCE` |
+| `DIST_CLEARANCE_COOKING` | Landing beside range/cooktop < minimum, or cooking < min distance to tall/fridge | WARNING | `MIN_CLEARANCE` |
+| `DIST_CLEARANCE_COOKING_PREFERRED` | Main-side landing beside cooking < preferred | INFO | `MIN_CLEARANCE` |
 | `DIST_CLEARANCE_CORNER` | Doors/drawers clash at a corner (no filler/blind corner) | ERROR | `MIN_CLEARANCE` |
 | `DIST_UPPER_COLLISION` | Upper module overlaps a window, hood zone or beam | ERROR | `NO_COLLISION` |
 | `DIST_UPPER_OVER_TALL` | Upper module over a tall module | ERROR | `NO_COLLISION` |
@@ -140,7 +142,8 @@ checked by shared conformance vectors. Studio web validates through the server
 | `DIST_UNKNOWN_MODULE` | Template code not in library | ERROR | `CODE_IN_LIBRARY` |
 | `DIST_MEASUREMENT_NOT_CONFIRMED` | Based on an unconfirmed measurement | INFO | `STATE_IS` |
 
-- Island/peninsula rules (aisles, inside room, floor services): see #128.
+- Aisle rules (work aisle vs walkway, one cook vs `multiCook`, wall runs vs
+  islands/peninsulas) and inside-room/floor-service rules: see #127 and #128.
 - Clearance and tolerance values: **proposed industry-standard defaults**,
   overridable by admins without releases (#127).
 - *Acknowledgeable* errors can be accepted with a reason (e.g. plumbing will be
