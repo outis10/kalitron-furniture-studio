@@ -24,7 +24,7 @@ the Studio editor and the AI gateway.
 | --- | --- |
 | `allowedWidthsMm` (String, CSV list, e.g. `300,400,450,600,800,900`) | Widths offered in the app stepper; validated by `DIST_WIDTH_NOT_ALLOWED`. Empty → min/max with `widthStepMm`. |
 | `widthStepMm` (Integer) | Fallback step between min and max. |
-| `row` (`DistributionRow`: `BASE`, `WALL`) | Where it goes; `TALL` category occupies both. |
+| `row` (`DistributionRow`: `BASE` "Bajos", `WALL` "Alacenas" — defined in #119) | Where it goes; `TALL` category occupies both. |
 | `tags` (String, CSV, e.g. `SINK_BASE`, `COOKTOP_BASE`, `CORNER_BLIND`) | Used by rules (`CONTAINS_POINT`, clearances). |
 | `mountHeightMm` (Integer, uppers) | Bottom of upper modules from floor, for collision checks. |
 | `shortLabelEsMx`, `icon` | App buttons. |

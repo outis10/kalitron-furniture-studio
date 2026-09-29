@@ -1,6 +1,6 @@
 # [E12] Issue 105: Nomenclature Catalog and Validation Rules Export
 
-Status: Draft
+Status: Reviewed
 Issue: #105
 Epic: #104
 Related: #113 (rules engine), outis10/KFS-APP#10 (download), outis10/KFS-APP#13 (Dart engine)
@@ -46,7 +46,7 @@ exports it as JSON for the app (offline cache) and the backup sheet legend.
 | `APPLIANCE` | `ES` | Estufa | `APPLIANCE` + `RANGE` |
 | `APPLIANCE` | `PA` | Parrilla | `APPLIANCE` + `COOKTOP` |
 | `APPLIANCE` | `HO` | Horno | `APPLIANCE` + `OVEN` |
-| `APPLIANCE` | `CA` | Campana | `APPLIANCE` + `HOOD` |
+| `APPLIANCE` | `CA` | Campana | `RANGE_HOOD` (existing type, no `ApplianceType`) |
 | `APPLIANCE` | `MW` | Microondas | `APPLIANCE` + `MICROWAVE` |
 | `APPLIANCE` | `LV` | Lavavajillas | `APPLIANCE` + `DISHWASHER` |
 | `APPLIANCE` | `TJ` | Tarja (espacio) | `APPLIANCE` + `SINK` |
@@ -109,16 +109,23 @@ Full rule list: see [plan.md](plan.md#validation-rules-defined-once-in-the-catal
 
 - [ ] Catalog contains every code and rule from the plan tables.
 - [ ] Every `obstacleType` / `applianceType` exists in the Java enums (unit test).
+- [ ] **Label parity:** each code's `labelEsMx` equals the Spanish value of its
+      mapped enum (`RoomObstacleType` / `ApplianceType` `getValue()`), except
+      `APPLIANCE` codes, which compare against `ApplianceType` (unit test).
 - [ ] Every rule `kind` is supported by the engine at `rulesEngineVersion` (unit test).
 - [ ] `If-None-Match` returns `304` when unchanged.
 - [ ] Invalid catalog JSON fails application startup with a clear message.
 
 ## Test Plan
 
-- Backend: service load, enum/kind parity, resource IT (200/304/401).
+- Backend: service load, enum/kind parity, label parity, resource IT (200/304/401).
 
 ## Open Questions
 
-- [ ] `catalogVersion` format: date + counter, or semver?
-- [ ] Confirm `CE` meaning: "Salida de extracción" (hood duct outlet) or something else?
-- [ ] Keep `TJ` in `APPLIANCE` (sink space) or move it to its own group?
+Resolved at review (2026-09-29):
+
+- [x] `catalogVersion` format: date + counter (`2026-10-01.1`); effective
+      version with admin overrides per #127.
+- [x] `CE` = "Salida de extracción" (hood duct outlet).
+- [x] `TJ` stays in `APPLIANCE` as "Tarja (espacio)"; the sink cabinet is a library module (E13 #120).
+- [x] `CA` maps to the existing `RoomObstacleType.RANGE_HOOD`; no `HOOD` in `ApplianceType`.

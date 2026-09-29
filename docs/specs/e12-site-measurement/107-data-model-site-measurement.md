@@ -29,17 +29,61 @@ Extend the JDL and add incremental Liquibase changesets for a versioned
 
 | Entity / enum | Change |
 | --- | --- |
-| `SiteMeasurement` (new) | `projectType` (`KITCHEN`/`CLOSET`), `spaceLabel` (e.g. "Cocina", "Vestidor recámara"; a `BOTH` session can hold several), `measurementUuid` (UUID, unique, client-generated), `revision` (int), `status` (`DRAFT`, `CONFIRMED`, `SUPERSEDED`), `schemaVersion` (int), `catalogVersion`, `payload` (JSON text, full snapshot), `deviceId`, `appVersion`, `laserModel`, `measuredBy` (User), `capturedAt`, `receivedAt`, `confirmedAt`; many-to-one `DesignSession` |
+| `SiteMeasurement` (new) | `projectType` (`KITCHEN`/`CLOSET`), `spaceLabel` (e.g. "Cocina", "Vestidor recámara"; a `BOTH` session can hold several), `measurementUuid` (UUID, unique, client-generated), `revision` (int), `status` (`SiteMeasurementStatus`), `schemaVersion` (int), `catalogVersion`, `payload` (JSON text, full snapshot), `deviceId`, `appVersion`, `laserModel`, `measuredBy` (User), `capturedAt`, `receivedAt`, `confirmedAt`; many-to-one `DesignSession` |
 | `RoomWall` | + `wallCode`, `lengthFloorMm`, `length900Mm`, `lengthCeilingMm`, `outOfPlumbMm`, `closingMm`; `lengthMm` = min of the three (service) |
-| `RoomObstacleType` | + `SWITCH`, `EXHAUST`, `BEAM`, `PIPE`, `ACCESS_PANEL` |
-| `ApplianceType` (new enum) | `FRIDGE, RANGE, COOKTOP, OVEN, HOOD, MICROWAVE, DISHWASHER, SINK` |
+| `RoomObstacleType` | + 5 values (see *Enums* below) |
+| `ApplianceType` (new enum) | see *Enums* below (no `HOOD`: `CA` uses existing `RANGE_HOOD`) |
+| `SiteMeasurementStatus` (new enum) | see *Enums* below |
 | `RoomObstacle` | + `applianceType`, `croquisCode` |
 | `KitchenSpec` | + `floorOutOfLevelMm`, `floorOutOfLevelNote` |
-| `ImageType` | + `SITE_PHOTO` |
+| `ImageType` | + `SITE_PHOTO` (see *Enums*) |
 | `DesignImage` | + `wallCode`, `photoUuid` (unique, client-generated), `sha256`; many-to-one `SiteMeasurement` (nullable) |
-| `SessionStatus` | + `MEASURED` |
+| `SessionStatus` | + `MEASURED` (see *Enums*) |
 | `DesignSession` | + `assignedMeasurer` (User) — defined in #116 |
 | `MobileRefreshToken` (new) | defined in #115 |
+
+### Enums (JDL, with es-MX values — same pattern as existing enums)
+
+Every enum value carries its Spanish label in the JDL; JHipster generates the
+Java `getValue()`, the TypeScript enum and `i18n/es` + `i18n/en` files
+(English labels added by hand in `i18n/en`).
+
+```text
+enum RoomObstacleType {
+  WINDOW ("Ventana"), DOOR ("Puerta"), COLUMN ("Columna"),
+  OUTLET ("Contacto eléctrico"), WATER ("Toma de agua"), GAS ("Toma de gas"),
+  DRAIN ("Drenaje"), RANGE_HOOD ("Campana"), APPLIANCE ("Electrodoméstico"),
+  OTHER ("Otro"),
+  SWITCH ("Apagador"),
+  EXHAUST ("Salida de extracción"),
+  BEAM ("Viga"),
+  PIPE ("Tubería"),
+  ACCESS_PANEL ("Registro")
+}
+
+enum ApplianceType {
+  FRIDGE ("Refrigerador"),
+  RANGE ("Estufa"),
+  COOKTOP ("Parrilla"),
+  OVEN ("Horno"),
+  MICROWAVE ("Microondas"),
+  DISHWASHER ("Lavavajillas"),
+  SINK ("Tarja (espacio)")
+}
+
+enum SiteMeasurementStatus {
+  DRAFT ("Borrador"),
+  CONFIRMED ("Confirmada"),
+  SUPERSEDED ("Reemplazada")
+}
+
+// additions to existing enums
+ImageType     + SITE_PHOTO ("Foto de obra")
+SessionStatus + MEASURED ("Medido")
+```
+
+- New enum values are appended (never reordered); enum columns are `varchar`.
+- Labels must match the catalog `labelEsMx` (parity test in #105).
 
 - Per-value source (`LASER` / `MANUAL`) and raw laser metadata stay in
   `SiteMeasurement.payload`; only the resolved values are projected to

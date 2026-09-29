@@ -22,9 +22,9 @@ the approved one projected to `Cabinet` rows (#124).
 | Entity / enum | Change |
 | --- | --- |
 | `LayoutDistribution` (new) | `projectType` (`ProjectType`: `KITCHEN` now, `CLOSET` in E14), `distributionUuid` (unique), `versionNumber` (int, per session, 0 = v0), `status` (`DistributionStatus`), `source` (`DistributionSource`), `label` (e.g. "Propuesta IA 2"), `schemaVersion`, `libraryVersion`, `catalogVersion`, `revision` (for mobile sync), `payload` (JSON text: walls/runs/items/acknowledgements/clientNotes), `errorCount`, `warningCount`, `createdAt`, `updatedAt`, `approvedAt`; many-to-one `DesignSession`, `SiteMeasurement` (nullable), `User` createdBy, `User` approvedBy, self `parent` (nullable), `GenerationJob` (nullable, for AI) |
-| `DistributionStatus` (new enum) | `PRELIMINARY`, `DRAFT`, `PROPOSED`, `APPROVED`, `SUPERSEDED`, `DISCARDED` |
-| `DistributionSource` (new enum) | `MOBILE_VISIT`, `STUDIO_EDITOR`, `AI_PROPOSAL` |
-| `GenerationJobType` | + `DISTRIBUTION_PROPOSAL` |
+| `DistributionStatus` (new enum) | see *Enums* below |
+| `DistributionSource` (new enum) | see *Enums* below |
+| `GenerationJobType` | + `DISTRIBUTION_PROPOSAL` (see *Enums*) |
 | `Cabinet` | + `wallCode`, `runCode` (islands/peninsulas, #128), `distributionItemUuid` (trace to the item) |
 | `DesignArtifact` | + `distributionVersion` (int, nullable) — which approved version produced it |
 
@@ -32,6 +32,35 @@ the approved one projected to `Cabinet` rows (#124).
 - At most one `APPROVED` per session (service-enforced + partial unique index
   if PostgreSQL-only is acceptable — open question).
 - Changes via JDL + regenerate; new Liquibase changelogs included in `master.xml`.
+
+### Enums (JDL, with es-MX values)
+
+```text
+enum DistributionStatus {
+  PRELIMINARY ("Preliminar"),
+  DRAFT ("Borrador"),
+  PROPOSED ("Propuesta"),
+  APPROVED ("Aprobada"),
+  SUPERSEDED ("Reemplazada"),
+  DISCARDED ("Descartada")
+}
+
+enum DistributionSource {
+  MOBILE_VISIT ("Visita en obra"),
+  STUDIO_EDITOR ("Editor de Studio"),
+  AI_PROPOSAL ("Propuesta IA")
+}
+
+enum DistributionRow {          // used by CabinetTemplate.row (#120)
+  BASE ("Bajos"),
+  WALL ("Alacenas")
+}
+
+// addition to existing enum
+GenerationJobType + DISTRIBUTION_PROPOSAL ("Propuesta de distribución")
+```
+
+English labels go to `i18n/en`. New values are appended to existing enums.
 
 ## Persistence rules
 
