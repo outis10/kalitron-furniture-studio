@@ -1,6 +1,6 @@
 # [E12] Issue 113: Declarative Validation Rules Engine and Conformance Vectors
 
-Status: Draft
+Status: Reviewed
 Issue: #113
 Epic: #104
 Related: #105 (rules in catalog), #112 (authoritative validation),
@@ -103,9 +103,14 @@ Closed set of `kind`s, implemented once per engine:
   compared **in order** on `ruleSet`, `code`, `severity`, `scope`, `wallCode`,
   `runCode`, `elementUuid`, `itemUuid`, `field`. Vectors pin their `params`
   (independent of admin overrides, #127).
-- Published with each release as a versioned artifact (GitHub release asset or
-  `GET /api/croquis/validation-vectors?catalogVersion=` — decision open) so the
-  KFS-APP CI can run them.
+- **Distribution: GitHub release asset.** A Studio workflow packages
+  `validation-vectors-{catalogVersion}.zip` (vectors + the catalog snapshot
+  they were generated with + `manifest.json` with `catalogVersion`,
+  `rulesEngineVersion` and sha256) and attaches it to a release tagged
+  `vectors-{catalogVersion}`.
+- KFS-APP CI downloads the asset for the `catalogVersion` / `rulesEngineVersion`
+  it targets (`gh release download` with a read-only token), verifies the
+  sha256 and runs the Dart engine against it. Studio does not need to be running.
 - Coverage: each rule pass + fail, tolerance edges (5 mm OK, 6 mm fails),
   struck/removed elements, empty walls, **prerequisite skips** (incomplete wall
   produces only `WALL_INCOMPLETE`), and a survey-only case (no distribution).
@@ -118,7 +123,8 @@ Closed set of `kind`s, implemented once per engine:
 - [ ] Survey-only sessions get `MEASUREMENT` validation on sync and confirm; `DISTRIBUTION` rules never run without a distribution.
 - [ ] All rules covered by vectors, including tolerance edges.
 - [ ] Changing a tolerance in the catalog changes results without code changes (test).
-- [ ] Vectors are published in a form the app CI can download by version.
+- [ ] A release asset `validation-vectors-{catalogVersion}.zip` (vectors, catalog snapshot, manifest with sha256) is published per catalog version.
+- [ ] KFS-APP CI can download a given version and verify its checksum.
 
 ## Test Plan
 
@@ -126,4 +132,6 @@ Closed set of `kind`s, implemented once per engine:
 
 ## Open Questions
 
-- [ ] Vector distribution: release asset vs endpoint vs git submodule.
+Resolved at review (2026-09-29):
+
+- [x] Vector distribution: GitHub release asset (versioned, no running Studio needed).
