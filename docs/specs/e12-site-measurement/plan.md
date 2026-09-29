@@ -119,21 +119,21 @@ Full catalog with enum mappings: [105-nomenclature-catalog.md](105-nomenclature-
 
 ### Validation rules (defined once in the catalog, #113)
 
-| Code | Rule | Severity | Change vs v1 |
-| --- | --- | --- | --- |
-| `WALL_CLOSURE_MISMATCH` | Rightmost element X + A + closing measurement ≠ wall design length (tol. 5 mm) | ERROR | Replaces `WALL_SUM_MISMATCH` (see *Free spans* below) |
-| `WALL_CLOSURE_MISSING` | Wall has elements with width but no closing measurement | WARNING | New |
-| `ELEMENTS_OVERLAP` | Two elements with width and height overlap in the wall plane (services excluded) | WARNING | New |
-| `WALL_LENGTH_SPREAD` | max − min of 3 lengths > 5 mm | WARNING | — |
-| `FLOOR_OUT_OF_LEVEL` | `dP` > 5 mm | WARNING | — |
-| `CORNER_NOT_SQUARE` | Angle ≠ 90° | WARNING | — |
-| `ELEMENT_MISSING_XY` | Element without X or Y | ERROR | — |
-| `APPLIANCE_MISSING_DIMS` | Appliance without A, H, depth | ERROR | — |
-| `ELEMENT_OUT_OF_WALL` | X + A > wall design length | ERROR | — |
-| `UNKNOWN_CODE` | Code not in catalog | ERROR | Server-side guard only; app uses buttons |
-| `MANUAL_VALUE` | Value entered manually, not from laser | INFO | Replaces `LOW_CONFIDENCE` |
-| `WALL_INCOMPLETE` | Wall in floor plan without 3 lengths | ERROR | Replaces `WALL_WITHOUT_SHEET` |
-| `WALL_WITHOUT_PHOTO` | Wall without evidence photo | WARNING | New |
+| Code | Rule | Severity | Scope | Change vs v1 |
+| --- | --- | --- | --- | --- |
+| `WALL_CLOSURE_MISMATCH` | Rightmost element X + A + closing measurement ≠ wall design length (tol. 5 mm) | ERROR | `WALL` | Replaces `WALL_SUM_MISMATCH` (see *Free spans* below) |
+| `WALL_CLOSURE_MISSING` | Wall has elements with width but no closing measurement | WARNING | `WALL` | New |
+| `ELEMENTS_OVERLAP` | Two elements with width and height overlap in the wall plane (services excluded) | WARNING | `ELEMENT` | New |
+| `WALL_LENGTH_SPREAD` | max − min of 3 lengths > 5 mm | WARNING | `WALL` | — |
+| `FLOOR_OUT_OF_LEVEL` | `dP` > 5 mm | WARNING | `SITE` | — |
+| `CORNER_NOT_SQUARE` | Angle ≠ 90° | WARNING | `SITE` | — |
+| `ELEMENT_MISSING_XY` | Element without X or Y | ERROR | `ELEMENT` | — |
+| `APPLIANCE_MISSING_DIMS` | Appliance without A, H, depth | ERROR | `ELEMENT` | — |
+| `ELEMENT_OUT_OF_WALL` | X + A > wall design length | ERROR | `ELEMENT` | — |
+| `UNKNOWN_CODE` | Code not in catalog | ERROR | `ELEMENT` | Server-side guard only; app uses buttons |
+| `MANUAL_VALUE` | Value entered manually, not from laser | INFO | `WALL` | Replaces `LOW_CONFIDENCE` |
+| `WALL_INCOMPLETE` | Wall in floor plan without 3 lengths | ERROR | `WALL` | Replaces `WALL_WITHOUT_SHEET` |
+| `WALL_WITHOUT_PHOTO` | Wall without evidence photo | WARNING | `WALL` | New |
 
 ### Free spans ("huecos") — decision
 
@@ -172,7 +172,8 @@ two elements typed at the same position.
 
 1. **Declarative definition** — the catalog JSON (#105) contains
    `validationRules[]`: `code`, `kind`, `severity`, `params` (e.g.
-   `toleranceMm: 5`), `scope` (`WALL`, `ELEMENT`, `SITE`, `MEASUREMENT`),
+   `toleranceMm: 5`), `ruleSet` (`MEASUREMENT` here; `DISTRIBUTION` in E13),
+   `scope` (`WALL`, `ELEMENT`, `SITE`, `MEASUREMENT`), `prerequisites`,
    `messageEsMx` template. Tolerances and severities are data, not code.
 2. **Small closed set of rule kinds** — each `kind` (e.g. `SUM_WITHIN_TOLERANCE`,
    `SPREAD_WITHIN_TOLERANCE`, `REQUIRED_FIELDS`, `WITHIN_BOUNDS`,

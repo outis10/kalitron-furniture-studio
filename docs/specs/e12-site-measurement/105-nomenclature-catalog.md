@@ -68,8 +68,10 @@ Declarative entries executed by #113 (Java) and KFS-APP#13 (Dart):
 ```json
 {
   "code": "WALL_CLOSURE_MISMATCH",
-  "kind": "SUM_WITHIN_TOLERANCE",
+  "ruleSet": "MEASUREMENT",
   "scope": "WALL",
+  "kind": "SUM_WITHIN_TOLERANCE",
+  "prerequisites": ["WALL_COMPLETE", "ELEMENT_HAS_WIDTH"],
   "severity": "ERROR",
   "params": { "toleranceMm": 5, "terms": ["rightmostElement.x", "rightmostElement.width", "wall.closingMm"], "target": "wall.designLength" },
   "messageEsMx": "Cierre: {sum} mm vs muro {length} mm (Δ {delta} mm)"
@@ -92,7 +94,7 @@ Full rule list: see [plan.md](plan.md#validation-rules-defined-once-in-the-catal
   "rulesEngineVersion": 1,
   "minAppVersion": "1.0.0",
   "entries": [ { "code": "V", "group": "OPENING", "labelEsMx": "Ventana", "requiredFields": ["X", "Y", "A", "H"], "obstacleType": "WINDOW", "applianceType": null } ],
-  "validationRules": [ { "code": "WALL_CLOSURE_MISMATCH", "kind": "SUM_WITHIN_TOLERANCE", "scope": "WALL", "severity": "ERROR", "params": { "toleranceMm": 5 }, "messageEsMx": "…" } ]
+  "validationRules": [ { "code": "WALL_CLOSURE_MISMATCH", "ruleSet": "MEASUREMENT", "scope": "WALL", "kind": "SUM_WITHIN_TOLERANCE", "severity": "ERROR", "params": { "toleranceMm": 5 }, "messageEsMx": "…" } ]
 }
 ```
 

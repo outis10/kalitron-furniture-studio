@@ -116,31 +116,32 @@ any non-approved ─────────────► DISCARDED
 
 ## Shared distribution rules
 
-Defined once in the catalog (E12 #105) with scope `DISTRIBUTION`, executed by
+Defined once in the catalog (E12 #105) with `ruleSet: DISTRIBUTION` and scopes
+`RUN` / `ITEM` / `DISTRIBUTION` (semantics in E12 #113), executed by
 the Java engine (#122, extends E12 #113) and the Dart engine (KFS-APP#23),
 checked by shared conformance vectors. Studio web validates through the server
 (debounced validate endpoint), not a third engine.
 
-| Code | Rule | Severity | Kind |
-| --- | --- | --- | --- |
-| `DIST_FILLER_TOO_WIDE` | Filler wider than `filler.maxMm` | WARNING | `WIDTH_ALLOWED` |
-| `DIST_CLEARANCE_SINK` | Countertop landing beside sink < primary/secondary | WARNING / INFO | `MIN_CLEARANCE` |
-| `DIST_DISHWASHER_FAR_FROM_SINK` | Dishwasher farther than max from sink edge | WARNING | `MIN_CLEARANCE` |
-| `DIST_HOOD_HEIGHT` | Hood bottom below min height above cooking | WARNING | `MIN_CLEARANCE` |
-| `DIST_EXCEEDS_SEGMENT` | Run items don't fit between corners and blocking obstacles (door, column, full-height pipe) | ERROR | `FITS_SEGMENT` |
-| `DIST_FILLER_REQUIRED` | Run ends at a corner, out-of-square corner or out-of-plumb wall without a filler ≥ min | WARNING | `FILLER_AT_END` |
-| `DIST_SINK_NOT_OVER_SERVICES` | Sink module X-range doesn't contain water and drain (± tol.) | ERROR, acknowledgeable | `CONTAINS_POINT` |
-| `DIST_COOKING_NOT_OVER_GAS` | Range/cooktop item doesn't contain the gas point (± tol.) | ERROR, acknowledgeable | `CONTAINS_POINT` |
-| `DIST_CLEARANCE_FRIDGE` | Clearance beside fridge < min | WARNING | `MIN_CLEARANCE` |
-| `DIST_CLEARANCE_COOKING` | Landing beside range/cooktop < minimum, or cooking < min distance to tall/fridge | WARNING | `MIN_CLEARANCE` |
-| `DIST_CLEARANCE_COOKING_PREFERRED` | Main-side landing beside cooking < preferred | INFO | `MIN_CLEARANCE` |
-| `DIST_CLEARANCE_CORNER` | Doors/drawers clash at a corner (no filler/blind corner) | ERROR | `MIN_CLEARANCE` |
-| `DIST_UPPER_COLLISION` | Upper module overlaps a window, hood zone or beam | ERROR | `NO_COLLISION` |
-| `DIST_UPPER_OVER_TALL` | Upper module over a tall module | ERROR | `NO_COLLISION` |
-| `DIST_BLOCKS_OPENING` | Base/tall item in front of a door; tall item in front of a window | ERROR | `NO_COLLISION` |
-| `DIST_WIDTH_NOT_ALLOWED` | Width not in the template's allowed widths | ERROR | `WIDTH_ALLOWED` |
-| `DIST_UNKNOWN_MODULE` | Template code not in library | ERROR | `CODE_IN_LIBRARY` |
-| `DIST_MEASUREMENT_NOT_CONFIRMED` | Based on an unconfirmed measurement | INFO | `STATE_IS` |
+| Code | Rule | Severity | Scope | Kind |
+| --- | --- | --- | --- | --- |
+| `DIST_FILLER_TOO_WIDE` | Filler wider than `filler.maxMm` | WARNING | `ITEM` | `WIDTH_ALLOWED` |
+| `DIST_CLEARANCE_SINK` | Countertop landing beside sink < primary/secondary | WARNING / INFO | `ITEM` | `MIN_CLEARANCE` |
+| `DIST_DISHWASHER_FAR_FROM_SINK` | Dishwasher farther than max from sink edge | WARNING | `ITEM` | `MIN_CLEARANCE` |
+| `DIST_HOOD_HEIGHT` | Hood bottom below min height above cooking | WARNING | `ITEM` | `MIN_CLEARANCE` |
+| `DIST_EXCEEDS_SEGMENT` | Run items don't fit between corners and blocking obstacles (door, column, full-height pipe) | ERROR | `RUN` | `FITS_SEGMENT` |
+| `DIST_FILLER_REQUIRED` | Run ends at a corner, out-of-square corner or out-of-plumb wall without a filler ≥ min | WARNING | `RUN` | `FILLER_AT_END` |
+| `DIST_SINK_NOT_OVER_SERVICES` | Sink module X-range doesn't contain water and drain (± tol.) | ERROR, acknowledgeable | `ITEM` | `CONTAINS_POINT` |
+| `DIST_COOKING_NOT_OVER_GAS` | Range/cooktop item doesn't contain the gas point (± tol.) | ERROR, acknowledgeable | `ITEM` | `CONTAINS_POINT` |
+| `DIST_CLEARANCE_FRIDGE` | Clearance beside fridge < min | WARNING | `ITEM` | `MIN_CLEARANCE` |
+| `DIST_CLEARANCE_COOKING` | Landing beside range/cooktop < minimum, or cooking < min distance to tall/fridge | WARNING | `ITEM` | `MIN_CLEARANCE` |
+| `DIST_CLEARANCE_COOKING_PREFERRED` | Main-side landing beside cooking < preferred | INFO | `ITEM` | `MIN_CLEARANCE` |
+| `DIST_CLEARANCE_CORNER` | Doors/drawers clash at a corner (no filler/blind corner) | ERROR | `RUN` | `MIN_CLEARANCE` |
+| `DIST_UPPER_COLLISION` | Upper module overlaps a window, hood zone or beam | ERROR | `ITEM` | `NO_COLLISION` |
+| `DIST_UPPER_OVER_TALL` | Upper module over a tall module | ERROR | `ITEM` | `NO_COLLISION` |
+| `DIST_BLOCKS_OPENING` | Base/tall item in front of a door; tall item in front of a window | ERROR | `ITEM` | `NO_COLLISION` |
+| `DIST_WIDTH_NOT_ALLOWED` | Width not in the template's allowed widths | ERROR | `ITEM` | `WIDTH_ALLOWED` |
+| `DIST_UNKNOWN_MODULE` | Template code not in library | ERROR | `ITEM` | `CODE_IN_LIBRARY` |
+| `DIST_MEASUREMENT_NOT_CONFIRMED` | Based on an unconfirmed measurement | INFO | `DISTRIBUTION` | `STATE_IS` |
 
 - Aisle rules (work aisle vs walkway, one cook vs `multiCook`, wall runs vs
   islands/peninsulas) and inside-room/floor-service rules: see #127 and #128.

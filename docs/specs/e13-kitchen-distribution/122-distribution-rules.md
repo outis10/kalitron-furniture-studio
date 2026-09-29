@@ -9,7 +9,8 @@ Owner: TBD
 
 ## Goal
 
-Add distribution rules (scope `DISTRIBUTION`) to the catalog and new rule
+Add distribution rules (`ruleSet: DISTRIBUTION`, scopes `RUN` / `ITEM` /
+`DISTRIBUTION`) to the catalog and new rule
 kinds to the Java engine, with conformance vectors shared with the app — the
 same "define once, execute twice" approach as E12.
 
@@ -38,6 +39,13 @@ added without affecting kitchens.
 - Rule definition flag `acknowledgeable: true`.
 - Acknowledged issues are returned with `acknowledged: true` and do not block
   approval; unacknowledged `ERROR`s do.
+
+## Evaluation
+
+Same semantics as E12 #113: all rules evaluated, prerequisites skip (e.g.
+aisle rules need `ROOM_CLOSED`, service rules need the service element),
+deterministic order, same issue shape. Distribution rules run **only** when a
+distribution exists; a survey-only session never triggers them.
 
 ## Engine inputs
 

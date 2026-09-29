@@ -55,16 +55,16 @@ mobile v0, AI proposals and cabinet materialization.
 
 ## Rules (added to #122, params in #127)
 
-| Code | Rule | Severity | Kind |
-| --- | --- | --- | --- |
-| `DIST_WORK_AISLE_NARROW` | Work aisle between facing wall runs (galley/U) < `aisle.workMinMm` (or `aisle.workMultiCookMinMm` when `multiCook`) | WARNING | `MIN_DISTANCE_BETWEEN_RUNS` |
-| `DIST_WALKWAY_NARROW` | Walkway between wall runs < `aisle.walkwayMinMm` | ERROR | `MIN_DISTANCE_BETWEEN_RUNS` |
-| `DIST_ISLAND_WORK_AISLE_NARROW` | Island/peninsula work aisle < `island.workAisleMinMm` (or `island.multiCookAisleMinMm`) | WARNING | `MIN_DISTANCE_BETWEEN_RUNS` |
-| `DIST_ISLAND_WALKWAY_NARROW` | Island/peninsula side without work zone < `island.walkwayMinMm` | ERROR | `MIN_DISTANCE_BETWEEN_RUNS` |
-| `DIST_OUTSIDE_ROOM` | Freestanding run outside the room polygon | ERROR | `INSIDE_ROOM` |
-| `DIST_PENINSULA_BLOCKS_OPENING` | Peninsula anchored over a door or low window | ERROR | `NO_COLLISION` |
-| `DIST_ISLAND_SERVICE_REQUIRED` | Sink/cooktop on an island/peninsula (needs floor services) | WARNING, ack. | `CONTAINS_POINT` (none) |
-| `DIST_ROOM_NOT_CLOSED` | Room polygon not closed → aisle/inside checks skipped | INFO | `STATE_IS` |
+| Code | Rule | Severity | Scope | Kind |
+| --- | --- | --- | --- | --- |
+| `DIST_WORK_AISLE_NARROW` | Work aisle between facing wall runs (galley/U) < `aisle.workMinMm` (or `aisle.workMultiCookMinMm` when `multiCook`) | WARNING | `DISTRIBUTION` | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_WALKWAY_NARROW` | Walkway between wall runs < `aisle.walkwayMinMm` | ERROR | `DISTRIBUTION` | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_ISLAND_WORK_AISLE_NARROW` | Island/peninsula work aisle < `island.workAisleMinMm` (or `island.multiCookAisleMinMm`) | WARNING | `DISTRIBUTION` | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_ISLAND_WALKWAY_NARROW` | Island/peninsula side without work zone < `island.walkwayMinMm` | ERROR | `DISTRIBUTION` | `MIN_DISTANCE_BETWEEN_RUNS` |
+| `DIST_OUTSIDE_ROOM` | Freestanding run outside the room polygon | ERROR | `RUN` | `INSIDE_ROOM` |
+| `DIST_PENINSULA_BLOCKS_OPENING` | Peninsula anchored over a door or low window | ERROR | `RUN` | `NO_COLLISION` |
+| `DIST_ISLAND_SERVICE_REQUIRED` | Sink/cooktop on an island/peninsula (needs floor services) | WARNING, ack. | `ITEM` | `CONTAINS_POINT` (none) |
+| `DIST_ROOM_NOT_CLOSED` | Room polygon not closed → aisle/inside checks skipped | INFO | `DISTRIBUTION` | `STATE_IS` |
 
 ## Editor (#123) and materialization (#124)
 
