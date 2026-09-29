@@ -1,6 +1,6 @@
 # [E13] Issue 127: Configurable Rule Parameters (Standard Defaults + Admin Overrides)
 
-Status: Draft
+Status: Reviewed
 Issue: #127
 Epic: #118
 Related: E12 #105 (catalog), E12 #113 / #122 (engines), outis10/KFS-APP#13, #23
