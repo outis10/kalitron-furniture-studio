@@ -67,10 +67,29 @@ it authoritatively, converts it to a measured layout and sets the session to
 
 - Changing gateway v1 (`/api/v1/sketch/analyze`) or E7.
 - Reading paper croquis with AI.
-- Cabinet design, rendering or quoting from the app.
+- Rendering or quoting from the app. (A simple preliminary distribution v0
+  **is** in scope, but in E13 — see *Distribution layer* below.)
 - Supporting laser models other than GLM 50-27 C in this epic (design the
   BLE layer so more can be added later).
 - Web review of the measurement in Studio (read-only view can come later).
+
+## Distribution layer (E13)
+
+The measurement describes the room **as it is**; the **distribution** (which
+modules go on each wall) is what produces the Fusion CSV. It is planned as a
+separate epic, **E13 #118**, on top of this one:
+
+- Visit types in the app: *survey only* or *survey + v0 distribution* (15–20
+  min with the client, marked preliminary) — KFS-APP#20.
+- Versioned `LayoutDistribution`: v0 (app) → v1+ (Studio editor with ripple)
+  → one approved version; Studio continues from v0 without re-capture.
+- Distribution rules share this epic's declarative engine and conformance
+  vectors (E13 #122 extends #113).
+- The AI Gateway proposes 2–3 distributions from the validated measurement,
+  interview and module library (gateway epic outis10/kalitron-furniture-ai-gateway#39).
+- Cabinet plan, Fusion CSV and scripts come only from the approved version (E13 #124).
+
+See [../e13-kitchen-distribution/epic.md](../e13-kitchen-distribution/epic.md).
 
 ## Capture Rules (kept from v1)
 
@@ -377,6 +396,7 @@ The device is not available, so the laser is **not** on the critical path.
 | 2026-09-29 | Mobile refresh tokens (#115). |
 | 2026-09-29 | New `ROLE_MEASURER` + `DesignSession.assignedMeasurer` (#116). |
 | 2026-09-29 | Free spans not captured; closing measurement + overlap rules replace `WALL_SUM_MISMATCH`. |
+| 2026-09-29 | Distribution layer added as E13 (#118): versioned v0→approved, shared rules, AI proposals, CSV only from approved. |
 
 ## Open questions
 

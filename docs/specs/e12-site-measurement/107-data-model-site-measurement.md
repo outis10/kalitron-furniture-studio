@@ -29,7 +29,7 @@ Extend the JDL and add incremental Liquibase changesets for a versioned
 
 | Entity / enum | Change |
 | --- | --- |
-| `SiteMeasurement` (new) | `measurementUuid` (UUID, unique, client-generated), `revision` (int), `status` (`DRAFT`, `CONFIRMED`, `SUPERSEDED`), `schemaVersion` (int), `catalogVersion`, `payload` (JSON text, full snapshot), `deviceId`, `appVersion`, `laserModel`, `measuredBy` (User), `capturedAt`, `receivedAt`, `confirmedAt`; many-to-one `DesignSession` |
+| `SiteMeasurement` (new) | `projectType` (`KITCHEN`/`CLOSET`), `spaceLabel` (e.g. "Cocina", "Vestidor recámara"; a `BOTH` session can hold several), `measurementUuid` (UUID, unique, client-generated), `revision` (int), `status` (`DRAFT`, `CONFIRMED`, `SUPERSEDED`), `schemaVersion` (int), `catalogVersion`, `payload` (JSON text, full snapshot), `deviceId`, `appVersion`, `laserModel`, `measuredBy` (User), `capturedAt`, `receivedAt`, `confirmedAt`; many-to-one `DesignSession` |
 | `RoomWall` | + `wallCode`, `lengthFloorMm`, `length900Mm`, `lengthCeilingMm`, `outOfPlumbMm`, `closingMm`; `lengthMm` = min of the three (service) |
 | `RoomObstacleType` | + `SWITCH`, `EXHAUST`, `BEAM`, `PIPE`, `ACCESS_PANEL` |
 | `ApplianceType` (new enum) | `FRIDGE, RANGE, COOKTOP, OVEN, HOOD, MICROWAVE, DISHWASHER, SINK` |

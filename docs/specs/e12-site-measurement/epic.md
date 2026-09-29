@@ -51,6 +51,8 @@ Studio session ─► app downloads sessions + catalog (#105, KFS-APP#10)
 
 Gateway E12 issues (gw#31–#38) are closed as not planned; gateway v1 is unchanged.
 
+Next layer: **E13 #118 — versioned kitchen distribution** ([../e13-kitchen-distribution/epic.md](../e13-kitchen-distribution/epic.md)).
+
 ## Epic acceptance criteria
 
 - [ ] A designer captures a full room offline with laser or manual values and
