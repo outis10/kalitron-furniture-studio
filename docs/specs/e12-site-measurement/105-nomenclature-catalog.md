@@ -26,14 +26,37 @@ exports it as JSON for the app (offline cache) and the backup sheet legend.
 
 ### Codes
 
-| Group | Codes | Maps to |
-| --- | --- | --- |
-| `WALL` / `CORNER` | `A`…`n`, `E-AB` | `RoomWall` |
-| `OPENING` | `V`, `P` | `WINDOW`, `DOOR` |
-| `SERVICE` | `TA`, `DR`, `GS`, `CT`, `AP`, `CE` | `WATER`, `DRAIN`, `GAS`, `OUTLET`, `SWITCH`, `EXHAUST` |
-| `OBSTRUCTION` | `CL`, `VG`, `TB`, `RG` | `COLUMN`, `BEAM`, `PIPE`, `ACCESS_PANEL` |
-| `APPLIANCE` | `RF`, `ES`, `PA`, `HO`, `CA`, `MW`, `LV`, `TJ` | `APPLIANCE` + `ApplianceType` |
-| `SITE` | `dP`, `dPl` | `KitchenSpec` / `RoomWall.outOfPlumbMm` |
+| Group | Code | `labelEsMx` | Maps to |
+| --- | --- | --- | --- |
+| `WALL` | `A`…`n` | Muro A, Muro B… | `RoomWall` |
+| `CORNER` | `E-AB` | Esquina entre muros A y B | `RoomWall.angleDeg` |
+| `OPENING` | `V` | Ventana | `WINDOW` |
+| `OPENING` | `P` | Puerta | `DOOR` |
+| `SERVICE` | `TA` | Toma de agua | `WATER` |
+| `SERVICE` | `DR` | Drenaje | `DRAIN` |
+| `SERVICE` | `GS` | Toma de gas | `GAS` |
+| `SERVICE` | `CT` | Contacto eléctrico | `OUTLET` |
+| `SERVICE` | `AP` | Apagador | `SWITCH` |
+| `SERVICE` | `CE` | Salida de extracción | `EXHAUST` |
+| `OBSTRUCTION` | `CL` | Columna | `COLUMN` |
+| `OBSTRUCTION` | `VG` | Viga | `BEAM` |
+| `OBSTRUCTION` | `TB` | Tubería | `PIPE` |
+| `OBSTRUCTION` | `RG` | Registro | `ACCESS_PANEL` |
+| `APPLIANCE` | `RF` | Refrigerador | `APPLIANCE` + `FRIDGE` |
+| `APPLIANCE` | `ES` | Estufa | `APPLIANCE` + `RANGE` |
+| `APPLIANCE` | `PA` | Parrilla | `APPLIANCE` + `COOKTOP` |
+| `APPLIANCE` | `HO` | Horno | `APPLIANCE` + `OVEN` |
+| `APPLIANCE` | `CA` | Campana | `APPLIANCE` + `HOOD` |
+| `APPLIANCE` | `MW` | Microondas | `APPLIANCE` + `MICROWAVE` |
+| `APPLIANCE` | `LV` | Lavavajillas | `APPLIANCE` + `DISHWASHER` |
+| `APPLIANCE` | `TJ` | Tarja (espacio) | `APPLIANCE` + `SINK` |
+| `SITE` | `dP` | Desnivel de piso | `KitchenSpec.floorOutOfLevelMm` |
+| `SITE` | `dPl` | Desplome de muro | `RoomWall.outOfPlumbMm` |
+
+- `labelEsMx` is what the app buttons, the review screens, the backup sheet
+  legend and validation messages show; codes stay as the short on-site notation.
+- `TJ` records the measured sink space/position on site; the sink **cabinet**
+  itself is a library module in the distribution (E13 #120).
 
 Entry: `code`, `group`, `labelEsMx`, `icon`, `requiredFields`
 (`X`, `Y`, `A`, `H`, `DEPTH`, `SWING`), `obstacleType`, `applianceType`, `sortOrder`.
@@ -97,3 +120,5 @@ Full rule list: see [plan.md](plan.md#validation-rules-defined-once-in-the-catal
 ## Open Questions
 
 - [ ] `catalogVersion` format: date + counter, or semver?
+- [ ] Confirm `CE` meaning: "Salida de extracción" (hood duct outlet) or something else?
+- [ ] Keep `TJ` in `APPLIANCE` (sink space) or move it to its own group?

@@ -106,14 +106,16 @@ See [../e13-kitchen-distribution/epic.md](../e13-kitchen-distribution/epic.md).
 
 ### Nomenclature (single source of truth — Studio catalog #105)
 
-| Group | Codes | Required data |
+| Group | Codes (es-MX label) | Required data |
 | --- | --- | --- |
-| Walls/corners | `A`…`n`, `E-AB` | 3 lengths; angle if ≠ 90° |
-| Openings | `V` window, `P` door | X, A, H, sill Y; swing for `P` |
-| Services | `TA` water, `DR` drain, `GS` gas, `CT` outlet, `AP` switch, `CE` exhaust | X, Y |
-| Obstructions | `CL` column, `VG` beam, `TB` pipe, `RG` access panel | X, A, H or depth |
-| Appliances | `RF` fridge, `ES` range, `PA` cooktop, `HO` oven, `CA` hood, `MW` microwave, `LV` dishwasher, `TJ` sink | A, H, depth |
-| Site | `dP` floor out of level, `dPl` wall out of plumb | value in mm + location |
+| Walls/corners | `A`…`n` Muro, `E-AB` Esquina entre muros A y B | 3 lengths; angle if ≠ 90° |
+| Openings | `V` Ventana, `P` Puerta | X, A, H, sill Y; swing for `P` |
+| Services | `TA` Toma de agua, `DR` Drenaje, `GS` Toma de gas, `CT` Contacto eléctrico, `AP` Apagador, `CE` Salida de extracción | X, Y |
+| Obstructions | `CL` Columna, `VG` Viga, `TB` Tubería, `RG` Registro | X, A, H or depth |
+| Appliances | `RF` Refrigerador, `ES` Estufa, `PA` Parrilla, `HO` Horno, `CA` Campana, `MW` Microondas, `LV` Lavavajillas, `TJ` Tarja (espacio) | A, H, depth |
+| Site | `dP` Desnivel de piso, `dPl` Desplome de muro | value in mm + location |
+
+Full catalog with enum mappings: [105-nomenclature-catalog.md](105-nomenclature-catalog.md).
 
 ### Validation rules (defined once in the catalog, #113)
 
