@@ -1,0 +1,225 @@
+{
+  "name": "04-closure-edges",
+  "description": "Closure Δ5 ok (A), Δ6 error (B), missing closing with wide elements (C), service-only wall needs no closing (D).",
+  "ruleSet": "MEASUREMENT",
+  "catalogVersion": "2026-09-30.1",
+  "params": {
+    "measure.lengthSpreadMm": 5,
+    "measure.closureToleranceMm": 5,
+    "measure.floorOutOfLevelMm": 5
+  },
+  "input": {
+    "schemaVersion": 1,
+    "projectType": "KITCHEN",
+    "catalogVersion": "2026-09-30.1",
+    "ceilingHeightMm": {
+      "value": 2440,
+      "source": "LASER"
+    },
+    "corners": [],
+    "walls": [
+      {
+        "wallCode": "A",
+        "lengthFloorMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": {
+          "value": 1105,
+          "source": "LASER"
+        },
+        "elements": [
+          {
+            "elementUuid": "a-v",
+            "code": "V",
+            "xMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 1050,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 900,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      },
+      {
+        "wallCode": "B",
+        "lengthFloorMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": {
+          "value": 1106,
+          "source": "LASER"
+        },
+        "elements": [
+          {
+            "elementUuid": "b-v",
+            "code": "V",
+            "xMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 1050,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 900,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      },
+      {
+        "wallCode": "C",
+        "lengthFloorMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": null,
+        "elements": [
+          {
+            "elementUuid": "c-v",
+            "code": "V",
+            "xMm": {
+              "value": 500,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 1050,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 600,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      },
+      {
+        "wallCode": "D",
+        "lengthFloorMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": null,
+        "elements": [
+          {
+            "elementUuid": "d-ta",
+            "code": "TA",
+            "xMm": {
+              "value": 1500,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 450,
+              "source": "LASER"
+            },
+            "widthMm": null,
+            "heightMm": null,
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      }
+    ],
+    "site": {
+      "floorOutOfLevelMm": null,
+      "floorOutOfLevelNote": null
+    }
+  },
+  "expectedIssues": [
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "WALL_CLOSURE_MISMATCH",
+      "severity": "ERROR",
+      "scope": "WALL",
+      "wallCode": "B",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": null,
+      "itemUuid": null,
+      "field": "closingMm"
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "WALL_CLOSURE_MISSING",
+      "severity": "WARNING",
+      "scope": "WALL",
+      "wallCode": "C",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": null,
+      "itemUuid": null,
+      "field": "closingMm"
+    }
+  ]
+}
