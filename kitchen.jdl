@@ -61,7 +61,26 @@ enum RoomObstacleType {
   DRAIN ("Drenaje"),
   RANGE_HOOD ("Campana"),
   APPLIANCE ("Electrodoméstico"),
-  OTHER ("Otro")
+  OTHER ("Otro"),
+  SWITCH ("Apagador"),
+  EXHAUST ("Salida de extracción"),
+  BEAM ("Viga"),
+  PIPE ("Tubería"),
+  ACCESS_PANEL ("Registro")
+}
+
+/**
+ * Appliance subtype for croquis codes (E12 #105). Used by the nomenclature
+ * catalog now; RoomObstacle.applianceType is added in E12 #107.
+ */
+enum ApplianceType {
+  FRIDGE ("Refrigerador"),
+  RANGE ("Estufa"),
+  COOKTOP ("Parrilla"),
+  OVEN ("Horno"),
+  MICROWAVE ("Microondas"),
+  DISHWASHER ("Lavavajillas"),
+  SINK ("Tarja (espacio)")
 }
 
 enum CabinetCategory {

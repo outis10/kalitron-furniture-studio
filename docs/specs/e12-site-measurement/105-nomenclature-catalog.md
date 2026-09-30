@@ -1,6 +1,6 @@
 # [E12] Issue 105: Nomenclature Catalog and Validation Rules Export
 
-Status: Reviewed
+Status: Implemented
 Issue: #105
 Epic: #104
 Related: #113 (rules engine), outis10/KFS-APP#10 (download), outis10/KFS-APP#13 (Dart engine)
@@ -121,6 +121,24 @@ Full rule list: see [plan.md](plan.md#validation-rules-defined-once-in-the-catal
 ## Test Plan
 
 - Backend: service load, enum/kind parity, label parity, resource IT (200/304/401).
+
+## Implementation notes
+
+- Catalog `src/main/resources/croquis/catalog.json` (`catalogVersion`
+  `2026-09-30.1`, `rulesEngineVersion` 1, `minAppVersion` `0.1.0`): 22 codes,
+  3 measurement params, 13 `MEASUREMENT` rules.
+- Rules reference tunable values through `paramRefs` → `params[]` (keys as in
+  E13 #127); fixed configuration (fields, groups) stays in `params`.
+- `wallCodePattern` / `cornerCodePattern` describe wall and corner codes
+  instead of catalog entries.
+- Loaded with a strict mapper (unknown properties/enum values fail) and
+  validated by `CroquisCatalogValidator`; any error stops startup.
+- Model lives in `service/dto/croquis` (immutable records + enums `RuleSet`,
+  `RuleScope`, `RuleKind`, `RulePrerequisite`, …) shared with the #113 engine.
+- **Scope moved from #107:** the 5 new `RoomObstacleType` values and the
+  `ApplianceType` enum were added here (JDL, Java, TS, i18n) because the parity
+  checks need them. `RoomObstacle.applianceType` (field) stays in #107.
+  Enum columns are `varchar`, so no migration was needed.
 
 ## Open Questions
 

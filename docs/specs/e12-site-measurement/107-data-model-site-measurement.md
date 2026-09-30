@@ -44,6 +44,10 @@ Extend the JDL and add incremental Liquibase changesets for a versioned
 
 ### Enums (JDL, with es-MX values — same pattern as existing enums)
 
+> `RoomObstacleType` additions and the `ApplianceType` enum were delivered in
+> #105 (needed by the catalog parity checks). This issue still adds the
+> `RoomObstacle.applianceType` field and the remaining enums below.
+
 Every enum value carries its Spanish label in the JDL; JHipster generates the
 Java `getValue()`, the TypeScript enum and `i18n/es` + `i18n/en` files
 (English labels added by hand in `i18n/en`).
