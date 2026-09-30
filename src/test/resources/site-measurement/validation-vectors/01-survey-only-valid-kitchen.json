@@ -1,0 +1,145 @@
+{
+  "name": "01-survey-only-valid-kitchen",
+  "description": "Complete survey, all laser values, no distribution: no issues.",
+  "ruleSet": "MEASUREMENT",
+  "catalogVersion": "2026-09-30.1",
+  "params": {
+    "measure.lengthSpreadMm": 5,
+    "measure.closureToleranceMm": 5,
+    "measure.floorOutOfLevelMm": 5
+  },
+  "input": {
+    "schemaVersion": 1,
+    "projectType": "KITCHEN",
+    "catalogVersion": "2026-09-30.1",
+    "ceilingHeightMm": {
+      "value": 2440,
+      "source": "LASER"
+    },
+    "corners": [
+      {
+        "cornerCode": "E-AB",
+        "angleDeg": 90
+      }
+    ],
+    "walls": [
+      {
+        "wallCode": "A",
+        "lengthFloorMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 3002,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": {
+          "value": 1100,
+          "source": "LASER"
+        },
+        "elements": [
+          {
+            "elementUuid": "a-v",
+            "code": "V",
+            "xMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 1050,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 900,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          },
+          {
+            "elementUuid": "a-ta",
+            "code": "TA",
+            "xMm": {
+              "value": 1300,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 450,
+              "source": "LASER"
+            },
+            "widthMm": null,
+            "heightMm": null,
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      },
+      {
+        "wallCode": "B",
+        "lengthFloorMm": {
+          "value": 2500,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 2500,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 2500,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": {
+          "value": 1600,
+          "source": "LASER"
+        },
+        "elements": [
+          {
+            "elementUuid": "b-rf",
+            "code": "RF",
+            "xMm": {
+              "value": 0,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 0,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 900,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1800,
+              "source": "LASER"
+            },
+            "depthMm": {
+              "value": 700,
+              "source": "LASER"
+            },
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      }
+    ],
+    "site": {
+      "floorOutOfLevelMm": 3,
+      "floorOutOfLevelNote": null
+    }
+  },
+  "expectedIssues": []
+}
