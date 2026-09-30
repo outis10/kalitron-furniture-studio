@@ -35,6 +35,7 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 ```json
 {
   "schemaVersion": 1,
+  "projectType": "KITCHEN",
   "revision": 4,
   "baseRevision": 3,
   "catalogVersion": "2026-10-01.1",

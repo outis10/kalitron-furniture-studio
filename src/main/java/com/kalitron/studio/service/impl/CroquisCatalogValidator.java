@@ -4,7 +4,9 @@ import com.kalitron.studio.service.dto.croquis.CroquisCatalogDTO;
 import com.kalitron.studio.service.dto.croquis.CroquisCodeDTO;
 import com.kalitron.studio.service.dto.croquis.RuleKind;
 import com.kalitron.studio.service.dto.croquis.RuleParamDTO;
+import com.kalitron.studio.service.dto.croquis.RuleSet;
 import com.kalitron.studio.service.dto.croquis.ValidationRuleDTO;
+import com.kalitron.studio.service.validation.MeasurementRuleEngine;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -122,6 +124,9 @@ final class CroquisCatalogValidator {
             }
             if (!rule.ruleSet().allows(rule.scope())) {
                 errors.add(code + ": scope " + rule.scope() + " not allowed for ruleSet " + rule.ruleSet());
+            }
+            if (rule.ruleSet() == RuleSet.MEASUREMENT && !MeasurementRuleEngine.supports(rule.scope(), rule.kind())) {
+                errors.add(code + ": kind " + rule.kind() + " not supported at scope " + rule.scope());
             }
             if (rule.kind().getSinceEngineVersion() > engineVersion) {
                 errors.add(code + ": kind " + rule.kind() + " needs engine version " + rule.kind().getSinceEngineVersion());
