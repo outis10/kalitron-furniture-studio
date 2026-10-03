@@ -24,7 +24,7 @@ measured layout and set `SessionStatus.MEASURED`.
 | wall code, three lengths, out-of-plumb, closing measurement, corner angle | `RoomWall` (`lengthMm` = min of lengths) |
 | non-appliance element | `RoomObstacle` with `obstacleType` from catalog + `croquisCode` |
 | appliance element | `RoomObstacle` `APPLIANCE` + `applianceType` |
-| ceiling height | `RoomWall.heightMm` for all walls |
+| wall ceiling heights (left/right) | `RoomWall.heightLeftMm`, `heightRightMm`; `heightMm` = min |
 | floor out of level | `KitchenSpec.floorOutOfLevelMm` + note |
 | wall photos | already `DesignImage` `SITE_PHOTO` (#112) |
 
