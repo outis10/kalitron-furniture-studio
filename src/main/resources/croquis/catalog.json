@@ -285,13 +285,13 @@
       "kind": "REQUIRED_FIELDS",
       "severity": "ERROR",
       "params": {
-        "fields": ["lengthFloorMm", "length900Mm", "lengthCeilingMm"]
+        "fields": ["lengthFloorMm", "length900Mm", "lengthCeilingMm", "ceilingHeightLeftMm", "ceilingHeightRightMm"]
       },
       "paramRefs": {},
       "prerequisites": [],
       "acknowledgeable": false,
       "projectTypes": ["KITCHEN", "CLOSET"],
-      "messageEsMx": "Muro {wallCode}: faltan longitudes ({missing})."
+      "messageEsMx": "Muro {wallCode}: faltan medidas ({missing})."
     },
     {
       "code": "WALL_LENGTH_SPREAD",
