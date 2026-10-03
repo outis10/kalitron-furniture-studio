@@ -1,0 +1,487 @@
+{
+  "catalogVersion": "2026-09-30.1",
+  "rulesEngineVersion": 1,
+  "minAppVersion": "0.1.0",
+  "wallCodePattern": "^[A-Z]$",
+  "cornerCodePattern": "^E-[A-Z]{2}$",
+  "entries": [
+    {
+      "code": "V",
+      "group": "OPENING",
+      "labelEsMx": "Ventana",
+      "icon": "window",
+      "requiredFields": ["X", "Y", "A", "H"],
+      "obstacleType": "WINDOW",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 10
+    },
+    {
+      "code": "P",
+      "group": "OPENING",
+      "labelEsMx": "Puerta",
+      "icon": "door",
+      "requiredFields": ["X", "Y", "A", "H", "SWING"],
+      "obstacleType": "DOOR",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 20
+    },
+    {
+      "code": "TA",
+      "group": "SERVICE",
+      "labelEsMx": "Toma de agua",
+      "icon": "water",
+      "requiredFields": ["X", "Y"],
+      "obstacleType": "WATER",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 30
+    },
+    {
+      "code": "DR",
+      "group": "SERVICE",
+      "labelEsMx": "Drenaje",
+      "icon": "drain",
+      "requiredFields": ["X", "Y"],
+      "obstacleType": "DRAIN",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 40
+    },
+    {
+      "code": "GS",
+      "group": "SERVICE",
+      "labelEsMx": "Toma de gas",
+      "icon": "gas",
+      "requiredFields": ["X", "Y"],
+      "obstacleType": "GAS",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 50
+    },
+    {
+      "code": "CT",
+      "group": "SERVICE",
+      "labelEsMx": "Contacto eléctrico",
+      "icon": "outlet",
+      "requiredFields": ["X", "Y"],
+      "obstacleType": "OUTLET",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 60
+    },
+    {
+      "code": "AP",
+      "group": "SERVICE",
+      "labelEsMx": "Apagador",
+      "icon": "switch",
+      "requiredFields": ["X", "Y"],
+      "obstacleType": "SWITCH",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 70
+    },
+    {
+      "code": "CE",
+      "group": "SERVICE",
+      "labelEsMx": "Salida de extracción",
+      "icon": "exhaust",
+      "requiredFields": ["X", "Y"],
+      "obstacleType": "EXHAUST",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 80
+    },
+    {
+      "code": "CL",
+      "group": "OBSTRUCTION",
+      "labelEsMx": "Columna",
+      "icon": "column",
+      "requiredFields": ["X", "Y", "A", "H"],
+      "obstacleType": "COLUMN",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 90
+    },
+    {
+      "code": "VG",
+      "group": "OBSTRUCTION",
+      "labelEsMx": "Viga",
+      "icon": "beam",
+      "requiredFields": ["X", "Y", "A", "H"],
+      "obstacleType": "BEAM",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 100
+    },
+    {
+      "code": "TB",
+      "group": "OBSTRUCTION",
+      "labelEsMx": "Tubería",
+      "icon": "pipe",
+      "requiredFields": ["X", "Y", "A", "H"],
+      "obstacleType": "PIPE",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 110
+    },
+    {
+      "code": "RG",
+      "group": "OBSTRUCTION",
+      "labelEsMx": "Registro",
+      "icon": "access_panel",
+      "requiredFields": ["X", "Y", "A", "H"],
+      "obstacleType": "ACCESS_PANEL",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 120
+    },
+    {
+      "code": "RF",
+      "group": "APPLIANCE",
+      "labelEsMx": "Refrigerador",
+      "icon": "fridge",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "APPLIANCE",
+      "applianceType": "FRIDGE",
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 130
+    },
+    {
+      "code": "ES",
+      "group": "APPLIANCE",
+      "labelEsMx": "Estufa",
+      "icon": "range",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "APPLIANCE",
+      "applianceType": "RANGE",
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 140
+    },
+    {
+      "code": "PA",
+      "group": "APPLIANCE",
+      "labelEsMx": "Parrilla",
+      "icon": "cooktop",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "APPLIANCE",
+      "applianceType": "COOKTOP",
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 150
+    },
+    {
+      "code": "HO",
+      "group": "APPLIANCE",
+      "labelEsMx": "Horno",
+      "icon": "oven",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "APPLIANCE",
+      "applianceType": "OVEN",
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 160
+    },
+    {
+      "code": "CA",
+      "group": "APPLIANCE",
+      "labelEsMx": "Campana",
+      "icon": "hood",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "RANGE_HOOD",
+      "applianceType": null,
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 170
+    },
+    {
+      "code": "MW",
+      "group": "APPLIANCE",
+      "labelEsMx": "Microondas",
+      "icon": "microwave",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "APPLIANCE",
+      "applianceType": "MICROWAVE",
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 180
+    },
+    {
+      "code": "LV",
+      "group": "APPLIANCE",
+      "labelEsMx": "Lavavajillas",
+      "icon": "dishwasher",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "APPLIANCE",
+      "applianceType": "DISHWASHER",
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 190
+    },
+    {
+      "code": "TJ",
+      "group": "APPLIANCE",
+      "labelEsMx": "Tarja (espacio)",
+      "icon": "sink",
+      "requiredFields": ["X", "Y", "A", "H", "DEPTH"],
+      "obstacleType": "APPLIANCE",
+      "applianceType": "SINK",
+      "projectTypes": ["KITCHEN"],
+      "sortOrder": 200
+    },
+    {
+      "code": "dP",
+      "group": "SITE",
+      "labelEsMx": "Desnivel de piso",
+      "icon": "floor_level",
+      "requiredFields": ["VALUE", "LOCATION"],
+      "obstacleType": null,
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 210
+    },
+    {
+      "code": "dPl",
+      "group": "SITE",
+      "labelEsMx": "Desplome de muro",
+      "icon": "wall_plumb",
+      "requiredFields": ["VALUE"],
+      "obstacleType": null,
+      "applianceType": null,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "sortOrder": 220
+    }
+  ],
+  "params": [
+    {
+      "key": "measure.lengthSpreadMm",
+      "defaultValue": 5,
+      "unit": "MM",
+      "min": 1,
+      "max": 50,
+      "labelEsMx": "Diferencia máxima entre las tres longitudes de un muro",
+      "projectTypes": ["KITCHEN", "CLOSET"]
+    },
+    {
+      "key": "measure.closureToleranceMm",
+      "defaultValue": 5,
+      "unit": "MM",
+      "min": 1,
+      "max": 50,
+      "labelEsMx": "Tolerancia de la medida de cierre",
+      "projectTypes": ["KITCHEN", "CLOSET"]
+    },
+    {
+      "key": "measure.floorOutOfLevelMm",
+      "defaultValue": 5,
+      "unit": "MM",
+      "min": 1,
+      "max": 50,
+      "labelEsMx": "Desnivel de piso máximo sin aviso",
+      "projectTypes": ["KITCHEN", "CLOSET"]
+    }
+  ],
+  "validationRules": [
+    {
+      "code": "WALL_INCOMPLETE",
+      "ruleSet": "MEASUREMENT",
+      "scope": "WALL",
+      "kind": "REQUIRED_FIELDS",
+      "severity": "ERROR",
+      "params": {
+        "fields": ["lengthFloorMm", "length900Mm", "lengthCeilingMm", "ceilingHeightLeftMm", "ceilingHeightRightMm"]
+      },
+      "paramRefs": {},
+      "prerequisites": [],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: faltan medidas ({missing})."
+    },
+    {
+      "code": "WALL_LENGTH_SPREAD",
+      "ruleSet": "MEASUREMENT",
+      "scope": "WALL",
+      "kind": "SPREAD_WITHIN_TOLERANCE",
+      "severity": "WARNING",
+      "params": {
+        "fields": ["lengthFloorMm", "length900Mm", "lengthCeilingMm"]
+      },
+      "paramRefs": {
+        "toleranceMm": "measure.lengthSpreadMm"
+      },
+      "prerequisites": ["WALL_COMPLETE"],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: las tres longitudes difieren {spread} mm (máximo {toleranceMm} mm)."
+    },
+    {
+      "code": "WALL_CLOSURE_MISMATCH",
+      "ruleSet": "MEASUREMENT",
+      "scope": "WALL",
+      "kind": "SUM_WITHIN_TOLERANCE",
+      "severity": "ERROR",
+      "params": {
+        "terms": ["rightmostElement.xMm", "rightmostElement.widthMm", "wall.closingMm"],
+        "target": "wall.designLengthMm",
+        "skipWhenMissing": ["wall.closingMm"]
+      },
+      "paramRefs": {
+        "toleranceMm": "measure.closureToleranceMm"
+      },
+      "prerequisites": ["WALL_COMPLETE", "ELEMENT_HAS_WIDTH"],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: cierre {sum} mm vs. muro {length} mm (Δ {delta} mm)."
+    },
+    {
+      "code": "WALL_CLOSURE_MISSING",
+      "ruleSet": "MEASUREMENT",
+      "scope": "WALL",
+      "kind": "REQUIRED_FIELDS",
+      "severity": "WARNING",
+      "params": {
+        "fields": ["closingMm"],
+        "when": "WALL_HAS_ELEMENTS_WITH_WIDTH"
+      },
+      "paramRefs": {},
+      "prerequisites": ["WALL_COMPLETE"],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: falta la medida de cierre."
+    },
+    {
+      "code": "WALL_WITHOUT_PHOTO",
+      "ruleSet": "MEASUREMENT",
+      "scope": "WALL",
+      "kind": "HAS_ATTACHMENT",
+      "severity": "WARNING",
+      "params": {
+        "attachment": "PHOTO",
+        "min": 1
+      },
+      "paramRefs": {},
+      "prerequisites": [],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: sin foto de evidencia."
+    },
+    {
+      "code": "MANUAL_VALUE",
+      "ruleSet": "MEASUREMENT",
+      "scope": "WALL",
+      "kind": "SOURCE_IS",
+      "severity": "INFO",
+      "params": {
+        "source": "MANUAL",
+        "includeElements": true
+      },
+      "paramRefs": {},
+      "prerequisites": [],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: {field} capturado manualmente."
+    },
+    {
+      "code": "UNKNOWN_CODE",
+      "ruleSet": "MEASUREMENT",
+      "scope": "ELEMENT",
+      "kind": "CODE_IN_CATALOG",
+      "severity": "ERROR",
+      "params": {},
+      "paramRefs": {},
+      "prerequisites": [],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: código «{code}» no existe en el catálogo."
+    },
+    {
+      "code": "ELEMENT_MISSING_XY",
+      "ruleSet": "MEASUREMENT",
+      "scope": "ELEMENT",
+      "kind": "REQUIRED_FIELDS",
+      "severity": "ERROR",
+      "params": {
+        "fields": ["xMm", "yMm"]
+      },
+      "paramRefs": {},
+      "prerequisites": ["CODE_KNOWN"],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: {code} sin X o Y."
+    },
+    {
+      "code": "APPLIANCE_MISSING_DIMS",
+      "ruleSet": "MEASUREMENT",
+      "scope": "ELEMENT",
+      "kind": "REQUIRED_FIELDS",
+      "severity": "ERROR",
+      "params": {
+        "fields": ["widthMm", "heightMm", "depthMm"],
+        "groups": ["APPLIANCE"]
+      },
+      "paramRefs": {},
+      "prerequisites": ["CODE_KNOWN"],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: {code} sin ancho, alto o fondo."
+    },
+    {
+      "code": "ELEMENT_OUT_OF_WALL",
+      "ruleSet": "MEASUREMENT",
+      "scope": "ELEMENT",
+      "kind": "WITHIN_BOUNDS",
+      "severity": "ERROR",
+      "params": {},
+      "paramRefs": {},
+      "prerequisites": ["WALL_COMPLETE", "ELEMENT_HAS_XY"],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: {code} termina en {end} mm, fuera del muro ({length} mm)."
+    },
+    {
+      "code": "ELEMENTS_OVERLAP",
+      "ruleSet": "MEASUREMENT",
+      "scope": "ELEMENT",
+      "kind": "NO_OVERLAP",
+      "severity": "WARNING",
+      "params": {
+        "excludeGroups": ["SERVICE"]
+      },
+      "paramRefs": {},
+      "prerequisites": ["ELEMENT_HAS_XY", "ELEMENT_HAS_WIDTH"],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Muro {wallCode}: {code} se encima con {otherCode}."
+    },
+    {
+      "code": "FLOOR_OUT_OF_LEVEL",
+      "ruleSet": "MEASUREMENT",
+      "scope": "SITE",
+      "kind": "THRESHOLD_EXCEEDED",
+      "severity": "WARNING",
+      "params": {
+        "field": "site.floorOutOfLevelMm"
+      },
+      "paramRefs": {
+        "thresholdMm": "measure.floorOutOfLevelMm"
+      },
+      "prerequisites": [],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Desnivel de piso de {value} mm (máximo {thresholdMm} mm)."
+    },
+    {
+      "code": "CORNER_NOT_SQUARE",
+      "ruleSet": "MEASUREMENT",
+      "scope": "SITE",
+      "kind": "THRESHOLD_EXCEEDED",
+      "severity": "WARNING",
+      "params": {
+        "field": "corner.angleDeg",
+        "expected": 90,
+        "threshold": 0
+      },
+      "paramRefs": {},
+      "prerequisites": [],
+      "acknowledgeable": false,
+      "projectTypes": ["KITCHEN", "CLOSET"],
+      "messageEsMx": "Esquina {cornerCode} a {value}° (no está a escuadra)."
+    }
+  ]
+}
