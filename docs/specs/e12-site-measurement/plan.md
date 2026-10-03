@@ -99,6 +99,8 @@ See [../e13-kitchen-distribution/epic.md](../e13-kitchen-distribution/epic.md).
 | Wall codes | `A`, `B`, `C`… clockwise, starting left of the entry door |
 | Corners | `E-AB` between wall A and B; angle only if ≠ 90° |
 | Wall length | Three heights: floor, 900 mm, ceiling; design uses the minimum |
+| Ceiling height | Per wall, at both ends (sloped ceilings); stepped ceilings / soffits captured as `VG` |
+| Procedure | Guided order by layers (openings → obstructions → services → appliances), corners by the diagonal method — KFS-APP#27 |
 | X | Cumulative from the wall's left corner, facing the wall |
 | Y | Height from finished floor |
 | Element fields | `X`, `Y`, `A` (width), `H` (height), depth where required |
@@ -132,7 +134,7 @@ Full catalog with enum mappings: [105-nomenclature-catalog.md](105-nomenclature-
 | `ELEMENT_OUT_OF_WALL` | X + A > wall design length | ERROR | `ELEMENT` | — |
 | `UNKNOWN_CODE` | Code not in catalog | ERROR | `ELEMENT` | Server-side guard only; app uses buttons |
 | `MANUAL_VALUE` | Value entered manually, not from laser | INFO | `WALL` | Replaces `LOW_CONFIDENCE` |
-| `WALL_INCOMPLETE` | Wall in floor plan without 3 lengths | ERROR | `WALL` | Replaces `WALL_WITHOUT_SHEET` |
+| `WALL_INCOMPLETE` | Wall without its 3 lengths or its 2 ceiling heights | ERROR | `WALL` | Replaces `WALL_WITHOUT_SHEET` |
 | `WALL_WITHOUT_PHOTO` | Wall without evidence photo | WARNING | `WALL` | New |
 
 ### Free spans ("huecos") — decision

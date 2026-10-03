@@ -40,10 +40,9 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
   "catalogVersion": "2026-10-01.1",
   "device": { "deviceId": "uuid", "platform": "android", "appVersion": "1.0.0", "laserModel": "GLM 50-27 C", "laserId": "decoded-id" },
   "capturedAt": "2026-10-05T16:20:00Z",
-  "ceilingHeightMm": { "value": 2440, "source": "LASER" },
   "corners": [
     { "cornerCode": "E-AB", "angleDeg": 90, "squareCheck": null },
-    { "cornerCode": "E-BC", "angleDeg": 91, "squareCheck": { "legAMm": 1000, "legBMm": 1000, "diagonalMm": { "value": 1426, "source": "LASER" } } }
+    { "cornerCode": "E-BC", "angleDeg": 91, "squareCheck": { "status": "VERIFIED", "legAMm": 1000, "legBMm": 1000, "diagonalMm": { "value": 1426, "source": "LASER" } } }
   ],
   "walls": [
     {
@@ -53,6 +52,8 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
       "lengthCeilingMm": { "value": 3452, "source": "MANUAL" },
       "outOfPlumbMm":    { "value": 4, "source": "MANUAL" },
       "closingMm":       { "value": 1348, "source": "LASER" },
+      "ceilingHeightLeftMm":  { "value": 2440, "source": "LASER" },
+      "ceilingHeightRightMm": { "value": 2385, "source": "LASER" },
       "elements": [
         { "elementUuid": "uuid", "code": "V", "xMm": {"value":1200,"source":"LASER"}, "yMm": {"value":1050,"source":"MANUAL"}, "widthMm": {"value":900,"source":"LASER"}, "heightMm": {"value":1000,"source":"LASER"}, "depthMm": null, "swing": null, "notes": null }
       ],
@@ -65,8 +66,12 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 ```
 
 - Guided survey fields (KFS-APP#27):
-  - `corners[].squareCheck` (optional): legs and measured diagonal of the
-    diagonal method. When present, Studio **recomputes** `angleDeg =
+  - `walls[].ceilingHeightLeftMm` / `ceilingHeightRightMm` (required):
+    floor-to-ceiling height near each end of the wall. Different values mean
+    a sloped ceiling. There is no global ceiling height.
+  - `corners[].squareCheck` (optional): `status` (`VERIFIED`,
+    `ASSUMED_SQUARE`, `NOT_VERIFIABLE` — legs < 300 mm), legs and measured
+    diagonal of the diagonal method. When present, Studio **recomputes** `angleDeg =
     round(acos((a² + b² − d²) / 2ab))` and stores the recomputed value
     (authoritative); a mismatch with the app value is logged, not rejected.
   - `walls[].layers`: per catalog group `OPENING`, `OBSTRUCTION`, `SERVICE`,

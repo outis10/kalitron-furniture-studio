@@ -137,6 +137,7 @@ checked by shared conformance vectors. Studio web validates through the server
 | `DIST_CLEARANCE_COOKING_PREFERRED` | Main-side landing beside cooking < preferred | INFO | `ITEM` | `MIN_CLEARANCE` |
 | `DIST_CLEARANCE_CORNER` | Doors/drawers clash at a corner (no filler/blind corner) | ERROR | `RUN` | `MIN_CLEARANCE` |
 | `DIST_UPPER_COLLISION` | Upper module overlaps a window, hood zone or beam | ERROR | `ITEM` | `NO_COLLISION` |
+| `DIST_EXCEEDS_CEILING` | Top of a tall or upper item above the ceiling at its X range (heights interpolated between the wall ends) minus `upper.ceilingClearanceMm` | ERROR | `ITEM` | `WITHIN_BOUNDS` |
 | `DIST_UPPER_OVER_TALL` | Upper module over a tall module | ERROR | `ITEM` | `NO_COLLISION` |
 | `DIST_BLOCKS_OPENING` | Base/tall item in front of a door; tall item in front of a window | ERROR | `ITEM` | `NO_COLLISION` |
 | `DIST_WIDTH_NOT_ALLOWED` | Width not in the template's allowed widths | ERROR | `ITEM` | `WIDTH_ALLOWED` |
