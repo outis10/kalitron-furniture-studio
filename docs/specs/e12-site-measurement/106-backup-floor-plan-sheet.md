@@ -27,8 +27,14 @@ so data can be typed into the app later as manual values.
   address or phone.**
 - Grid area for floor plan with wall/corner labelling reminder (clockwise from
   left of entry door).
-- Table per wall: `L piso / L 900 / L techo`, out-of-plumb, closing measurement (`Cierre`).
-- Element table: `Muro | Código | X | Y | A | H | Fondo | Notas`.
+- **Same order as the guided survey (KFS-APP#27)**, one block per wall:
+  photo checkbox → `L piso / L 900 / L techo` → desplome → four layer
+  sections in order *Aberturas, Obstrucciones, Servicios, Electrodomésticos*
+  (each with a "No hay" checkbox and rows `Código | X | Y | A | H | Fondo |
+  Notas`) → `Cierre`.
+- Corner table with the diagonal method: `Esquina | ¿A escuadra? | Lado A |
+  Lado B | Diagonal` (1000 / 1000 / 1414 ≈ 90°).
+- Site box: desnivel de piso + ubicación.
 - Legend generated from the catalog (#105); units note "todo en mm".
 
 ## API Contract
