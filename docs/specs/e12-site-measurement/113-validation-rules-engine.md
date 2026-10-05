@@ -134,7 +134,8 @@ Closed set of `kind`s, implemented once per engine:
 
 - Engine: `service/validation/MeasurementRuleEngine` (pure, no Spring/DB);
   Spring wrapper `MeasurementValidationService` for the sync API (#112).
-- Input: `SiteMeasurementPayloadDTO` (#112 payload shape + `projectType`).
+- Input: `SiteMeasurementPayloadDTO` (#112 payload shape: per-wall ceiling
+  heights, `corners[].squareCheck`, `projectType`).
 - Effective params = catalog defaults + overrides map (admin overrides come
   with E13 #127).
 - Supported (scope, kind) combinations for `MEASUREMENT` rules are declared
@@ -147,8 +148,8 @@ Closed set of `kind`s, implemented once per engine:
 - Order: `MEASUREMENT`-scope issues, then `SITE`, then walls in input order;
   wall-level before element-level; elements by X (missing X last), uuid; then
   rule code, corner code, field.
-- Vectors: `src/test/resources/site-measurement/validation-vectors/` (8
-  cases); packaged by `scripts/package-validation-vectors.sh` and published by
+- Vectors: `src/test/resources/site-measurement/validation-vectors/` (9
+  cases, incl. per-wall ceiling heights and corner square checks); packaged by `scripts/package-validation-vectors.sh` and published by
   `.github/workflows/validation-vectors.yml` on tag `vectors-<catalogVersion>`.
 
 ## Open Questions

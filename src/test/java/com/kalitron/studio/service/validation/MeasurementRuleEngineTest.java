@@ -42,7 +42,7 @@ class MeasurementRuleEngineTest {
     @Test
     void emptyMeasurementProducesNoIssues() {
         assertThat(
-            new MeasurementRuleEngine(CATALOG).validate(new SiteMeasurementPayloadDTO(1, ProjectType.KITCHEN, null, null, null, null, null))
+            new MeasurementRuleEngine(CATALOG).validate(new SiteMeasurementPayloadDTO(1, ProjectType.KITCHEN, null, null, null, null))
         ).isEmpty();
     }
 
@@ -62,10 +62,12 @@ class MeasurementRuleEngineTest {
             laser(3000),
             null,
             null,
+            laser(2440),
+            laser(2440),
             List.of(),
             List.of("photo-1")
         );
-        return new SiteMeasurementPayloadDTO(1, ProjectType.KITCHEN, "2026-09-30.1", laser(2440), List.of(), List.of(wall), null);
+        return new SiteMeasurementPayloadDTO(1, ProjectType.KITCHEN, "2026-09-30.1", List.of(), List.of(wall), null);
     }
 
     private static MeasuredValueDTO laser(int value) {

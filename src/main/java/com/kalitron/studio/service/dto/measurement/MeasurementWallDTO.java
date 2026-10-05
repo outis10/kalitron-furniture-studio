@@ -4,7 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Stream;
 
-/** Wall with the three lengths (floor, 900 mm, ceiling), elements and photos. */
+/**
+ * Wall with the three lengths (floor, 900 mm, ceiling), ceiling height at both
+ * ends (sloped ceilings), elements and photos.
+ */
 public record MeasurementWallDTO(
     String wallCode,
     MeasuredValueDTO lengthFloorMm,
@@ -12,6 +15,8 @@ public record MeasurementWallDTO(
     MeasuredValueDTO lengthCeilingMm,
     MeasuredValueDTO outOfPlumbMm,
     MeasuredValueDTO closingMm,
+    MeasuredValueDTO ceilingHeightLeftMm,
+    MeasuredValueDTO ceilingHeightRightMm,
     List<MeasurementElementDTO> elements,
     List<String> photoUuids
 ) implements Serializable {

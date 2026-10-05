@@ -12,18 +12,16 @@
     "schemaVersion": 1,
     "projectType": "KITCHEN",
     "catalogVersion": "2026-09-30.1",
-    "ceilingHeightMm": {
-      "value": 2440,
-      "source": "LASER"
-    },
     "corners": [
       {
         "cornerCode": "E-AB",
-        "angleDeg": 90
+        "angleDeg": 90,
+        "squareCheck": null
       },
       {
         "cornerCode": "E-BC",
-        "angleDeg": 92
+        "angleDeg": 92,
+        "squareCheck": null
       }
     ],
     "walls": [
@@ -43,6 +41,14 @@
         },
         "outOfPlumbMm": null,
         "closingMm": null,
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
         "elements": [],
         "photoUuids": ["p-x"]
       }

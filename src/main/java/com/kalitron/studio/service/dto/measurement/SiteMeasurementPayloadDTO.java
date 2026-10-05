@@ -13,7 +13,6 @@ public record SiteMeasurementPayloadDTO(
     Integer schemaVersion,
     ProjectType projectType,
     String catalogVersion,
-    MeasuredValueDTO ceilingHeightMm,
     List<MeasurementCornerDTO> corners,
     List<MeasurementWallDTO> walls,
     MeasurementSiteDTO site

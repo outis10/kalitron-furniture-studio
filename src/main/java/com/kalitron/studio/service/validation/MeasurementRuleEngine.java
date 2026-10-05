@@ -48,6 +48,8 @@ public final class MeasurementRuleEngine {
         "lengthFloorMm",
         "length900Mm",
         "lengthCeilingMm",
+        "ceilingHeightLeftMm",
+        "ceilingHeightRightMm",
         "outOfPlumbMm",
         "closingMm"
     );
@@ -437,6 +439,8 @@ public final class MeasurementRuleEngine {
             case "lengthCeilingMm" -> wall.lengthCeilingMm();
             case "outOfPlumbMm" -> wall.outOfPlumbMm();
             case "closingMm" -> wall.closingMm();
+            case "ceilingHeightLeftMm" -> wall.ceilingHeightLeftMm();
+            case "ceilingHeightRightMm" -> wall.ceilingHeightRightMm();
             default -> throw new IllegalStateException("Unknown wall field " + field);
         };
     }

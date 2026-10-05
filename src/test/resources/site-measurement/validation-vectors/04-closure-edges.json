@@ -12,10 +12,6 @@
     "schemaVersion": 1,
     "projectType": "KITCHEN",
     "catalogVersion": "2026-09-30.1",
-    "ceilingHeightMm": {
-      "value": 2440,
-      "source": "LASER"
-    },
     "corners": [],
     "walls": [
       {
@@ -35,6 +31,14 @@
         "outOfPlumbMm": null,
         "closingMm": {
           "value": 1105,
+          "source": "LASER"
+        },
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
           "source": "LASER"
         },
         "elements": [
@@ -83,6 +87,14 @@
           "value": 1106,
           "source": "LASER"
         },
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
         "elements": [
           {
             "elementUuid": "b-v",
@@ -126,6 +138,14 @@
         },
         "outOfPlumbMm": null,
         "closingMm": null,
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
         "elements": [
           {
             "elementUuid": "c-v",
@@ -169,6 +189,14 @@
         },
         "outOfPlumbMm": null,
         "closingMm": null,
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
         "elements": [
           {
             "elementUuid": "d-ta",
