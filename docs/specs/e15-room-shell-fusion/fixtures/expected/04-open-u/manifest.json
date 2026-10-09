@@ -1,0 +1,59 @@
+{
+  "contract": "kfs-room-shell",
+  "schemaVersion": 1,
+  "units": "mm",
+  "frame": {
+    "up": "+Z",
+    "origin": "left end of wall A, interior face, finished floor",
+    "wallA": "+X",
+    "roomSide": "right of the wall direction (walls run clockwise seen from above)"
+  },
+  "session": {
+    "sessionCode": "KD-FX-004",
+    "projectType": "KITCHEN",
+    "spaceLabel": "Cocina abierta en U"
+  },
+  "source": {
+    "measurementUuid": "00000004-0000-4000-8000-000000000000",
+    "revision": 3,
+    "catalogVersion": "2026-10-01.1"
+  },
+  "generatedAt": "2026-10-09T00:00:00Z",
+  "room": {
+    "closed": false,
+    "wallCount": 3,
+    "closureGapMm": null,
+    "closureGapXMm": null,
+    "closureGapYMm": null,
+    "angleSumDeg": 180,
+    "expectedAngleSumDeg": null,
+    "maxCeilingHeightMm": 2500,
+    "floorOutOfLevelMm": null,
+    "floorOutOfLevelNote": null
+  },
+  "defaults": {
+    "wallThicknessMm": 150,
+    "markerSizeMm": 80,
+    "markerDepthMm": 25,
+    "panelDepthMm": 10,
+    "obstructionDepthMm": {
+      "CL": 300,
+      "VG": 300,
+      "TB": 100
+    },
+    "closureToleranceMm": 20
+  },
+  "files": {
+    "walls": {
+      "name": "walls.csv",
+      "rows": 3,
+      "sha256": "6035f127b04c8bbc7f0a663d0cce5cd557a1b625fcde84cf1ba526a7178b069f"
+    },
+    "elements": {
+      "name": "elements.csv",
+      "rows": 13,
+      "sha256": "22ef8d3a5ece10e00c03f811dfd862c4fb50baf901b72e595f22073bb0b4eb12"
+    }
+  },
+  "warnings": []
+}

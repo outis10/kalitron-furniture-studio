@@ -147,3 +147,6 @@ Procfile        text
 *.otf           binary
 *.woff          binary
 *.woff2         binary
+
+# E15 golden fixtures: byte-exact (CRLF + BOM), their sha256 is in manifest.json
+docs/specs/e15-room-shell-fusion/fixtures/expected/**/*.csv -text

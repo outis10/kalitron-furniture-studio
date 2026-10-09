@@ -1,0 +1,5 @@
+﻿wall_code,seq,length_mm,length_floor_mm,length_900_mm,length_ceiling_mm,height_left_mm,height_right_mm,thickness_mm,out_of_plumb_mm,direction_deg,start_x_mm,start_y_mm,end_x_mm,end_y_mm,inner_normal_x,inner_normal_y,outer_start_x_mm,outer_start_y_mm,outer_end_x_mm,outer_end_y_mm,corner_start_code,corner_start_angle_deg,corner_end_code,corner_end_angle_deg,color_hex
+A,1,3000,3004,3000,3002,2600,2600,150,,0,0,0,3000,0,0,-1,-152.6,150,3147.4,150,E-DA,89,E-AB,91,#D9D9D9
+B,2,2500,2500,2500,2500,2600,2300,150,6,271,3000,0,3043.6,-2499.6,-0.999848,-0.017452,3147.4,150,3196.3,-2649.6,E-AB,91,E-BC,89,#D9D9D9
+C,3,3010,3010,3010,3010,2300,2300,150,,180,3043.6,-2499.6,33.6,-2499.6,0,1,3196.3,-2649.6,-113.8,-2649.6,E-BC,89,E-CD,91,#D9D9D9
+D,4,2480,2480,2480,2480,2300,2600,150,,91,33.6,-2499.6,-9.7,-20,0.999848,0.017452,-113.8,-2649.6,-162.3,130,E-CD,91,E-DA,89,#D9D9D9
