@@ -2,7 +2,7 @@
 epic: E15
 title: Room shell to Fusion 360 (walls, openings, services and obstructions from the confirmed measurement)
 status: Draft
-issues: "#134 #135 #136 #137 #138 #139 #140"
+issues: "#134 #135 #136 outis10/kalitron-fusion-addin#1 outis10/kalitron-fusion-addin#2 #139 #140"
 depends_on: "E12 #104 (confirmed SiteMeasurement, catalog #105)"
 feeds: "E11 #99 (Fusion prototype), E13 #124 (Fusion gate)"
 ---
@@ -66,7 +66,7 @@ else — is right. These upgrades make it robust:
 | R7 | **Layer-first component tree** (`MUROS`, `SERVICIOS`, `OBSTRUCCIONES`, `ELECTRODOMESTICOS`) + Fusion **attributes** (`kalitron/elementUuid`, `code`, `wallCode`, `measurementUuid`, `revision`) on every occurrence. | Toggle a whole layer (hide all services) and trace any Fusion body back to the Studio element. |
 | R8 | **Generate geometry in code**, do not insert pre-built `.f3d` components for v1. | Inserting library components needs Fusion Team hub/project ids and network; generated boxes are offline and deterministic. A real component library (doors, windows, appliances) can come in v2 behind the same `render_as` values. |
 | R9 | **Shared golden fixtures** (`fixtures/inputs` → `fixtures/expected`), like E12's conformance vectors. Studio's exporter must reproduce `expected/`; the add-in uses `expected/` as test data. | The Fusion dev can start today without Studio running; contract drift is caught in CI. |
-| R10 | **Add-in split into a pure-Python core (`kfs_room_core`) and a thin Fusion adapter.** | Parsing, validation and coordinate math are tested with `pytest` outside Fusion; only drawing needs Fusion. |
+| R10 | **Add-in split into a pure-Python core (`kfs_core`) and a thin Fusion adapter.** | Parsing, validation and coordinate math are tested with `pytest` outside Fusion; only drawing needs Fusion. |
 | R11 | **Feedback to E12** (see below): reflex corners (270°), open rooms, angle-sum and closure checks. | Found while building the fixtures; they affect capture and validation, not just export. |
 | R12 | **Update E11 #100** to consume the room shell: drop `roomHeightMm` and per-wall `angleDeg`; cabinets reference `wallCode` + wall-local X and mount height. | E12 now has per-wall ceiling heights and corner angles; E11's contract predates them. |
 
@@ -87,8 +87,8 @@ else — is right. These upgrades make it robust:
 | #134 | task | Room-shell package contract + golden fixtures ([room-shell-contract.md](room-shell-contract.md), this folder) | studio |
 | #135 | task | `RoomShellExportService`: geometry + resolution from confirmed `SiteMeasurement`; golden-fixture tests | studio |
 | #136 | task | Export endpoint + `DesignArtifact` (zip) + download | studio |
-| #137 | task | Fusion add-in core (`kfs_room_core`): parse, validate, frame math; pytest on fixtures ([fusion-room-shell-addin.md](fusion-room-shell-addin.md)) | fusion add-in |
-| #138 | task | Fusion add-in adapter: walls, openings, markers, solids, envelopes, door swings, attributes | fusion add-in |
+| outis10/kalitron-fusion-addin#1 | task | Fusion add-in core (`kfs_core`): parse, validate, frame math; pytest on fixtures ([fusion-room-shell-addin.md](fusion-room-shell-addin.md)) | fusion add-in |
+| outis10/kalitron-fusion-addin#2 | task | Fusion add-in adapter: walls, openings, markers, solids, envelopes, door swings, attributes | fusion add-in |
 | #139 | user-story | Studio UI: "Exportar muros a Fusion 360" with instructions and warnings | studio |
 | #140 | task | E12 feedback: reflex corners, open rooms, `ROOM_ANGLE_SUM_MISMATCH`, `ROOM_NOT_CLOSED` | studio + KFS-APP |
 | — | update | E11 #100: reuse the room-shell frame and walls | studio |
@@ -96,7 +96,7 @@ else — is right. These upgrades make it robust:
 ## Suggested order
 
 1. #134 (this spec + fixtures) → review → `Reviewed`.
-2. **In parallel:** #137/#138 (Fusion dev, from `fixtures/expected/` only) and
+2. **In parallel:** outis10/kalitron-fusion-addin#1/#2 (Fusion dev, from `fixtures/expected/` only) and
    #140 (E12 rules).
 3. #135 → #136 once E12 #107/#112 exist (the exporter needs a stored
    confirmed measurement).

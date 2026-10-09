@@ -1,10 +1,10 @@
 # [E15] Fusion 360 Room-Shell Add-in
 
 Status: Draft
-Issues: #137 (core), #138 (Fusion adapter)
+Issues: outis10/kalitron-fusion-addin#1 (core), outis10/kalitron-fusion-addin#2 (Fusion adapter)
 Epic: #133
 Contract: [room-shell-contract.md](room-shell-contract.md) · Test data: [fixtures/](fixtures/README.md)
-Repo: `outis10/kalitron-fusion-addin` (new)
+Repo: `outis10/kalitron-fusion-addin` (private)
 Owner: TBD (Fusion developer)
 
 ## Goal
@@ -24,22 +24,22 @@ package (`manifest.json`) and builds the room in a **new** design.
 kfs_room_shell/
   kfs_room_shell.py        # Fusion entry point: run(context) → file dialog → build
   kfs_room_shell.manifest  # Fusion add-in manifest
-  core/                    # pure Python, NO adsk imports
+  kfs_core/                # pure Python, NO adsk imports (kfs_ prefix: Fusion shares one
+                           #   Python process across scripts, generic names collide)
     package.py             # load manifest + CSVs, sha256, schema/columns validation
     model.py               # dataclasses Wall, Element (mm, floats)
     frame.py               # wall-local ↔ room transforms, ceiling height at X
-  fusion/                  # adsk only, no business logic
-    build.py               # components, sketches, extrudes, cuts
-    appearance.py          # colors / opacity
-  tests/                   # pytest over ../fixtures/expected/*
+  kfs_fusion/              # adsk only, no business logic
+    build.py               # components, bodies, cuts, appearances
+tests/                     # pytest over tests/fixtures/* (copy of Studio fixtures/expected)
 ```
 
 ## Fusion build rules
 
 - **Units:** CSV is mm; the Fusion API works in **cm** internally → divide
   every length by 10 (`ValueInput.createByReal(mm / 10)`, `Point3D.create(x / 10, …)`).
-- **New document per run**, named `{sessionCode} r{revision} — muros`; never
-  modify an existing design.
+- **New document per run**, direct modeling (`DesignTypes.DirectDesignType`; the room
+  shell is as-built data, no timeline needed), top component `ROOM {sessionCode} r{revision}`; never modify an existing design.
 - **Component tree** (layer first, one sub-component per wall):
 
 ```
