@@ -5,4 +5,5 @@ export const MESSAGE_PARAM_HEADER_NAME = 'x-kalitronfurniturestudioapp-params';
 export enum Authority {
   ADMIN = 'ROLE_ADMIN',
   USER = 'ROLE_USER',
+  MEASURER = 'ROLE_MEASURER',
 }
