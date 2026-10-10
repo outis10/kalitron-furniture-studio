@@ -1,0 +1,10 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "SiteMeasurementStatus": {
+      "null": "",
+      "DRAFT": "Borrador",
+      "CONFIRMED": "Confirmada",
+      "SUPERSEDED": "Reemplazada"
+    }
+  }
+}

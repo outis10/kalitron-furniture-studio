@@ -23,7 +23,8 @@
         "cabinet": "Cabinet",
         "cabinetPart": "Cabinet Part",
         "quote": "Quote",
-        "quoteItem": "Quote Item"
+        "quoteItem": "Quote Item",
+        "siteMeasurement": "Site Measurement"
       },
       "account": {
         "main": "Account",

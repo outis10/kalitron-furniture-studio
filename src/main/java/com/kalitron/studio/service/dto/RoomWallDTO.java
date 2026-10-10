@@ -29,6 +29,22 @@ public class RoomWallDTO implements Serializable {
 
     private Integer sortOrder;
 
+    private Integer lengthFloorMm;
+
+    private Integer length900Mm;
+
+    private Integer lengthCeilingMm;
+
+    private Integer outOfPlumbMm;
+
+    private Integer closingMm;
+
+    private Integer heightLeftMm;
+
+    private Integer heightRightMm;
+
+    private SiteMeasurementDTO siteMeasurement;
+
     @NotNull
     private DesignSessionDTO session;
 
@@ -96,6 +112,70 @@ public class RoomWallDTO implements Serializable {
         this.sortOrder = sortOrder;
     }
 
+    public Integer getLengthFloorMm() {
+        return lengthFloorMm;
+    }
+
+    public void setLengthFloorMm(Integer lengthFloorMm) {
+        this.lengthFloorMm = lengthFloorMm;
+    }
+
+    public Integer getLength900Mm() {
+        return length900Mm;
+    }
+
+    public void setLength900Mm(Integer length900Mm) {
+        this.length900Mm = length900Mm;
+    }
+
+    public Integer getLengthCeilingMm() {
+        return lengthCeilingMm;
+    }
+
+    public void setLengthCeilingMm(Integer lengthCeilingMm) {
+        this.lengthCeilingMm = lengthCeilingMm;
+    }
+
+    public Integer getOutOfPlumbMm() {
+        return outOfPlumbMm;
+    }
+
+    public void setOutOfPlumbMm(Integer outOfPlumbMm) {
+        this.outOfPlumbMm = outOfPlumbMm;
+    }
+
+    public Integer getClosingMm() {
+        return closingMm;
+    }
+
+    public void setClosingMm(Integer closingMm) {
+        this.closingMm = closingMm;
+    }
+
+    public Integer getHeightLeftMm() {
+        return heightLeftMm;
+    }
+
+    public void setHeightLeftMm(Integer heightLeftMm) {
+        this.heightLeftMm = heightLeftMm;
+    }
+
+    public Integer getHeightRightMm() {
+        return heightRightMm;
+    }
+
+    public void setHeightRightMm(Integer heightRightMm) {
+        this.heightRightMm = heightRightMm;
+    }
+
+    public SiteMeasurementDTO getSiteMeasurement() {
+        return siteMeasurement;
+    }
+
+    public void setSiteMeasurement(SiteMeasurementDTO siteMeasurement) {
+        this.siteMeasurement = siteMeasurement;
+    }
+
     public DesignSessionDTO getSession() {
         return session;
     }
@@ -137,6 +217,14 @@ public class RoomWallDTO implements Serializable {
             ", positionX=" + getPositionX() +
             ", positionY=" + getPositionY() +
             ", sortOrder=" + getSortOrder() +
+            ", lengthFloorMm=" + getLengthFloorMm() +
+            ", length900Mm=" + getLength900Mm() +
+            ", lengthCeilingMm=" + getLengthCeilingMm() +
+            ", outOfPlumbMm=" + getOutOfPlumbMm() +
+            ", closingMm=" + getClosingMm() +
+            ", heightLeftMm=" + getHeightLeftMm() +
+            ", heightRightMm=" + getHeightRightMm() +
+            ", siteMeasurement=" + getSiteMeasurement() +
             ", session=" + getSession() +
             "}";
     }

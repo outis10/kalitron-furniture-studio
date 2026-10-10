@@ -31,14 +31,18 @@ public interface RoomObstacleRepository extends JpaRepository<RoomObstacle, Long
     }
 
     @Query(
-        value = "select roomObstacle from RoomObstacle roomObstacle left join fetch roomObstacle.session",
+        value = "select roomObstacle from RoomObstacle roomObstacle left join fetch roomObstacle.siteMeasurement left join fetch roomObstacle.session",
         countQuery = "select count(roomObstacle) from RoomObstacle roomObstacle"
     )
     Page<RoomObstacle> findAllWithToOneRelationships(Pageable pageable);
 
-    @Query("select roomObstacle from RoomObstacle roomObstacle left join fetch roomObstacle.session")
+    @Query(
+        "select roomObstacle from RoomObstacle roomObstacle left join fetch roomObstacle.siteMeasurement left join fetch roomObstacle.session"
+    )
     List<RoomObstacle> findAllWithToOneRelationships();
 
-    @Query("select roomObstacle from RoomObstacle roomObstacle left join fetch roomObstacle.session where roomObstacle.id =:id")
+    @Query(
+        "select roomObstacle from RoomObstacle roomObstacle left join fetch roomObstacle.siteMeasurement left join fetch roomObstacle.session where roomObstacle.id =:id"
+    )
     Optional<RoomObstacle> findOneWithToOneRelationships(@Param("id") Long id);
 }

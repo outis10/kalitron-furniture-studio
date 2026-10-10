@@ -2,6 +2,7 @@ package com.kalitron.studio.domain;
 
 import static com.kalitron.studio.domain.DesignSessionTestSamples.*;
 import static com.kalitron.studio.domain.RoomWallTestSamples.*;
+import static com.kalitron.studio.domain.SiteMeasurementTestSamples.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kalitron.studio.web.rest.TestUtil;
@@ -21,6 +22,18 @@ class RoomWallTest {
 
         roomWall2 = getRoomWallSample2();
         assertThat(roomWall1).isNotEqualTo(roomWall2);
+    }
+
+    @Test
+    void siteMeasurementTest() {
+        RoomWall roomWall = getRoomWallRandomSampleGenerator();
+        SiteMeasurement siteMeasurementBack = getSiteMeasurementRandomSampleGenerator();
+
+        roomWall.setSiteMeasurement(siteMeasurementBack);
+        assertThat(roomWall.getSiteMeasurement()).isEqualTo(siteMeasurementBack);
+
+        roomWall.siteMeasurement(null);
+        assertThat(roomWall.getSiteMeasurement()).isNull();
     }
 
     @Test

@@ -7,6 +7,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getEntities as getDesignSessions } from 'app/entities/design-session/design-session.reducer';
+import { getEntities as getSiteMeasurements } from 'app/entities/site-measurement/site-measurement.reducer';
+import { ApplianceType } from 'app/shared/model/enumerations/appliance-type.model';
 import { RoomObstacleType } from 'app/shared/model/enumerations/room-obstacle-type.model';
 
 import { createEntity, getEntity, reset, updateEntity } from './room-obstacle.reducer';
@@ -19,12 +21,14 @@ export const RoomObstacleUpdate = () => {
   const { id } = useParams<'id'>();
   const isNew = id === undefined;
 
+  const siteMeasurements = useAppSelector(state => state.siteMeasurement.entities);
   const designSessions = useAppSelector(state => state.designSession.entities);
   const roomObstacleEntity = useAppSelector(state => state.roomObstacle.entity);
   const loading = useAppSelector(state => state.roomObstacle.loading);
   const updating = useAppSelector(state => state.roomObstacle.updating);
   const updateSuccess = useAppSelector(state => state.roomObstacle.updateSuccess);
   const roomObstacleTypeValues = Object.keys(RoomObstacleType);
+  const applianceTypeValues = Object.keys(ApplianceType);
 
   const handleClose = () => {
     navigate('/room-obstacle');
@@ -37,6 +41,7 @@ export const RoomObstacleUpdate = () => {
       dispatch(getEntity(id));
     }
 
+    dispatch(getSiteMeasurements({}));
     dispatch(getDesignSessions({}));
   }, []);
 
@@ -72,6 +77,7 @@ export const RoomObstacleUpdate = () => {
     const entity = {
       ...roomObstacleEntity,
       ...values,
+      siteMeasurement: siteMeasurements.find(it => it.id.toString() === values.siteMeasurement?.toString()),
       session: designSessions.find(it => it.id.toString() === values.session?.toString()),
     };
 
@@ -87,7 +93,9 @@ export const RoomObstacleUpdate = () => {
       ? {}
       : {
           obstacleType: 'WINDOW',
+          applianceType: 'FRIDGE',
           ...roomObstacleEntity,
+          siteMeasurement: roomObstacleEntity?.siteMeasurement?.id,
           session: roomObstacleEntity?.session?.id,
         };
 
@@ -195,6 +203,55 @@ export const RoomObstacleUpdate = () => {
                   maxLength: { value: 300, message: translate('entity.validation.maxlength', { max: 300 }) },
                 }}
               />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomObstacle.wallCode')}
+                id="room-obstacle-wallCode"
+                name="wallCode"
+                data-cy="wallCode"
+                type="text"
+                validate={{
+                  maxLength: { value: 5, message: translate('entity.validation.maxlength', { max: 5 }) },
+                }}
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomObstacle.croquisCode')}
+                id="room-obstacle-croquisCode"
+                name="croquisCode"
+                data-cy="croquisCode"
+                type="text"
+                validate={{
+                  maxLength: { value: 5, message: translate('entity.validation.maxlength', { max: 5 }) },
+                }}
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomObstacle.applianceType')}
+                id="room-obstacle-applianceType"
+                name="applianceType"
+                data-cy="applianceType"
+                type="select"
+              >
+                {applianceTypeValues.map(applianceType => (
+                  <option value={applianceType} key={applianceType}>
+                    {translate(`kalitronFurnitureStudioApp.ApplianceType.${applianceType}`)}
+                  </option>
+                ))}
+              </ValidatedField>
+              <ValidatedField
+                id="room-obstacle-siteMeasurement"
+                name="siteMeasurement"
+                data-cy="siteMeasurement"
+                label={translate('kalitronFurnitureStudioApp.roomObstacle.siteMeasurement')}
+                type="select"
+              >
+                <option value="" key="0" />
+                {siteMeasurements
+                  ? siteMeasurements.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.measurementUuid}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
               <ValidatedField
                 id="room-obstacle-session"
                 name="session"

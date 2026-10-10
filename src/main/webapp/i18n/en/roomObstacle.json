@@ -27,7 +27,11 @@
       "heightMm": "Height Mm",
       "depthMm": "Depth Mm",
       "notes": "Notes",
-      "session": "Session"
+      "session": "Session",
+      "wallCode": "Wall Code",
+      "croquisCode": "Croquis Code",
+      "applianceType": "Appliance Type",
+      "siteMeasurement": "Site Measurement"
     }
   }
 }

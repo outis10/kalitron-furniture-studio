@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kalitron.studio.IntegrationTest;
 import com.kalitron.studio.domain.DesignSession;
 import com.kalitron.studio.domain.RoomObstacle;
+import com.kalitron.studio.domain.enumeration.ApplianceType;
 import com.kalitron.studio.domain.enumeration.RoomObstacleType;
 import com.kalitron.studio.repository.RoomObstacleRepository;
 import com.kalitron.studio.service.RoomObstacleService;
@@ -72,6 +73,15 @@ class RoomObstacleResourceIT {
     private static final String DEFAULT_NOTES = "AAAAAAAAAA";
     private static final String UPDATED_NOTES = "BBBBBBBBBB";
 
+    private static final String DEFAULT_WALL_CODE = "AAAAA";
+    private static final String UPDATED_WALL_CODE = "BBBBB";
+
+    private static final String DEFAULT_CROQUIS_CODE = "AAAAA";
+    private static final String UPDATED_CROQUIS_CODE = "BBBBB";
+
+    private static final ApplianceType DEFAULT_APPLIANCE_TYPE = ApplianceType.FRIDGE;
+    private static final ApplianceType UPDATED_APPLIANCE_TYPE = ApplianceType.RANGE;
+
     private static final String ENTITY_API_URL = "/api/room-obstacles";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -119,7 +129,10 @@ class RoomObstacleResourceIT {
             .widthMm(DEFAULT_WIDTH_MM)
             .heightMm(DEFAULT_HEIGHT_MM)
             .depthMm(DEFAULT_DEPTH_MM)
-            .notes(DEFAULT_NOTES);
+            .notes(DEFAULT_NOTES)
+            .wallCode(DEFAULT_WALL_CODE)
+            .croquisCode(DEFAULT_CROQUIS_CODE)
+            .applianceType(DEFAULT_APPLIANCE_TYPE);
         // Add required entity
         DesignSession designSession;
         if (TestUtil.findAll(em, DesignSession.class).isEmpty()) {
@@ -149,7 +162,10 @@ class RoomObstacleResourceIT {
             .widthMm(UPDATED_WIDTH_MM)
             .heightMm(UPDATED_HEIGHT_MM)
             .depthMm(UPDATED_DEPTH_MM)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .wallCode(UPDATED_WALL_CODE)
+            .croquisCode(UPDATED_CROQUIS_CODE)
+            .applianceType(UPDATED_APPLIANCE_TYPE);
         // Add required entity
         DesignSession designSession;
         if (TestUtil.findAll(em, DesignSession.class).isEmpty()) {
@@ -272,7 +288,10 @@ class RoomObstacleResourceIT {
             .andExpect(jsonPath("$.[*].widthMm").value(hasItem(DEFAULT_WIDTH_MM)))
             .andExpect(jsonPath("$.[*].heightMm").value(hasItem(DEFAULT_HEIGHT_MM)))
             .andExpect(jsonPath("$.[*].depthMm").value(hasItem(DEFAULT_DEPTH_MM)))
-            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)));
+            .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
+            .andExpect(jsonPath("$.[*].wallCode").value(hasItem(DEFAULT_WALL_CODE)))
+            .andExpect(jsonPath("$.[*].croquisCode").value(hasItem(DEFAULT_CROQUIS_CODE)))
+            .andExpect(jsonPath("$.[*].applianceType").value(hasItem(DEFAULT_APPLIANCE_TYPE.toString())));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -312,7 +331,10 @@ class RoomObstacleResourceIT {
             .andExpect(jsonPath("$.widthMm").value(DEFAULT_WIDTH_MM))
             .andExpect(jsonPath("$.heightMm").value(DEFAULT_HEIGHT_MM))
             .andExpect(jsonPath("$.depthMm").value(DEFAULT_DEPTH_MM))
-            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES));
+            .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES))
+            .andExpect(jsonPath("$.wallCode").value(DEFAULT_WALL_CODE))
+            .andExpect(jsonPath("$.croquisCode").value(DEFAULT_CROQUIS_CODE))
+            .andExpect(jsonPath("$.applianceType").value(DEFAULT_APPLIANCE_TYPE.toString()));
     }
 
     @Test
@@ -343,7 +365,10 @@ class RoomObstacleResourceIT {
             .widthMm(UPDATED_WIDTH_MM)
             .heightMm(UPDATED_HEIGHT_MM)
             .depthMm(UPDATED_DEPTH_MM)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .wallCode(UPDATED_WALL_CODE)
+            .croquisCode(UPDATED_CROQUIS_CODE)
+            .applianceType(UPDATED_APPLIANCE_TYPE);
         RoomObstacleDTO roomObstacleDTO = roomObstacleMapper.toDto(updatedRoomObstacle);
 
         restRoomObstacleMockMvc
@@ -437,7 +462,9 @@ class RoomObstacleResourceIT {
             .obstacleType(UPDATED_OBSTACLE_TYPE)
             .label(UPDATED_LABEL)
             .heightMm(UPDATED_HEIGHT_MM)
-            .depthMm(UPDATED_DEPTH_MM);
+            .depthMm(UPDATED_DEPTH_MM)
+            .wallCode(UPDATED_WALL_CODE)
+            .applianceType(UPDATED_APPLIANCE_TYPE);
 
         restRoomObstacleMockMvc
             .perform(
@@ -477,7 +504,10 @@ class RoomObstacleResourceIT {
             .widthMm(UPDATED_WIDTH_MM)
             .heightMm(UPDATED_HEIGHT_MM)
             .depthMm(UPDATED_DEPTH_MM)
-            .notes(UPDATED_NOTES);
+            .notes(UPDATED_NOTES)
+            .wallCode(UPDATED_WALL_CODE)
+            .croquisCode(UPDATED_CROQUIS_CODE)
+            .applianceType(UPDATED_APPLIANCE_TYPE);
 
         restRoomObstacleMockMvc
             .perform(

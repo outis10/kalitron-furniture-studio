@@ -15,6 +15,12 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DesignImageRepository extends JpaRepository<DesignImage, Long> {
+    Optional<DesignImage> findFirstBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtDesc(Long sessionId, ImageType imageType);
+
+    List<DesignImage> findBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtAsc(Long sessionId, ImageType imageType);
+
+    long countBySessionIdAndImageTypeAndIsActiveTrue(Long sessionId, ImageType imageType);
+
     default Optional<DesignImage> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }
@@ -28,20 +34,18 @@ public interface DesignImageRepository extends JpaRepository<DesignImage, Long> 
     }
 
     @Query(
-        value = "select designImage from DesignImage designImage left join fetch designImage.session",
+        value = "select designImage from DesignImage designImage left join fetch designImage.siteMeasurement left join fetch designImage.session",
         countQuery = "select count(designImage) from DesignImage designImage"
     )
     Page<DesignImage> findAllWithToOneRelationships(Pageable pageable);
 
-    @Query("select designImage from DesignImage designImage left join fetch designImage.session")
+    @Query(
+        "select designImage from DesignImage designImage left join fetch designImage.siteMeasurement left join fetch designImage.session"
+    )
     List<DesignImage> findAllWithToOneRelationships();
 
-    @Query("select designImage from DesignImage designImage left join fetch designImage.session where designImage.id =:id")
+    @Query(
+        "select designImage from DesignImage designImage left join fetch designImage.siteMeasurement left join fetch designImage.session where designImage.id =:id"
+    )
     Optional<DesignImage> findOneWithToOneRelationships(@Param("id") Long id);
-
-    Optional<DesignImage> findFirstBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtDesc(Long sessionId, ImageType imageType);
-
-    List<DesignImage> findBySessionIdAndImageTypeAndIsActiveTrueOrderByUploadedAtAsc(Long sessionId, ImageType imageType);
-
-    long countBySessionIdAndImageTypeAndIsActiveTrue(Long sessionId, ImageType imageType);
 }

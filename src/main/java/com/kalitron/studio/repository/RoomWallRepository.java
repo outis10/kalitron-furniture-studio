@@ -31,14 +31,16 @@ public interface RoomWallRepository extends JpaRepository<RoomWall, Long> {
     }
 
     @Query(
-        value = "select roomWall from RoomWall roomWall left join fetch roomWall.session",
+        value = "select roomWall from RoomWall roomWall left join fetch roomWall.siteMeasurement left join fetch roomWall.session",
         countQuery = "select count(roomWall) from RoomWall roomWall"
     )
     Page<RoomWall> findAllWithToOneRelationships(Pageable pageable);
 
-    @Query("select roomWall from RoomWall roomWall left join fetch roomWall.session")
+    @Query("select roomWall from RoomWall roomWall left join fetch roomWall.siteMeasurement left join fetch roomWall.session")
     List<RoomWall> findAllWithToOneRelationships();
 
-    @Query("select roomWall from RoomWall roomWall left join fetch roomWall.session where roomWall.id =:id")
+    @Query(
+        "select roomWall from RoomWall roomWall left join fetch roomWall.siteMeasurement left join fetch roomWall.session where roomWall.id =:id"
+    )
     Optional<RoomWall> findOneWithToOneRelationships(@Param("id") Long id);
 }

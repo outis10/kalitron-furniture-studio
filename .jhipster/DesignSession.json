@@ -21,7 +21,7 @@
       "fieldName": "status",
       "fieldType": "SessionStatus",
       "fieldValidateRules": ["required"],
-      "fieldValues": "DRAFT (Borrador),CHATTING (En conversación),SPECS_READY (Especificaciones listas),VISUAL_GENERATED (Visual generado),LAYOUT_CONFIRMED (Layout confirmado),BOM_GENERATED (BOM generado),QUOTE_GENERATED (Cotización generada),FUSION_GENERATED (Fusion 360 generado),COMPLETED (Completado),ARCHIVED (Archivado)"
+      "fieldValues": "DRAFT (Borrador),CHATTING (En conversación),SPECS_READY (Especificaciones listas),VISUAL_GENERATED (Visual generado),LAYOUT_CONFIRMED (Layout confirmado),BOM_GENERATED (BOM generado),QUOTE_GENERATED (Cotización generada),FUSION_GENERATED (Fusion 360 generado),COMPLETED (Completado),ARCHIVED (Archivado),MEASURED (Medido)"
     },
     {
       "fieldName": "clientName",

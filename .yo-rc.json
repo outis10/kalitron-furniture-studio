@@ -30,7 +30,8 @@
       "Cabinet",
       "CabinetPart",
       "Quote",
-      "QuoteItem"
+      "QuoteItem",
+      "SiteMeasurement"
     ],
     "feignClient": null,
     "gradleDevelocityHost": null,

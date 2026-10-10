@@ -55,7 +55,10 @@ public class RoomObstacleAsserts {
             .satisfies(a -> assertThat(a.getWidthMm()).as("check widthMm").isEqualTo(expected.getWidthMm()))
             .satisfies(a -> assertThat(a.getHeightMm()).as("check heightMm").isEqualTo(expected.getHeightMm()))
             .satisfies(a -> assertThat(a.getDepthMm()).as("check depthMm").isEqualTo(expected.getDepthMm()))
-            .satisfies(a -> assertThat(a.getNotes()).as("check notes").isEqualTo(expected.getNotes()));
+            .satisfies(a -> assertThat(a.getNotes()).as("check notes").isEqualTo(expected.getNotes()))
+            .satisfies(a -> assertThat(a.getWallCode()).as("check wallCode").isEqualTo(expected.getWallCode()))
+            .satisfies(a -> assertThat(a.getCroquisCode()).as("check croquisCode").isEqualTo(expected.getCroquisCode()))
+            .satisfies(a -> assertThat(a.getApplianceType()).as("check applianceType").isEqualTo(expected.getApplianceType()));
     }
 
     /**
@@ -67,6 +70,7 @@ public class RoomObstacleAsserts {
     public static void assertRoomObstacleUpdatableRelationshipsEquals(RoomObstacle expected, RoomObstacle actual) {
         assertThat(actual)
             .as("Verify RoomObstacle relationships")
+            .satisfies(a -> assertThat(a.getSiteMeasurement()).as("check siteMeasurement").isEqualTo(expected.getSiteMeasurement()))
             .satisfies(a -> assertThat(a.getSession()).as("check session").isEqualTo(expected.getSession()));
     }
 }

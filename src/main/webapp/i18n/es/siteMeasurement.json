@@ -1,0 +1,41 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "siteMeasurement": {
+      "home": {
+        "title": "Site Measurements",
+        "refreshListLabel": "Refrescar lista",
+        "createLabel": "Crear nuevo Site Measurement",
+        "createOrEditLabel": "Crear o editar Site Measurement",
+        "notFound": "Ningún Site Measurements encontrado"
+      },
+      "created": "Un nuevo Site Measurement ha sido creado con el identificador {{ param }}",
+      "updated": "Un Site Measurement ha sido actualizado con el identificador {{ param }}",
+      "deleted": "Un Site Measurement ha sido eliminado con el identificador {{ param }}",
+      "delete": {
+        "question": "¿Seguro que quiere eliminar Site Measurement {{ id }}?"
+      },
+      "detail": {
+        "title": "Site Measurement"
+      },
+      "id": "ID",
+      "measurementUuid": "Measurement Uuid",
+      "projectType": "Project Type",
+      "revision": "Revision",
+      "status": "Status",
+      "schemaVersion": "Schema Version",
+      "catalogVersion": "Catalog Version",
+      "payload": "Payload",
+      "payloadSha256": "Payload Sha 256",
+      "floorOutOfLevelMm": "Floor Out Of Level Mm",
+      "floorOutOfLevelNote": "Floor Out Of Level Note",
+      "deviceId": "Device Id",
+      "appVersion": "App Version",
+      "laserModel": "Laser Model",
+      "capturedAt": "Captured At",
+      "receivedAt": "Received At",
+      "confirmedAt": "Confirmed At",
+      "session": "Session",
+      "measuredBy": "Measured By"
+    }
+  }
+}

@@ -52,6 +52,12 @@ export const DesignImageDetail = () => {
           </dt>
           <dd>{designImageEntity.filePath}</dd>
           <dt>
+            <span id="imageDataBase64">
+              <Translate contentKey="kalitronFurnitureStudioApp.designImage.imageDataBase64">Image Data Base 64</Translate>
+            </span>
+          </dt>
+          <dd>{designImageEntity.imageDataBase64}</dd>
+          <dt>
             <span id="mimeType">
               <Translate contentKey="kalitronFurnitureStudioApp.designImage.mimeType">Mime Type</Translate>
             </span>
@@ -95,6 +101,28 @@ export const DesignImageDetail = () => {
             </span>
           </dt>
           <dd>{designImageEntity.description}</dd>
+          <dt>
+            <span id="wallCode">
+              <Translate contentKey="kalitronFurnitureStudioApp.designImage.wallCode">Wall Code</Translate>
+            </span>
+          </dt>
+          <dd>{designImageEntity.wallCode}</dd>
+          <dt>
+            <span id="photoUuid">
+              <Translate contentKey="kalitronFurnitureStudioApp.designImage.photoUuid">Photo Uuid</Translate>
+            </span>
+          </dt>
+          <dd>{designImageEntity.photoUuid}</dd>
+          <dt>
+            <span id="sha256">
+              <Translate contentKey="kalitronFurnitureStudioApp.designImage.sha256">Sha 256</Translate>
+            </span>
+          </dt>
+          <dd>{designImageEntity.sha256}</dd>
+          <dt>
+            <Translate contentKey="kalitronFurnitureStudioApp.designImage.siteMeasurement">Site Measurement</Translate>
+          </dt>
+          <dd>{designImageEntity.siteMeasurement ? designImageEntity.siteMeasurement.measurementUuid : ''}</dd>
           <dt>
             <Translate contentKey="kalitronFurnitureStudioApp.designImage.session">Session</Translate>
           </dt>

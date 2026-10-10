@@ -102,6 +102,10 @@ export const DesignImage = () => {
                   <Translate contentKey="kalitronFurnitureStudioApp.designImage.filePath">File Path</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('filePath')} />
                 </th>
+                <th className="hand" onClick={sort('imageDataBase64')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.designImage.imageDataBase64">Image Data Base 64</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('imageDataBase64')} />
+                </th>
                 <th className="hand" onClick={sort('mimeType')}>
                   <Translate contentKey="kalitronFurnitureStudioApp.designImage.mimeType">Mime Type</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('mimeType')} />
@@ -130,6 +134,22 @@ export const DesignImage = () => {
                   <Translate contentKey="kalitronFurnitureStudioApp.designImage.description">Description</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('description')} />
                 </th>
+                <th className="hand" onClick={sort('wallCode')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.designImage.wallCode">Wall Code</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('wallCode')} />
+                </th>
+                <th className="hand" onClick={sort('photoUuid')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.designImage.photoUuid">Photo Uuid</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('photoUuid')} />
+                </th>
+                <th className="hand" onClick={sort('sha256')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.designImage.sha256">Sha 256</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('sha256')} />
+                </th>
+                <th>
+                  <Translate contentKey="kalitronFurnitureStudioApp.designImage.siteMeasurement">Site Measurement</Translate>{' '}
+                  <FontAwesomeIcon icon="sort" />
+                </th>
                 <th>
                   <Translate contentKey="kalitronFurnitureStudioApp.designImage.session">Session</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
@@ -149,6 +169,7 @@ export const DesignImage = () => {
                   </td>
                   <td>{designImage.fileName}</td>
                   <td>{designImage.filePath}</td>
+                  <td>{designImage.imageDataBase64}</td>
                   <td>{designImage.mimeType}</td>
                   <td>{designImage.fileSizeKb}</td>
                   <td>{designImage.widthPx}</td>
@@ -158,6 +179,16 @@ export const DesignImage = () => {
                     {designImage.uploadedAt ? <TextFormat type="date" value={designImage.uploadedAt} format={APP_DATE_FORMAT} /> : null}
                   </td>
                   <td>{designImage.description}</td>
+                  <td>{designImage.wallCode}</td>
+                  <td>{designImage.photoUuid}</td>
+                  <td>{designImage.sha256}</td>
+                  <td>
+                    {designImage.siteMeasurement ? (
+                      <Link to={`/site-measurement/${designImage.siteMeasurement.id}`}>{designImage.siteMeasurement.measurementUuid}</Link>
+                    ) : (
+                      ''
+                    )}
+                  </td>
                   <td>
                     {designImage.session ? (
                       <Link to={`/design-session/${designImage.session.id}`}>{designImage.session.sessionCode}</Link>

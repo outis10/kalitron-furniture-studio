@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getEntities as getDesignSessions } from 'app/entities/design-session/design-session.reducer';
+import { getEntities as getSiteMeasurements } from 'app/entities/site-measurement/site-measurement.reducer';
 
 import { createEntity, getEntity, reset, updateEntity } from './room-wall.reducer';
 
@@ -18,6 +19,7 @@ export const RoomWallUpdate = () => {
   const { id } = useParams<'id'>();
   const isNew = id === undefined;
 
+  const siteMeasurements = useAppSelector(state => state.siteMeasurement.entities);
   const designSessions = useAppSelector(state => state.designSession.entities);
   const roomWallEntity = useAppSelector(state => state.roomWall.entity);
   const loading = useAppSelector(state => state.roomWall.loading);
@@ -35,6 +37,7 @@ export const RoomWallUpdate = () => {
       dispatch(getEntity(id));
     }
 
+    dispatch(getSiteMeasurements({}));
     dispatch(getDesignSessions({}));
   }, []);
 
@@ -66,10 +69,32 @@ export const RoomWallUpdate = () => {
     if (values.sortOrder !== undefined && typeof values.sortOrder !== 'number') {
       values.sortOrder = Number(values.sortOrder);
     }
+    if (values.lengthFloorMm !== undefined && typeof values.lengthFloorMm !== 'number') {
+      values.lengthFloorMm = Number(values.lengthFloorMm);
+    }
+    if (values.length900Mm !== undefined && typeof values.length900Mm !== 'number') {
+      values.length900Mm = Number(values.length900Mm);
+    }
+    if (values.lengthCeilingMm !== undefined && typeof values.lengthCeilingMm !== 'number') {
+      values.lengthCeilingMm = Number(values.lengthCeilingMm);
+    }
+    if (values.outOfPlumbMm !== undefined && typeof values.outOfPlumbMm !== 'number') {
+      values.outOfPlumbMm = Number(values.outOfPlumbMm);
+    }
+    if (values.closingMm !== undefined && typeof values.closingMm !== 'number') {
+      values.closingMm = Number(values.closingMm);
+    }
+    if (values.heightLeftMm !== undefined && typeof values.heightLeftMm !== 'number') {
+      values.heightLeftMm = Number(values.heightLeftMm);
+    }
+    if (values.heightRightMm !== undefined && typeof values.heightRightMm !== 'number') {
+      values.heightRightMm = Number(values.heightRightMm);
+    }
 
     const entity = {
       ...roomWallEntity,
       ...values,
+      siteMeasurement: siteMeasurements.find(it => it.id.toString() === values.siteMeasurement?.toString()),
       session: designSessions.find(it => it.id.toString() === values.session?.toString()),
     };
 
@@ -85,6 +110,7 @@ export const RoomWallUpdate = () => {
       ? {}
       : {
           ...roomWallEntity,
+          siteMeasurement: roomWallEntity?.siteMeasurement?.id,
           session: roomWallEntity?.session?.id,
         };
 
@@ -170,6 +196,71 @@ export const RoomWallUpdate = () => {
                 data-cy="sortOrder"
                 type="text"
               />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomWall.lengthFloorMm')}
+                id="room-wall-lengthFloorMm"
+                name="lengthFloorMm"
+                data-cy="lengthFloorMm"
+                type="text"
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomWall.length900Mm')}
+                id="room-wall-length900Mm"
+                name="length900Mm"
+                data-cy="length900Mm"
+                type="text"
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomWall.lengthCeilingMm')}
+                id="room-wall-lengthCeilingMm"
+                name="lengthCeilingMm"
+                data-cy="lengthCeilingMm"
+                type="text"
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomWall.outOfPlumbMm')}
+                id="room-wall-outOfPlumbMm"
+                name="outOfPlumbMm"
+                data-cy="outOfPlumbMm"
+                type="text"
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomWall.closingMm')}
+                id="room-wall-closingMm"
+                name="closingMm"
+                data-cy="closingMm"
+                type="text"
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomWall.heightLeftMm')}
+                id="room-wall-heightLeftMm"
+                name="heightLeftMm"
+                data-cy="heightLeftMm"
+                type="text"
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.roomWall.heightRightMm')}
+                id="room-wall-heightRightMm"
+                name="heightRightMm"
+                data-cy="heightRightMm"
+                type="text"
+              />
+              <ValidatedField
+                id="room-wall-siteMeasurement"
+                name="siteMeasurement"
+                data-cy="siteMeasurement"
+                label={translate('kalitronFurnitureStudioApp.roomWall.siteMeasurement')}
+                type="select"
+              >
+                <option value="" key="0" />
+                {siteMeasurements
+                  ? siteMeasurements.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.measurementUuid}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
               <ValidatedField
                 id="room-wall-session"
                 name="session"

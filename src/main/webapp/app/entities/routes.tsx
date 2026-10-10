@@ -3,22 +3,23 @@ import { Route } from 'react-router';
 
 import ErrorBoundaryRoutes from 'app/shared/error/error-boundary-routes';
 
-import Hardware from './hardware';
-import CabinetTemplate from './cabinet-template';
 import Cabinet from './cabinet';
 import CabinetPart from './cabinet-part';
+import CabinetTemplate from './cabinet-template';
 import CatalogStyle from './catalog-style';
 import ChatMessage from './chat-message';
 import DesignArtifact from './design-artifact';
 import DesignImage from './design-image';
 import DesignSession from './design-session';
 import GenerationJob from './generation-job';
+import Hardware from './hardware';
 import KitchenSpec from './kitchen-spec';
 import Material from './material';
 import Quote from './quote';
 import QuoteItem from './quote-item';
 import RoomObstacle from './room-obstacle';
 import RoomWall from './room-wall';
+import SiteMeasurement from './site-measurement';
 /* jhipster-needle-add-route-import - JHipster will add routes here */
 
 export default () => {
@@ -42,6 +43,7 @@ export default () => {
         <Route path="/cabinet-part/*" element={<CabinetPart />} />
         <Route path="/quote/*" element={<Quote />} />
         <Route path="/quote-item/*" element={<QuoteItem />} />
+        <Route path="/site-measurement/*" element={<SiteMeasurement />} />
         {/* jhipster-needle-add-route-path - JHipster will add routes here */}
       </ErrorBoundaryRoutes>
     </div>

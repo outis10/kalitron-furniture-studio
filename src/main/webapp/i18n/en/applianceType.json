@@ -1,0 +1,14 @@
+{
+  "kalitronFurnitureStudioApp": {
+    "ApplianceType": {
+      "null": "",
+      "FRIDGE": "Fridge",
+      "RANGE": "Range",
+      "COOKTOP": "Cooktop",
+      "OVEN": "Oven",
+      "MICROWAVE": "Microwave",
+      "DISHWASHER": "Dishwasher",
+      "SINK": "Sink (space)"
+    }
+  }
+}

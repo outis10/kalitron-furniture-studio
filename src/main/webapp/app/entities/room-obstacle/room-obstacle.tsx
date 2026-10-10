@@ -125,6 +125,22 @@ export const RoomObstacle = () => {
                   <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.notes">Notes</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('notes')} />
                 </th>
+                <th className="hand" onClick={sort('wallCode')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.wallCode">Wall Code</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('wallCode')} />
+                </th>
+                <th className="hand" onClick={sort('croquisCode')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.croquisCode">Croquis Code</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('croquisCode')} />
+                </th>
+                <th className="hand" onClick={sort('applianceType')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.applianceType">Appliance Type</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('applianceType')} />
+                </th>
+                <th>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.siteMeasurement">Site Measurement</Translate>{' '}
+                  <FontAwesomeIcon icon="sort" />
+                </th>
                 <th>
                   <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.session">Session</Translate>{' '}
                   <FontAwesomeIcon icon="sort" />
@@ -151,6 +167,20 @@ export const RoomObstacle = () => {
                   <td>{roomObstacle.heightMm}</td>
                   <td>{roomObstacle.depthMm}</td>
                   <td>{roomObstacle.notes}</td>
+                  <td>{roomObstacle.wallCode}</td>
+                  <td>{roomObstacle.croquisCode}</td>
+                  <td>
+                    <Translate contentKey={`kalitronFurnitureStudioApp.ApplianceType.${roomObstacle.applianceType}`} />
+                  </td>
+                  <td>
+                    {roomObstacle.siteMeasurement ? (
+                      <Link to={`/site-measurement/${roomObstacle.siteMeasurement.id}`}>
+                        {roomObstacle.siteMeasurement.measurementUuid}
+                      </Link>
+                    ) : (
+                      ''
+                    )}
+                  </td>
                   <td>
                     {roomObstacle.session ? (
                       <Link to={`/design-session/${roomObstacle.session.id}`}>{roomObstacle.session.sessionCode}</Link>

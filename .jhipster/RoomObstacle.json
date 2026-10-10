@@ -47,10 +47,35 @@
       "fieldType": "String",
       "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "300"
+    },
+    {
+      "fieldName": "wallCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "5"
+    },
+    {
+      "fieldName": "croquisCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "5"
+    },
+    {
+      "fieldName": "applianceType",
+      "fieldType": "ApplianceType",
+      "fieldTypeDocumentation": "Appliance subtype for croquis codes (E12 #105). Used by the nomenclature\\ncatalog and RoomObstacle.applianceType (E12 #107).",
+      "fieldValues": "FRIDGE (Refrigerador),RANGE (Estufa),COOKTOP (Parrilla),OVEN (Horno),MICROWAVE (Microondas),DISHWASHER (Lavavajillas),SINK (Tarja (espacio))"
     }
   ],
   "name": "RoomObstacle",
   "relationships": [
+    {
+      "otherEntityField": "measurementUuid",
+      "otherEntityName": "siteMeasurement",
+      "relationshipName": "siteMeasurement",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
     {
       "otherEntityField": "sessionCode",
       "otherEntityName": "designSession",

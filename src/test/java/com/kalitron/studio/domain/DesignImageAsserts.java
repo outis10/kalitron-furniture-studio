@@ -56,7 +56,10 @@ public class DesignImageAsserts {
             .satisfies(a -> assertThat(a.getHeightPx()).as("check heightPx").isEqualTo(expected.getHeightPx()))
             .satisfies(a -> assertThat(a.getIsActive()).as("check isActive").isEqualTo(expected.getIsActive()))
             .satisfies(a -> assertThat(a.getUploadedAt()).as("check uploadedAt").isEqualTo(expected.getUploadedAt()))
-            .satisfies(a -> assertThat(a.getDescription()).as("check description").isEqualTo(expected.getDescription()));
+            .satisfies(a -> assertThat(a.getDescription()).as("check description").isEqualTo(expected.getDescription()))
+            .satisfies(a -> assertThat(a.getWallCode()).as("check wallCode").isEqualTo(expected.getWallCode()))
+            .satisfies(a -> assertThat(a.getPhotoUuid()).as("check photoUuid").isEqualTo(expected.getPhotoUuid()))
+            .satisfies(a -> assertThat(a.getSha256()).as("check sha256").isEqualTo(expected.getSha256()));
     }
 
     /**
@@ -68,6 +71,7 @@ public class DesignImageAsserts {
     public static void assertDesignImageUpdatableRelationshipsEquals(DesignImage expected, DesignImage actual) {
         assertThat(actual)
             .as("Verify DesignImage relationships")
+            .satisfies(a -> assertThat(a.getSiteMeasurement()).as("check siteMeasurement").isEqualTo(expected.getSiteMeasurement()))
             .satisfies(a -> assertThat(a.getSession()).as("check session").isEqualTo(expected.getSession()));
     }
 }

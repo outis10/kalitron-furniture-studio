@@ -13,7 +13,8 @@ public enum SessionStatus {
     QUOTE_GENERATED("Cotización generada"),
     FUSION_GENERATED("Fusion 360 generado"),
     COMPLETED("Completado"),
-    ARCHIVED("Archivado");
+    ARCHIVED("Archivado"),
+    MEASURED("Medido");
 
     private final String value;
 
