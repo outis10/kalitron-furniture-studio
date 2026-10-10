@@ -1,6 +1,6 @@
 # [E12] Issue 107: Data Model for Site Measurements
 
-Status: Reviewed
+Status: Implemented
 Issue: #107
 Epic: #104
 Related: #112 (sync API), #110 (conversion), #113 (payload DTOs, implemented),
@@ -109,6 +109,21 @@ SessionStatus + MEASURED ("Medido")
    `YYYYMMDDHHMMSS_add_site_measurement.xml` (new table, new columns, FKs,
    indexes, partial unique index) and include it in `master.xml`.
 5. Verify the migration on a copy of a real dev DB and on an empty DB.
+
+Found while implementing (2026-10-10), handled in the PR:
+
+- The generator also rewrote other entities, `ArtifactType`, `GenerationJobType`,
+  seven repositories with custom methods and `CatalogStyleResourceIT` — all reverted.
+- It renamed `DesignImage.imageDataBase64`'s column to `image_data_base_64`
+  (the real column is `image_data_base64`), dropped its `@JsonIgnore`, and added
+  the field to `DesignImageDTO`/mapper. Restored: the base64 stays out of the
+  DTO and API (the generated IT assertions on it were removed).
+- JDL labels with nested parentheses are cut: `"Tarja (espacio)"` came out as
+  `"Tarja (espacio"`. `ApplianceType.java` kept as is; the new TS enum and
+  i18n files fixed by hand.
+- Generated column names: `sha256` → `sha_256`, `payloadSha256` → `payload_sha_256`
+  (the hand-written changelog matches them).
+- The generator only writes the `es` i18n files; `en` keys were added by hand.
 
 The generated CRUD endpoint `/api/site-measurements` is readable/writable by
 any `ROLE_USER` until #142; it must not be used by the app (the app uses #112).
