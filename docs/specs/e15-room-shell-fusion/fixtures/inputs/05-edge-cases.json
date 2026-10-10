@@ -1,0 +1,374 @@
+{
+  "_fixture": {
+    "sessionCode": "KD-FX-005",
+    "spaceLabel": "Cocina \"casos borde\", ñ y acentos",
+    "description": null
+  },
+  "schemaVersion": 1,
+  "projectType": "KITCHEN",
+  "revision": 3,
+  "baseRevision": 2,
+  "catalogVersion": "2026-10-01.1",
+  "device": {
+    "deviceId": "fixture-device",
+    "platform": "android",
+    "appVersion": "1.0.0",
+    "laserModel": "GLM 50-27 C",
+    "laserId": "fixture"
+  },
+  "capturedAt": "2026-10-08T16:00:00Z",
+  "measurementUuid": "00000005-0000-4000-8000-000000000000",
+  "corners": [
+    {
+      "cornerCode": "E-AB",
+      "angleDeg": 90,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-BC",
+      "angleDeg": 92,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-CD",
+      "angleDeg": 90,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-DA",
+      "angleDeg": 90,
+      "squareCheck": null
+    }
+  ],
+  "walls": [
+    {
+      "wallCode": "A",
+      "lengthFloorMm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000001",
+          "code": "V",
+          "xMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 1200,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 1500,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": null,
+          "notes": "Ventana hasta el techo"
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "B",
+      "lengthFloorMm": {
+        "value": 2000,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 2000,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 2000,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000002",
+          "code": "P",
+          "xMm": {
+            "value": 1100,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 2100,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": "RIGHT_OUT",
+          "notes": "Puerta \"principal\", abre hacia pasillo"
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "C",
+      "lengthFloorMm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000003",
+          "code": "CT",
+          "xMm": {
+            "value": 200,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000004",
+          "code": "CT",
+          "xMm": {
+            "value": 200,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 1100,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000005",
+          "code": "P",
+          "xMm": {
+            "value": 1000,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 1200,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 2100,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": "SLIDING",
+          "notes": null
+        },
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000006",
+          "code": "AP",
+          "xMm": {
+            "value": 2400,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 1200,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000007",
+          "code": "CT",
+          "xMm": {
+            "value": 2800,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 1100,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": "Contacto 220V, doble"
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "DONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "D",
+      "lengthFloorMm": {
+        "value": 2003,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 2000,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 2001,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": {
+        "value": 8,
+        "source": "MANUAL"
+      },
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000008",
+          "code": "TB",
+          "xMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 2250,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 2000,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 100,
+            "source": "LASER"
+          },
+          "depthMm": {
+            "value": 100,
+            "source": "LASER"
+          },
+          "swing": null,
+          "notes": "Tubería horizontal de gas"
+        },
+        {
+          "elementUuid": "00000005-0000-4000-8000-000000000009",
+          "code": "RG",
+          "xMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "NONE",
+        "OBSTRUCTION": "DONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    }
+  ],
+  "site": {
+    "floorOutOfLevelMm": null,
+    "floorOutOfLevelNote": null
+  }
+}

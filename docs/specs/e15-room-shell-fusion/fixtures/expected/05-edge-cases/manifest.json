@@ -1,0 +1,68 @@
+{
+  "contract": "kfs-room-shell",
+  "schemaVersion": 1,
+  "units": "mm",
+  "frame": {
+    "up": "+Z",
+    "origin": "left end of wall A, interior face, finished floor",
+    "wallA": "+X",
+    "roomSide": "right of the wall direction (walls run clockwise seen from above)"
+  },
+  "session": {
+    "sessionCode": "KD-FX-005",
+    "projectType": "KITCHEN",
+    "spaceLabel": "Cocina \"casos borde\", ñ y acentos"
+  },
+  "source": {
+    "measurementUuid": "00000005-0000-4000-8000-000000000000",
+    "revision": 3,
+    "catalogVersion": "2026-10-01.1"
+  },
+  "generatedAt": "2026-10-09T00:00:00Z",
+  "room": {
+    "closed": true,
+    "wallCount": 4,
+    "closureGapMm": 125.9,
+    "closureGapXMm": -68.0,
+    "closureGapYMm": -105.9,
+    "angleSumDeg": 362,
+    "expectedAngleSumDeg": 360,
+    "maxCeilingHeightMm": 2400,
+    "floorOutOfLevelMm": null,
+    "floorOutOfLevelNote": null
+  },
+  "defaults": {
+    "wallThicknessMm": 150,
+    "markerSizeMm": 80,
+    "markerDepthMm": 25,
+    "panelDepthMm": 10,
+    "obstructionDepthMm": {
+      "CL": 300,
+      "VG": 300,
+      "TB": 100
+    },
+    "closureToleranceMm": 20
+  },
+  "files": {
+    "walls": {
+      "name": "walls.csv",
+      "rows": 4,
+      "sha256": "0a9a1dfbe644a47241ddfc224e55035061f00e87f50afdb9ead65c391d76eb60"
+    },
+    "elements": {
+      "name": "elements.csv",
+      "rows": 9,
+      "sha256": "a1be90ed0fa0190c3e5a10712436c494e673e892da46472ae4ee54c57fc4524f"
+    }
+  },
+  "warnings": [
+    {
+      "code": "ROOM_NOT_CLOSED",
+      "message": "El contorno no cierra: 125.9 mm entre el final del muro D y el origen"
+    },
+    {
+      "code": "ROOM_ANGLE_SUM_MISMATCH",
+      "message": "Suma de ángulos 362° vs 360° esperados"
+    }
+  ]
+}

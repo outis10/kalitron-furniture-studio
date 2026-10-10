@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1062" font-family="sans-serif"><rect width="100%" height="100%" fill="white"/>
+<text x="40" y="24" font-size="16" font-weight="bold">KD-FX-003 — Cocina con techo inclinado (rev 3)</text>
+<text x="40" y="44" font-size="11" fill="#C62828">ROOM_NOT_CLOSED</text>
+<polygon points="152.3,118.0 512.3,118.0 529.9,100.0 133.9,100.0" fill="#D9D9D9" stroke="#424242" stroke-width="1"/>
+<text x="332.3" y="78.4" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle">A</text>
+<polygon points="512.3,118.0 517.5,418.0 535.8,436.0 529.9,100.0" fill="#D9D9D9" stroke="#424242" stroke-width="1"/>
+<text x="554.5" y="267.3" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle">B</text>
+<polygon points="517.5,418.0 156.3,418.0 138.6,436.0 535.8,436.0" fill="#D9D9D9" stroke="#424242" stroke-width="1"/>
+<text x="336.9" y="457.6" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle">C</text>
+<polygon points="156.3,418.0 151.1,120.4 132.8,102.4 138.6,436.0" fill="#D9D9D9" stroke="#424242" stroke-width="1"/>
+<text x="114.1" y="269.9" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="middle">D</text>
+<circle cx="152.3" cy="118.0" r="4" fill="#C62828"/><text x="158.3" y="112.0" font-size="10" fill="#C62828">0,0</text>
+<polygon points="200.3,118.0 248.3,118.0 248.3,119.2 200.3,119.2" fill="#BDBDBD" fill-opacity="1.0" stroke="#212121" stroke-width="0.6"/>
+<polygon points="447.5,118.0 457.1,118.0 457.1,121.0 447.5,121.0" fill="#E53935" fill-opacity="1.0" stroke="#212121" stroke-width="0.6"/>
+<polygon points="512.7,142.0 512.9,155.2 499.7,155.4 499.5,142.2" fill="#9E9E9E" fill-opacity="1.0" stroke="#212121" stroke-width="0.6"/>
+<line x1="523.1" y1="225.8" x2="525.2" y2="345.8" stroke="#4FA3E0" stroke-width="5"/>
+<polygon points="517.5,418.0 156.3,418.0 156.3,376.0 517.5,376.0" fill="#757575" fill-opacity="1.0" stroke="#212121" stroke-width="0.6"/>
+<line x1="146.7" y1="382.1" x2="145.0" y2="286.1" stroke="#8D6E63" stroke-width="5"/>
+<path d="M40.0,288.0 L136.0,286.3 M137.7,382.3 A96.0,96.0 0 0 0 40.0,288.0" fill="none" stroke="#8D6E63" stroke-dasharray="4 3"/>
+<text x="40.0" y="508.0" font-size="12" font-weight="bold">Muro A — 3000 mm</text>
+<polygon points="40.0,724.0 280.0,724.0 280.0,516.0 40.0,516.0" fill="#F5F5F5" stroke="#424242"/>
+<rect x="72.0" y="668.0" width="32.0" height="32.0" fill="#BDBDBD" fill-opacity="1.0" stroke="#212121" stroke-width="0.5"/>
+<text x="88.0" y="684.0" font-size="8" text-anchor="middle" dominant-baseline="middle">RG</text>
+<rect x="236.8" y="632.8" width="6.4" height="6.4" fill="#E53935" fill-opacity="1.0" stroke="#212121" stroke-width="0.5"/>
+<text x="240.0" y="629.8" font-size="8" text-anchor="middle">CT</text>
+<text x="320.0" y="508.0" font-size="12" font-weight="bold">Muro B — 2500 mm</text>
+<polygon points="320.0,724.0 520.0,724.0 520.0,540.0 320.0,516.0" fill="#F5F5F5" stroke="#424242"/>
+<rect x="336.0" y="518.9" width="8.8" height="205.0" fill="#9E9E9E" fill-opacity="1.0" stroke="#212121" stroke-width="0.5"/>
+<text x="340.4" y="621.4" font-size="8" text-anchor="middle" dominant-baseline="middle">TB</text>
+<rect x="392.0" y="564.0" width="80.0" height="72.0" fill="#4FA3E0" fill-opacity="0.5" stroke="#212121" stroke-width="0.5"/>
+<text x="432.0" y="600.0" font-size="8" text-anchor="middle" dominant-baseline="middle">V</text>
+<text x="560.0" y="508.0" font-size="12" font-weight="bold">Muro C — 3010 mm</text>
+<polygon points="560.0,700.0 800.8,700.0 800.8,516.0 560.0,516.0" fill="#F5F5F5" stroke="#424242"/>
+<rect x="560.0" y="516.0" width="240.8" height="24.0" fill="#757575" fill-opacity="1.0" stroke="#212121" stroke-width="0.5"/>
+<text x="680.4" y="528.0" font-size="8" text-anchor="middle" dominant-baseline="middle">VG</text>
+<text x="40.0" y="796.0" font-size="12" font-weight="bold">Muro D — 2480 mm</text>
+<polygon points="40.0,1012.0 238.4,1012.0 238.4,804.0 40.0,828.0" fill="#F5F5F5" stroke="#424242"/>
+<rect x="64.0" y="848.0" width="64.0" height="164.0" fill="#8D6E63" fill-opacity="0.5" stroke="#212121" stroke-width="0.5"/>
+<text x="96.0" y="930.0" font-size="8" text-anchor="middle" dominant-baseline="middle">P</text>
+</svg>

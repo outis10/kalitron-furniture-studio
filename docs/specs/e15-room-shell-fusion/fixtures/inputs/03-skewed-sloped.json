@@ -1,0 +1,341 @@
+{
+  "_fixture": {
+    "sessionCode": "KD-FX-003",
+    "spaceLabel": "Cocina con techo inclinado",
+    "description": null
+  },
+  "schemaVersion": 1,
+  "projectType": "KITCHEN",
+  "revision": 3,
+  "baseRevision": 2,
+  "catalogVersion": "2026-10-01.1",
+  "device": {
+    "deviceId": "fixture-device",
+    "platform": "android",
+    "appVersion": "1.0.0",
+    "laserModel": "GLM 50-27 C",
+    "laserId": "fixture"
+  },
+  "capturedAt": "2026-10-08T16:00:00Z",
+  "measurementUuid": "00000003-0000-4000-8000-000000000000",
+  "corners": [
+    {
+      "cornerCode": "E-AB",
+      "angleDeg": 91,
+      "squareCheck": {
+        "status": "VERIFIED",
+        "legAMm": 1000,
+        "legBMm": 1000,
+        "diagonalMm": {
+          "value": 1427,
+          "source": "LASER"
+        }
+      }
+    },
+    {
+      "cornerCode": "E-BC",
+      "angleDeg": 89,
+      "squareCheck": {
+        "status": "VERIFIED",
+        "legAMm": 1000,
+        "legBMm": 1000,
+        "diagonalMm": {
+          "value": 1402,
+          "source": "LASER"
+        }
+      }
+    },
+    {
+      "cornerCode": "E-CD",
+      "angleDeg": 91,
+      "squareCheck": {
+        "status": "ASSUMED_SQUARE",
+        "legAMm": null,
+        "legBMm": null,
+        "diagonalMm": null
+      }
+    },
+    {
+      "cornerCode": "E-DA",
+      "angleDeg": 89,
+      "squareCheck": null
+    }
+  ],
+  "walls": [
+    {
+      "wallCode": "A",
+      "lengthFloorMm": {
+        "value": 3004,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 3002,
+        "source": "MANUAL"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2600,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2600,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000003-0000-4000-8000-000000000001",
+          "code": "RG",
+          "xMm": {
+            "value": 400,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 400,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 400,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000003-0000-4000-8000-000000000002",
+          "code": "CT",
+          "xMm": {
+            "value": 2500,
+            "source": "MANUAL"
+          },
+          "yMm": {
+            "value": 1100,
+            "source": "MANUAL"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "NONE",
+        "OBSTRUCTION": "DONE",
+        "SERVICE": "DONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "B",
+      "lengthFloorMm": {
+        "value": 2500,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 2500,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 2500,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": {
+        "value": 6,
+        "source": "MANUAL"
+      },
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2600,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2300,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000003-0000-4000-8000-000000000003",
+          "code": "TB",
+          "xMm": {
+            "value": 200,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 110,
+            "source": "LASER"
+          },
+          "heightMm": null,
+          "depthMm": {
+            "value": 110,
+            "source": "LASER"
+          },
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000003-0000-4000-8000-000000000004",
+          "code": "V",
+          "xMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 1100,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 1000,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "DONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "C",
+      "lengthFloorMm": {
+        "value": 3010,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 3010,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 3010,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2300,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2300,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000003-0000-4000-8000-000000000005",
+          "code": "VG",
+          "xMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "yMm": null,
+          "widthMm": {
+            "value": 3010,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "depthMm": {
+            "value": 350,
+            "source": "LASER"
+          },
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "NONE",
+        "OBSTRUCTION": "DONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "D",
+      "lengthFloorMm": {
+        "value": 2480,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 2480,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 2480,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2300,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2600,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000003-0000-4000-8000-000000000006",
+          "code": "P",
+          "xMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 800,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 2050,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": "RIGHT_OUT",
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    }
+  ],
+  "site": {
+    "floorOutOfLevelMm": 7,
+    "floorOutOfLevelNote": "Baja hacia esquina E-CD"
+  }
+}

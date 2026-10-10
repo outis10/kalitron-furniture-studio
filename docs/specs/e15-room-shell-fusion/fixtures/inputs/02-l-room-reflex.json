@@ -1,0 +1,494 @@
+{
+  "_fixture": {
+    "sessionCode": "KD-FX-002",
+    "spaceLabel": "Cocina en L",
+    "description": null
+  },
+  "schemaVersion": 1,
+  "projectType": "KITCHEN",
+  "revision": 3,
+  "baseRevision": 2,
+  "catalogVersion": "2026-10-01.1",
+  "device": {
+    "deviceId": "fixture-device",
+    "platform": "android",
+    "appVersion": "1.0.0",
+    "laserModel": "GLM 50-27 C",
+    "laserId": "fixture"
+  },
+  "capturedAt": "2026-10-08T16:00:00Z",
+  "measurementUuid": "00000002-0000-4000-8000-000000000000",
+  "corners": [
+    {
+      "cornerCode": "E-AB",
+      "angleDeg": 90,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-BC",
+      "angleDeg": 270,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-CD",
+      "angleDeg": 90,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-DE",
+      "angleDeg": 90,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-EF",
+      "angleDeg": 90,
+      "squareCheck": null
+    },
+    {
+      "cornerCode": "E-FA",
+      "angleDeg": 90,
+      "squareCheck": null
+    }
+  ],
+  "walls": [
+    {
+      "wallCode": "A",
+      "lengthFloorMm": {
+        "value": 2500,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 2500,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 2500,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000001",
+          "code": "V",
+          "xMm": {
+            "value": 700,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 1000,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 1200,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 1100,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000002",
+          "code": "TJ",
+          "xMm": {
+            "value": 850,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "depthMm": {
+            "value": 600,
+            "source": "LASER"
+          },
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000003",
+          "code": "TA",
+          "xMm": {
+            "value": 1200,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 500,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000004",
+          "code": "DR",
+          "xMm": {
+            "value": 1300,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 400,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "DONE",
+        "APPLIANCE": "DONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "B",
+      "lengthFloorMm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [],
+      "layers": {
+        "OPENING": "NONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "C",
+      "lengthFloorMm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000005",
+          "code": "CL",
+          "xMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "yMm": null,
+          "widthMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "heightMm": null,
+          "depthMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "NONE",
+        "OBSTRUCTION": "DONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "D",
+      "lengthFloorMm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 1500,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000006",
+          "code": "VG",
+          "xMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "yMm": null,
+          "widthMm": {
+            "value": 1500,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 350,
+            "source": "LASER"
+          },
+          "depthMm": {
+            "value": 400,
+            "source": "LASER"
+          },
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "NONE",
+        "OBSTRUCTION": "DONE",
+        "SERVICE": "NONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "E",
+      "lengthFloorMm": {
+        "value": 4000,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 4000,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 4000,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000007",
+          "code": "RF",
+          "xMm": {
+            "value": 100,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 1850,
+            "source": "LASER"
+          },
+          "depthMm": {
+            "value": 720,
+            "source": "LASER"
+          },
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000008",
+          "code": "CT",
+          "xMm": {
+            "value": 500,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 400,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000009",
+          "code": "P",
+          "xMm": {
+            "value": 2800,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 0,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 2100,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": "RIGHT_IN",
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "DONE",
+        "APPLIANCE": "DONE"
+      },
+      "photoUuids": []
+    },
+    {
+      "wallCode": "F",
+      "lengthFloorMm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "length900Mm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "lengthCeilingMm": {
+        "value": 3000,
+        "source": "LASER"
+      },
+      "outOfPlumbMm": null,
+      "closingMm": null,
+      "ceilingHeightLeftMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "ceilingHeightRightMm": {
+        "value": 2400,
+        "source": "LASER"
+      },
+      "elements": [
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000010",
+          "code": "CT",
+          "xMm": {
+            "value": 300,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 1100,
+            "source": "LASER"
+          },
+          "widthMm": null,
+          "heightMm": null,
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        },
+        {
+          "elementUuid": "00000002-0000-4000-8000-000000000011",
+          "code": "V",
+          "xMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "yMm": {
+            "value": 900,
+            "source": "LASER"
+          },
+          "widthMm": {
+            "value": 1500,
+            "source": "LASER"
+          },
+          "heightMm": {
+            "value": 1200,
+            "source": "LASER"
+          },
+          "depthMm": null,
+          "swing": null,
+          "notes": null
+        }
+      ],
+      "layers": {
+        "OPENING": "DONE",
+        "OBSTRUCTION": "NONE",
+        "SERVICE": "DONE",
+        "APPLIANCE": "NONE"
+      },
+      "photoUuids": []
+    }
+  ],
+  "site": {
+    "floorOutOfLevelMm": null,
+    "floorOutOfLevelNote": null
+  }
+}
