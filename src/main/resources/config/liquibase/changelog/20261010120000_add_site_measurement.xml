@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- E12 #107: SiteMeasurement aggregate and the extended layout fields -->
+
+    <changeSet id="20261010120000-1-create-site-measurement" author="kalitron">
+        <createTable tableName="site_measurement">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="measurement_uuid" type="${uuidType}">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_site_measurement__measurement_uuid"/>
+            </column>
+            <column name="project_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="revision" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schema_version" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="catalog_version" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload" type="${clobType}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payload_sha_256" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="floor_out_of_level_mm" type="integer"/>
+            <column name="floor_out_of_level_note" type="varchar(200)"/>
+            <column name="device_id" type="varchar(64)"/>
+            <column name="app_version" type="varchar(20)"/>
+            <column name="laser_model" type="varchar(40)"/>
+            <column name="captured_at" type="${datetimeType}"/>
+            <column name="received_at" type="${datetimeType}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="confirmed_at" type="${datetimeType}"/>
+            <column name="session_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="measured_by_id" type="bigint"/>
+        </createTable>
+        <dropDefaultValue tableName="site_measurement" columnName="captured_at" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="site_measurement" columnName="received_at" columnDataType="${datetimeType}"/>
+        <dropDefaultValue tableName="site_measurement" columnName="confirmed_at" columnDataType="${datetimeType}"/>
+        <addForeignKeyConstraint baseColumnNames="session_id"
+                                 baseTableName="site_measurement"
+                                 constraintName="fk_site_measurement__session_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="design_session"/>
+        <addForeignKeyConstraint baseColumnNames="measured_by_id"
+                                 baseTableName="site_measurement"
+                                 constraintName="fk_site_measurement__measured_by_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
+        <createIndex indexName="idx_site_measurement__session_id" tableName="site_measurement">
+            <column name="session_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- At most one CONFIRMED measurement per session and project type -->
+    <changeSet id="20261010120000-2-site-measurement-one-confirmed" author="kalitron" dbms="postgresql">
+        <sql>
+            CREATE UNIQUE INDEX ux_site_measurement__one_confirmed
+                ON site_measurement (session_id, project_type)
+                WHERE status = 'CONFIRMED'
+        </sql>
+        <rollback>
+            <sql>DROP INDEX ux_site_measurement__one_confirmed</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="20261010120000-3-room-wall-measurement-fields" author="kalitron">
+        <addColumn tableName="room_wall">
+            <column name="length_floor_mm" type="integer"/>
+            <column name="length_900_mm" type="integer"/>
+            <column name="length_ceiling_mm" type="integer"/>
+            <column name="out_of_plumb_mm" type="integer"/>
+            <column name="closing_mm" type="integer"/>
+            <column name="height_left_mm" type="integer"/>
+            <column name="height_right_mm" type="integer"/>
+            <column name="site_measurement_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="site_measurement_id"
+                                 baseTableName="room_wall"
+                                 constraintName="fk_room_wall__site_measurement_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="site_measurement"/>
+    </changeSet>
+
+    <changeSet id="20261010120000-4-room-obstacle-measurement-fields" author="kalitron">
+        <addColumn tableName="room_obstacle">
+            <column name="wall_code" type="varchar(5)"/>
+            <column name="croquis_code" type="varchar(5)"/>
+            <column name="appliance_type" type="varchar(255)"/>
+            <column name="site_measurement_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="site_measurement_id"
+                                 baseTableName="room_obstacle"
+                                 constraintName="fk_room_obstacle__site_measurement_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="site_measurement"/>
+    </changeSet>
+
+    <changeSet id="20261010120000-5-design-image-site-photo-fields" author="kalitron">
+        <addColumn tableName="design_image">
+            <column name="wall_code" type="varchar(5)"/>
+            <column name="photo_uuid" type="${uuidType}">
+                <constraints unique="true" uniqueConstraintName="ux_design_image__photo_uuid"/>
+            </column>
+            <column name="sha_256" type="varchar(64)"/>
+            <column name="site_measurement_id" type="bigint"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="site_measurement_id"
+                                 baseTableName="design_image"
+                                 constraintName="fk_design_image__site_measurement_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="site_measurement"/>
+    </changeSet>
+</databaseChangeLog>
