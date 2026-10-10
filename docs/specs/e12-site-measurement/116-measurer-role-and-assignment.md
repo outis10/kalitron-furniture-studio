@@ -1,6 +1,6 @@
 # [E12] Issue 116: ROLE_MEASURER and Session Assignment
 
-Status: Reviewed
+Status: Implemented
 Issue: #116
 Epic: #104
 Related: #115 (mobile auth), #112 (sync API), #106 (backup sheet), #114 (app config),
@@ -65,7 +65,11 @@ included) is **out of scope** here and tracked in #142 (see *Follow-up*).
   (new id; `authority.csv` seed is not edited).
 - `AuthoritiesConstants.MEASURER = "ROLE_MEASURER"`; frontend `Authority.MEASURER`.
 - JDL: `relationship ManyToOne { DesignSession{assignedMeasurer(login)} to User with builtInEntity }`
-  (nullable), regenerated; new changelog for the FK column + index.
+  (nullable) and field `measurerAssignedAt Instant`; `DesignSession` regenerated.
+- Liquibase: hand-written `20261009120000_add_measurer_role_and_assignment.xml`
+  (authority row, two nullable columns, FK, index). The generator's edits to the
+  original `added_entity` changelogs were discarded (immutable changesets), as
+  were its overwrites of unrelated customized files.
 
 ## Security configuration
 
@@ -150,13 +154,18 @@ otherwise `403`. Used by #112, #106 and `GET /api/mobile/sessions/{id}`.
 
 ## Frontend (Studio web)
 
-- Session detail (`modules/`): "Medidor asignado" select fed by `GET /api/measurers`,
-  visible to ADMIN (and DESIGNER after #126).
+- There is no dedicated session detail page; the select lives in the header of
+  the per-session "Captura de espacio" page (`/design-layout/:sessionId`), as
+  `modules/measurement/measurer-assignment.tsx` (API in `shared/api/measurer-api.ts`,
+  hook `shared/hooks/useMeasurerAssignment.ts`). Fed by `GET /api/measurers`; the
+  current value comes from the generated `GET /api/design-sessions/{id}`
+  (`assignedMeasurer.login`). Visible to ADMIN (and DESIGNER after #126).
   - Loading: disabled select with spinner. Empty: "No hay usuarios con rol de medidor" + link to user admin (ADMIN).
-  - Error: inline alert, previous value kept. Success: toast "Medidor asignado". Unassign: "Sin asignar" option.
-  - Mobile width: select full width below the session header.
-- User admin: `ROLE_MEASURER` selectable automatically (authorities come from the DB);
-  add the es/en label "Medidor en obra" / "Site measurer".
+  - Error: inline alert, previous value kept. Success: inline confirmation "Medidor asignado." (the page uses inline
+    alerts, not toasts). Unassign: "Sin asignar" option.
+  - Mobile width: the header stacks (≤ 720 px) and the select takes the full width.
+- User admin: `ROLE_MEASURER` is selectable automatically (authorities come from the DB). The generated admin
+  screens show raw authority names, so no translated label is added.
 
 ## Acceptance Criteria
 
