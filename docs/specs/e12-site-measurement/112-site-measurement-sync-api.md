@@ -125,6 +125,9 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 ## Backend Behavior
 
 - Resource: `web/rest/custom/SiteMeasurementResource`.
+- Payload DTOs come from #113 (`service/dto/measurement`). `MeasurementWallDTO`
+  does not have `layers` yet: add it (map of group → `DONE`/`NONE`) for the
+  `LAYERS_UNANSWERED` check on confirm. The rules engine does not use it.
 - Service: `SiteMeasurementService` (+ Impl); repository by `measurementUuid`
   with pessimistic lock on update.
 - Transactions: upsert and confirm each in one transaction; photo file write
