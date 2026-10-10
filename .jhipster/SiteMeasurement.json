@@ -1,0 +1,118 @@
+{
+  "annotations": {
+    "changelogDate": "20261010172959"
+  },
+  "applications": ["*"],
+  "documentation": "On-site laser measurement snapshot synced from KFS-APP (E12 #107, #112).\\npayload keeps the raw request body; the layout projection is done by #110.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "measurementUuid",
+      "fieldType": "UUID",
+      "fieldValidateRules": ["required", "unique"]
+    },
+    {
+      "fieldName": "projectType",
+      "fieldType": "ProjectType",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "KITCHEN (Cocina),CLOSET (Closet),BOTH (Cocina y closet)"
+    },
+    {
+      "fieldName": "revision",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "SiteMeasurementStatus",
+      "fieldTypeDocumentation": "Lifecycle of an on-site measurement (E12 #107).",
+      "fieldValidateRules": ["required"],
+      "fieldValues": "DRAFT (Borrador),CONFIRMED (Confirmada),SUPERSEDED (Reemplazada)"
+    },
+    {
+      "fieldName": "schemaVersion",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "catalogVersion",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "payload",
+      "fieldType": "TextBlob",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "payloadSha256",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "fieldName": "floorOutOfLevelMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "floorOutOfLevelNote",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "200"
+    },
+    {
+      "fieldName": "deviceId",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
+    },
+    {
+      "fieldName": "appVersion",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "20"
+    },
+    {
+      "fieldName": "laserModel",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "40"
+    },
+    {
+      "fieldName": "capturedAt",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "receivedAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "confirmedAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "name": "SiteMeasurement",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "sessionCode",
+      "otherEntityName": "designSession",
+      "relationshipName": "session",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": "required"
+    },
+    {
+      "otherEntityField": "login",
+      "otherEntityName": "user",
+      "relationshipName": "measuredBy",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceImpl"
+}

@@ -9,7 +9,7 @@
       "fieldName": "imageType",
       "fieldType": "ImageType",
       "fieldValidateRules": ["required"],
-      "fieldValues": "REFERENCE (Referencia),CATALOG (Catálogo),AI_RENDER (Render IA),FUSION_RENDER (Render Fusion 360),SKETCH (Boceto)"
+      "fieldValues": "REFERENCE (Referencia),CATALOG (Catálogo),AI_RENDER (Render IA),FUSION_RENDER (Render Fusion 360),SKETCH (Boceto),SITE_PHOTO (Foto de obra)"
     },
     {
       "fieldName": "fileName",
@@ -60,10 +60,34 @@
       "fieldType": "String",
       "fieldValidateRules": ["maxlength"],
       "fieldValidateRulesMaxlength": "300"
+    },
+    {
+      "fieldName": "wallCode",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "5"
+    },
+    {
+      "fieldName": "photoUuid",
+      "fieldType": "UUID",
+      "fieldValidateRules": ["unique"]
+    },
+    {
+      "fieldName": "sha256",
+      "fieldType": "String",
+      "fieldValidateRules": ["maxlength"],
+      "fieldValidateRulesMaxlength": "64"
     }
   ],
   "name": "DesignImage",
   "relationships": [
+    {
+      "otherEntityField": "measurementUuid",
+      "otherEntityName": "siteMeasurement",
+      "relationshipName": "siteMeasurement",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
     {
       "otherEntityField": "sessionCode",
       "otherEntityName": "designSession",

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * A DTO for the {@link com.kalitron.studio.domain.DesignImage} entity.
@@ -42,6 +43,16 @@ public class DesignImageDTO implements Serializable {
 
     @Size(max = 300)
     private String description;
+
+    @Size(max = 5)
+    private String wallCode;
+
+    private UUID photoUuid;
+
+    @Size(max = 64)
+    private String sha256;
+
+    private SiteMeasurementDTO siteMeasurement;
 
     @NotNull
     private DesignSessionDTO session;
@@ -134,6 +145,38 @@ public class DesignImageDTO implements Serializable {
         this.description = description;
     }
 
+    public String getWallCode() {
+        return wallCode;
+    }
+
+    public void setWallCode(String wallCode) {
+        this.wallCode = wallCode;
+    }
+
+    public UUID getPhotoUuid() {
+        return photoUuid;
+    }
+
+    public void setPhotoUuid(UUID photoUuid) {
+        this.photoUuid = photoUuid;
+    }
+
+    public String getSha256() {
+        return sha256;
+    }
+
+    public void setSha256(String sha256) {
+        this.sha256 = sha256;
+    }
+
+    public SiteMeasurementDTO getSiteMeasurement() {
+        return siteMeasurement;
+    }
+
+    public void setSiteMeasurement(SiteMeasurementDTO siteMeasurement) {
+        this.siteMeasurement = siteMeasurement;
+    }
+
     public DesignSessionDTO getSession() {
         return session;
     }
@@ -178,6 +221,10 @@ public class DesignImageDTO implements Serializable {
             ", isActive='" + getIsActive() + "'" +
             ", uploadedAt='" + getUploadedAt() + "'" +
             ", description='" + getDescription() + "'" +
+            ", wallCode='" + getWallCode() + "'" +
+            ", photoUuid='" + getPhotoUuid() + "'" +
+            ", sha256='" + getSha256() + "'" +
+            ", siteMeasurement=" + getSiteMeasurement() +
             ", session=" + getSession() +
             "}";
     }

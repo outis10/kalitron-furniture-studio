@@ -90,7 +90,7 @@ public class DesignSession implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "session")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "session" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "siteMeasurement", "session" }, allowSetters = true)
     private Set<DesignImage> imageses = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "session")
@@ -110,12 +110,12 @@ public class DesignSession implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "session")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "session" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "siteMeasurement", "session" }, allowSetters = true)
     private Set<RoomWall> wallses = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "session")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @JsonIgnoreProperties(value = { "session" }, allowSetters = true)
+    @JsonIgnoreProperties(value = { "siteMeasurement", "session" }, allowSetters = true)
     private Set<RoomObstacle> obstacleses = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

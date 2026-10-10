@@ -1,6 +1,7 @@
 package com.kalitron.studio.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.kalitron.studio.domain.enumeration.ApplianceType;
 import com.kalitron.studio.domain.enumeration.RoomObstacleType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -59,10 +60,37 @@ public class RoomObstacle implements Serializable {
     @Column(name = "notes", length = 300)
     private String notes;
 
+    @Size(max = 5)
+    @Column(name = "wall_code", length = 5)
+    private String wallCode;
+
+    @Size(max = 5)
+    @Column(name = "croquis_code", length = 5)
+    private String croquisCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "appliance_type")
+    private ApplianceType applianceType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = { "session", "measuredBy" }, allowSetters = true)
+    private SiteMeasurement siteMeasurement;
+
     @ManyToOne(optional = false)
     @NotNull
     @JsonIgnoreProperties(
-        value = { "spec", "messageses", "imageses", "artifactses", "jobses", "quoteses", "wallses", "obstacleses", "catalogStyle" },
+        value = {
+            "spec",
+            "messageses",
+            "imageses",
+            "artifactses",
+            "jobses",
+            "quoteses",
+            "wallses",
+            "obstacleses",
+            "catalogStyle",
+            "assignedMeasurer",
+        },
         allowSetters = true
     )
     private DesignSession session;
@@ -199,6 +227,58 @@ public class RoomObstacle implements Serializable {
         this.notes = notes;
     }
 
+    public String getWallCode() {
+        return this.wallCode;
+    }
+
+    public RoomObstacle wallCode(String wallCode) {
+        this.setWallCode(wallCode);
+        return this;
+    }
+
+    public void setWallCode(String wallCode) {
+        this.wallCode = wallCode;
+    }
+
+    public String getCroquisCode() {
+        return this.croquisCode;
+    }
+
+    public RoomObstacle croquisCode(String croquisCode) {
+        this.setCroquisCode(croquisCode);
+        return this;
+    }
+
+    public void setCroquisCode(String croquisCode) {
+        this.croquisCode = croquisCode;
+    }
+
+    public ApplianceType getApplianceType() {
+        return this.applianceType;
+    }
+
+    public RoomObstacle applianceType(ApplianceType applianceType) {
+        this.setApplianceType(applianceType);
+        return this;
+    }
+
+    public void setApplianceType(ApplianceType applianceType) {
+        this.applianceType = applianceType;
+    }
+
+    public SiteMeasurement getSiteMeasurement() {
+        return this.siteMeasurement;
+    }
+
+    public void setSiteMeasurement(SiteMeasurement siteMeasurement) {
+        this.siteMeasurement = siteMeasurement;
+    }
+
+    public RoomObstacle siteMeasurement(SiteMeasurement siteMeasurement) {
+        this.setSiteMeasurement(siteMeasurement);
+        return this;
+    }
+
     public DesignSession getSession() {
         return this.session;
     }
@@ -245,6 +325,9 @@ public class RoomObstacle implements Serializable {
             ", heightMm=" + getHeightMm() +
             ", depthMm=" + getDepthMm() +
             ", notes='" + getNotes() + "'" +
+            ", wallCode='" + getWallCode() + "'" +
+            ", croquisCode='" + getCroquisCode() + "'" +
+            ", applianceType='" + getApplianceType() + "'" +
             "}";
     }
 }

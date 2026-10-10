@@ -53,7 +53,14 @@ public class RoomWallAsserts {
             .satisfies(a -> assertThat(a.getAngleDeg()).as("check angleDeg").isEqualTo(expected.getAngleDeg()))
             .satisfies(a -> assertThat(a.getPositionX()).as("check positionX").isEqualTo(expected.getPositionX()))
             .satisfies(a -> assertThat(a.getPositionY()).as("check positionY").isEqualTo(expected.getPositionY()))
-            .satisfies(a -> assertThat(a.getSortOrder()).as("check sortOrder").isEqualTo(expected.getSortOrder()));
+            .satisfies(a -> assertThat(a.getSortOrder()).as("check sortOrder").isEqualTo(expected.getSortOrder()))
+            .satisfies(a -> assertThat(a.getLengthFloorMm()).as("check lengthFloorMm").isEqualTo(expected.getLengthFloorMm()))
+            .satisfies(a -> assertThat(a.getLength900Mm()).as("check length900Mm").isEqualTo(expected.getLength900Mm()))
+            .satisfies(a -> assertThat(a.getLengthCeilingMm()).as("check lengthCeilingMm").isEqualTo(expected.getLengthCeilingMm()))
+            .satisfies(a -> assertThat(a.getOutOfPlumbMm()).as("check outOfPlumbMm").isEqualTo(expected.getOutOfPlumbMm()))
+            .satisfies(a -> assertThat(a.getClosingMm()).as("check closingMm").isEqualTo(expected.getClosingMm()))
+            .satisfies(a -> assertThat(a.getHeightLeftMm()).as("check heightLeftMm").isEqualTo(expected.getHeightLeftMm()))
+            .satisfies(a -> assertThat(a.getHeightRightMm()).as("check heightRightMm").isEqualTo(expected.getHeightRightMm()));
     }
 
     /**
@@ -65,6 +72,7 @@ public class RoomWallAsserts {
     public static void assertRoomWallUpdatableRelationshipsEquals(RoomWall expected, RoomWall actual) {
         assertThat(actual)
             .as("Verify RoomWall relationships")
+            .satisfies(a -> assertThat(a.getSiteMeasurement()).as("check siteMeasurement").isEqualTo(expected.getSiteMeasurement()))
             .satisfies(a -> assertThat(a.getSession()).as("check session").isEqualTo(expected.getSession()));
     }
 }

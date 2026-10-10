@@ -2,6 +2,7 @@ package com.kalitron.studio.domain;
 
 import static com.kalitron.studio.domain.DesignSessionTestSamples.*;
 import static com.kalitron.studio.domain.RoomObstacleTestSamples.*;
+import static com.kalitron.studio.domain.SiteMeasurementTestSamples.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kalitron.studio.web.rest.TestUtil;
@@ -21,6 +22,18 @@ class RoomObstacleTest {
 
         roomObstacle2 = getRoomObstacleSample2();
         assertThat(roomObstacle1).isNotEqualTo(roomObstacle2);
+    }
+
+    @Test
+    void siteMeasurementTest() {
+        RoomObstacle roomObstacle = getRoomObstacleRandomSampleGenerator();
+        SiteMeasurement siteMeasurementBack = getSiteMeasurementRandomSampleGenerator();
+
+        roomObstacle.setSiteMeasurement(siteMeasurementBack);
+        assertThat(roomObstacle.getSiteMeasurement()).isEqualTo(siteMeasurementBack);
+
+        roomObstacle.siteMeasurement(null);
+        assertThat(roomObstacle.getSiteMeasurement()).isNull();
     }
 
     @Test

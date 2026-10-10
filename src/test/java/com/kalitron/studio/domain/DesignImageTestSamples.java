@@ -20,7 +20,10 @@ public class DesignImageTestSamples {
             .fileSizeKb(1L)
             .widthPx(1)
             .heightPx(1)
-            .description("description1");
+            .description("description1")
+            .wallCode("wallCode1")
+            .photoUuid(UUID.fromString("23d8dc04-a48b-45d9-a01d-4b728f0ad4aa"))
+            .sha256("sha2561");
     }
 
     public static DesignImage getDesignImageSample2() {
@@ -32,7 +35,10 @@ public class DesignImageTestSamples {
             .fileSizeKb(2L)
             .widthPx(2)
             .heightPx(2)
-            .description("description2");
+            .description("description2")
+            .wallCode("wallCode2")
+            .photoUuid(UUID.fromString("ad79f240-3727-46c3-b89f-2cf6ebd74367"))
+            .sha256("sha2562");
     }
 
     public static DesignImage getDesignImageRandomSampleGenerator() {
@@ -44,6 +50,9 @@ public class DesignImageTestSamples {
             .fileSizeKb(longCount.incrementAndGet())
             .widthPx(intCount.incrementAndGet())
             .heightPx(intCount.incrementAndGet())
-            .description(UUID.randomUUID().toString());
+            .description(UUID.randomUUID().toString())
+            .wallCode(UUID.randomUUID().toString())
+            .photoUuid(UUID.randomUUID())
+            .sha256(UUID.randomUUID().toString());
     }
 }

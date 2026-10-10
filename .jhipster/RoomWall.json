@@ -35,10 +35,45 @@
     {
       "fieldName": "sortOrder",
       "fieldType": "Integer"
+    },
+    {
+      "fieldName": "lengthFloorMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "length900Mm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "lengthCeilingMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "outOfPlumbMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "closingMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "heightLeftMm",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "heightRightMm",
+      "fieldType": "Integer"
     }
   ],
   "name": "RoomWall",
   "relationships": [
+    {
+      "otherEntityField": "measurementUuid",
+      "otherEntityName": "siteMeasurement",
+      "relationshipName": "siteMeasurement",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
     {
       "otherEntityField": "sessionCode",
       "otherEntityName": "designSession",

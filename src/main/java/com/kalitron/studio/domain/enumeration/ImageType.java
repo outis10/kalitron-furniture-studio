@@ -8,7 +8,8 @@ public enum ImageType {
     CATALOG("Catálogo"),
     AI_RENDER("Render IA"),
     FUSION_RENDER("Render Fusion 360"),
-    SKETCH("Boceto");
+    SKETCH("Boceto"),
+    SITE_PHOTO("Foto de obra");
 
     private final String value;
 

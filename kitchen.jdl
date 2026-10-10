@@ -32,7 +32,17 @@ enum SessionStatus {
   QUOTE_GENERATED ("Cotización generada"),
   FUSION_GENERATED ("Fusion 360 generado"),
   COMPLETED ("Completado"),
-  ARCHIVED ("Archivado")
+  ARCHIVED ("Archivado"),
+  MEASURED ("Medido")
+}
+
+/**
+ * Lifecycle of an on-site measurement (E12 #107).
+ */
+enum SiteMeasurementStatus {
+  DRAFT ("Borrador"),
+  CONFIRMED ("Confirmada"),
+  SUPERSEDED ("Reemplazada")
 }
 
 enum ProjectType {
@@ -71,7 +81,7 @@ enum RoomObstacleType {
 
 /**
  * Appliance subtype for croquis codes (E12 #105). Used by the nomenclature
- * catalog now; RoomObstacle.applianceType is added in E12 #107.
+ * catalog and RoomObstacle.applianceType (E12 #107).
  */
 enum ApplianceType {
   FRIDGE ("Refrigerador"),
@@ -139,7 +149,8 @@ enum ImageType {
   CATALOG ("Catálogo"),
   AI_RENDER ("Render IA"),
   FUSION_RENDER ("Render Fusion 360"),
-  SKETCH ("Boceto")
+  SKETCH ("Boceto"),
+  SITE_PHOTO ("Foto de obra")
 }
 
 enum ArtifactType {
@@ -228,6 +239,13 @@ entity RoomWall {
   positionX Integer
   positionY Integer
   sortOrder Integer
+  lengthFloorMm Integer
+  length900Mm Integer
+  lengthCeilingMm Integer
+  outOfPlumbMm Integer
+  closingMm Integer
+  heightLeftMm Integer
+  heightRightMm Integer
 }
 
 entity RoomObstacle {
@@ -240,6 +258,9 @@ entity RoomObstacle {
   heightMm Integer
   depthMm Integer
   notes String maxlength(300)
+  wallCode String maxlength(5)
+  croquisCode String maxlength(5)
+  applianceType ApplianceType
 }
 
 entity DesignImage {
@@ -254,6 +275,32 @@ entity DesignImage {
   isActive Boolean required
   uploadedAt Instant required
   description String maxlength(300)
+  wallCode String maxlength(5)
+  photoUuid UUID unique
+  sha256 String maxlength(64)
+}
+
+/**
+ * On-site laser measurement snapshot synced from KFS-APP (E12 #107, #112).
+ * payload keeps the raw request body; the layout projection is done by #110.
+ */
+entity SiteMeasurement {
+  measurementUuid UUID required unique
+  projectType ProjectType required
+  revision Integer required
+  status SiteMeasurementStatus required
+  schemaVersion Integer required
+  catalogVersion String required maxlength(20)
+  payload TextBlob required
+  payloadSha256 String required maxlength(64)
+  floorOutOfLevelMm Integer
+  floorOutOfLevelNote String maxlength(200)
+  deviceId String maxlength(64)
+  appVersion String maxlength(20)
+  laserModel String maxlength(40)
+  capturedAt Instant
+  receivedAt Instant required
+  confirmedAt Instant
 }
 
 entity DesignArtifact {
@@ -426,6 +473,11 @@ relationship OneToMany {
 relationship ManyToOne {
   DesignSession{catalogStyle(name)} to CatalogStyle
   DesignSession{assignedMeasurer(login)} to User with builtInEntity
+  SiteMeasurement{session(sessionCode) required} to DesignSession
+  SiteMeasurement{measuredBy(login)} to User with builtInEntity
+  RoomWall{siteMeasurement(measurementUuid)} to SiteMeasurement
+  RoomObstacle{siteMeasurement(measurementUuid)} to SiteMeasurement
+  DesignImage{siteMeasurement(measurementUuid)} to SiteMeasurement
   KitchenSpec{primaryMaterial(name) required} to Material
   Cabinet{template(code)} to CabinetTemplate
   Cabinet{material(name) required} to Material
@@ -442,7 +494,7 @@ relationship ManyToOne {
 // ---------------------------------------------------------------------------
 
 paginate DesignSession, Quote with pagination
-paginate Cabinet, CabinetPart, ChatMessage, QuoteItem, GenerationJob, DesignArtifact with pagination
+paginate Cabinet, CabinetPart, ChatMessage, QuoteItem, GenerationJob, DesignArtifact, SiteMeasurement with pagination
 filter DesignSession, KitchenSpec, Cabinet, CabinetPart, Quote, Material, Hardware, CabinetTemplate
 dto * with mapstruct
 service * with serviceImpl

@@ -65,6 +65,27 @@ class RoomWallResourceIT {
     private static final Integer DEFAULT_SORT_ORDER = 1;
     private static final Integer UPDATED_SORT_ORDER = 2;
 
+    private static final Integer DEFAULT_LENGTH_FLOOR_MM = 1;
+    private static final Integer UPDATED_LENGTH_FLOOR_MM = 2;
+
+    private static final Integer DEFAULT_LENGTH_900_MM = 1;
+    private static final Integer UPDATED_LENGTH_900_MM = 2;
+
+    private static final Integer DEFAULT_LENGTH_CEILING_MM = 1;
+    private static final Integer UPDATED_LENGTH_CEILING_MM = 2;
+
+    private static final Integer DEFAULT_OUT_OF_PLUMB_MM = 1;
+    private static final Integer UPDATED_OUT_OF_PLUMB_MM = 2;
+
+    private static final Integer DEFAULT_CLOSING_MM = 1;
+    private static final Integer UPDATED_CLOSING_MM = 2;
+
+    private static final Integer DEFAULT_HEIGHT_LEFT_MM = 1;
+    private static final Integer UPDATED_HEIGHT_LEFT_MM = 2;
+
+    private static final Integer DEFAULT_HEIGHT_RIGHT_MM = 1;
+    private static final Integer UPDATED_HEIGHT_RIGHT_MM = 2;
+
     private static final String ENTITY_API_URL = "/api/room-walls";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -110,7 +131,14 @@ class RoomWallResourceIT {
             .angleDeg(DEFAULT_ANGLE_DEG)
             .positionX(DEFAULT_POSITION_X)
             .positionY(DEFAULT_POSITION_Y)
-            .sortOrder(DEFAULT_SORT_ORDER);
+            .sortOrder(DEFAULT_SORT_ORDER)
+            .lengthFloorMm(DEFAULT_LENGTH_FLOOR_MM)
+            .length900Mm(DEFAULT_LENGTH_900_MM)
+            .lengthCeilingMm(DEFAULT_LENGTH_CEILING_MM)
+            .outOfPlumbMm(DEFAULT_OUT_OF_PLUMB_MM)
+            .closingMm(DEFAULT_CLOSING_MM)
+            .heightLeftMm(DEFAULT_HEIGHT_LEFT_MM)
+            .heightRightMm(DEFAULT_HEIGHT_RIGHT_MM);
         // Add required entity
         DesignSession designSession;
         if (TestUtil.findAll(em, DesignSession.class).isEmpty()) {
@@ -138,7 +166,14 @@ class RoomWallResourceIT {
             .angleDeg(UPDATED_ANGLE_DEG)
             .positionX(UPDATED_POSITION_X)
             .positionY(UPDATED_POSITION_Y)
-            .sortOrder(UPDATED_SORT_ORDER);
+            .sortOrder(UPDATED_SORT_ORDER)
+            .lengthFloorMm(UPDATED_LENGTH_FLOOR_MM)
+            .length900Mm(UPDATED_LENGTH_900_MM)
+            .lengthCeilingMm(UPDATED_LENGTH_CEILING_MM)
+            .outOfPlumbMm(UPDATED_OUT_OF_PLUMB_MM)
+            .closingMm(UPDATED_CLOSING_MM)
+            .heightLeftMm(UPDATED_HEIGHT_LEFT_MM)
+            .heightRightMm(UPDATED_HEIGHT_RIGHT_MM);
         // Add required entity
         DesignSession designSession;
         if (TestUtil.findAll(em, DesignSession.class).isEmpty()) {
@@ -259,7 +294,14 @@ class RoomWallResourceIT {
             .andExpect(jsonPath("$.[*].angleDeg").value(hasItem(DEFAULT_ANGLE_DEG)))
             .andExpect(jsonPath("$.[*].positionX").value(hasItem(DEFAULT_POSITION_X)))
             .andExpect(jsonPath("$.[*].positionY").value(hasItem(DEFAULT_POSITION_Y)))
-            .andExpect(jsonPath("$.[*].sortOrder").value(hasItem(DEFAULT_SORT_ORDER)));
+            .andExpect(jsonPath("$.[*].sortOrder").value(hasItem(DEFAULT_SORT_ORDER)))
+            .andExpect(jsonPath("$.[*].lengthFloorMm").value(hasItem(DEFAULT_LENGTH_FLOOR_MM)))
+            .andExpect(jsonPath("$.[*].length900Mm").value(hasItem(DEFAULT_LENGTH_900_MM)))
+            .andExpect(jsonPath("$.[*].lengthCeilingMm").value(hasItem(DEFAULT_LENGTH_CEILING_MM)))
+            .andExpect(jsonPath("$.[*].outOfPlumbMm").value(hasItem(DEFAULT_OUT_OF_PLUMB_MM)))
+            .andExpect(jsonPath("$.[*].closingMm").value(hasItem(DEFAULT_CLOSING_MM)))
+            .andExpect(jsonPath("$.[*].heightLeftMm").value(hasItem(DEFAULT_HEIGHT_LEFT_MM)))
+            .andExpect(jsonPath("$.[*].heightRightMm").value(hasItem(DEFAULT_HEIGHT_RIGHT_MM)));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -297,7 +339,14 @@ class RoomWallResourceIT {
             .andExpect(jsonPath("$.angleDeg").value(DEFAULT_ANGLE_DEG))
             .andExpect(jsonPath("$.positionX").value(DEFAULT_POSITION_X))
             .andExpect(jsonPath("$.positionY").value(DEFAULT_POSITION_Y))
-            .andExpect(jsonPath("$.sortOrder").value(DEFAULT_SORT_ORDER));
+            .andExpect(jsonPath("$.sortOrder").value(DEFAULT_SORT_ORDER))
+            .andExpect(jsonPath("$.lengthFloorMm").value(DEFAULT_LENGTH_FLOOR_MM))
+            .andExpect(jsonPath("$.length900Mm").value(DEFAULT_LENGTH_900_MM))
+            .andExpect(jsonPath("$.lengthCeilingMm").value(DEFAULT_LENGTH_CEILING_MM))
+            .andExpect(jsonPath("$.outOfPlumbMm").value(DEFAULT_OUT_OF_PLUMB_MM))
+            .andExpect(jsonPath("$.closingMm").value(DEFAULT_CLOSING_MM))
+            .andExpect(jsonPath("$.heightLeftMm").value(DEFAULT_HEIGHT_LEFT_MM))
+            .andExpect(jsonPath("$.heightRightMm").value(DEFAULT_HEIGHT_RIGHT_MM));
     }
 
     @Test
@@ -326,7 +375,14 @@ class RoomWallResourceIT {
             .angleDeg(UPDATED_ANGLE_DEG)
             .positionX(UPDATED_POSITION_X)
             .positionY(UPDATED_POSITION_Y)
-            .sortOrder(UPDATED_SORT_ORDER);
+            .sortOrder(UPDATED_SORT_ORDER)
+            .lengthFloorMm(UPDATED_LENGTH_FLOOR_MM)
+            .length900Mm(UPDATED_LENGTH_900_MM)
+            .lengthCeilingMm(UPDATED_LENGTH_CEILING_MM)
+            .outOfPlumbMm(UPDATED_OUT_OF_PLUMB_MM)
+            .closingMm(UPDATED_CLOSING_MM)
+            .heightLeftMm(UPDATED_HEIGHT_LEFT_MM)
+            .heightRightMm(UPDATED_HEIGHT_RIGHT_MM);
         RoomWallDTO roomWallDTO = roomWallMapper.toDto(updatedRoomWall);
 
         restRoomWallMockMvc
@@ -416,7 +472,14 @@ class RoomWallResourceIT {
         RoomWall partialUpdatedRoomWall = new RoomWall();
         partialUpdatedRoomWall.setId(roomWall.getId());
 
-        partialUpdatedRoomWall.heightMm(UPDATED_HEIGHT_MM).positionY(UPDATED_POSITION_Y);
+        partialUpdatedRoomWall
+            .heightMm(UPDATED_HEIGHT_MM)
+            .positionY(UPDATED_POSITION_Y)
+            .lengthFloorMm(UPDATED_LENGTH_FLOOR_MM)
+            .length900Mm(UPDATED_LENGTH_900_MM)
+            .lengthCeilingMm(UPDATED_LENGTH_CEILING_MM)
+            .closingMm(UPDATED_CLOSING_MM)
+            .heightLeftMm(UPDATED_HEIGHT_LEFT_MM);
 
         restRoomWallMockMvc
             .perform(
@@ -451,7 +514,14 @@ class RoomWallResourceIT {
             .angleDeg(UPDATED_ANGLE_DEG)
             .positionX(UPDATED_POSITION_X)
             .positionY(UPDATED_POSITION_Y)
-            .sortOrder(UPDATED_SORT_ORDER);
+            .sortOrder(UPDATED_SORT_ORDER)
+            .lengthFloorMm(UPDATED_LENGTH_FLOOR_MM)
+            .length900Mm(UPDATED_LENGTH_900_MM)
+            .lengthCeilingMm(UPDATED_LENGTH_CEILING_MM)
+            .outOfPlumbMm(UPDATED_OUT_OF_PLUMB_MM)
+            .closingMm(UPDATED_CLOSING_MM)
+            .heightLeftMm(UPDATED_HEIGHT_LEFT_MM)
+            .heightRightMm(UPDATED_HEIGHT_RIGHT_MM);
 
         restRoomWallMockMvc
             .perform(

@@ -2,6 +2,7 @@ package com.kalitron.studio.domain;
 
 import static com.kalitron.studio.domain.DesignImageTestSamples.*;
 import static com.kalitron.studio.domain.DesignSessionTestSamples.*;
+import static com.kalitron.studio.domain.SiteMeasurementTestSamples.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kalitron.studio.web.rest.TestUtil;
@@ -21,6 +22,18 @@ class DesignImageTest {
 
         designImage2 = getDesignImageSample2();
         assertThat(designImage1).isNotEqualTo(designImage2);
+    }
+
+    @Test
+    void siteMeasurementTest() {
+        DesignImage designImage = getDesignImageRandomSampleGenerator();
+        SiteMeasurement siteMeasurementBack = getSiteMeasurementRandomSampleGenerator();
+
+        designImage.setSiteMeasurement(siteMeasurementBack);
+        assertThat(designImage.getSiteMeasurement()).isEqualTo(siteMeasurementBack);
+
+        designImage.siteMeasurement(null);
+        assertThat(designImage.getSiteMeasurement()).isNull();
     }
 
     @Test

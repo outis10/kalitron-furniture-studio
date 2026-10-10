@@ -1,5 +1,6 @@
 package com.kalitron.studio.service.dto;
 
+import com.kalitron.studio.domain.enumeration.ApplianceType;
 import com.kalitron.studio.domain.enumeration.RoomObstacleType;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
@@ -34,6 +35,16 @@ public class RoomObstacleDTO implements Serializable {
 
     @Size(max = 300)
     private String notes;
+
+    @Size(max = 5)
+    private String wallCode;
+
+    @Size(max = 5)
+    private String croquisCode;
+
+    private ApplianceType applianceType;
+
+    private SiteMeasurementDTO siteMeasurement;
 
     @NotNull
     private DesignSessionDTO session;
@@ -118,6 +129,38 @@ public class RoomObstacleDTO implements Serializable {
         this.notes = notes;
     }
 
+    public String getWallCode() {
+        return wallCode;
+    }
+
+    public void setWallCode(String wallCode) {
+        this.wallCode = wallCode;
+    }
+
+    public String getCroquisCode() {
+        return croquisCode;
+    }
+
+    public void setCroquisCode(String croquisCode) {
+        this.croquisCode = croquisCode;
+    }
+
+    public ApplianceType getApplianceType() {
+        return applianceType;
+    }
+
+    public void setApplianceType(ApplianceType applianceType) {
+        this.applianceType = applianceType;
+    }
+
+    public SiteMeasurementDTO getSiteMeasurement() {
+        return siteMeasurement;
+    }
+
+    public void setSiteMeasurement(SiteMeasurementDTO siteMeasurement) {
+        this.siteMeasurement = siteMeasurement;
+    }
+
     public DesignSessionDTO getSession() {
         return session;
     }
@@ -161,6 +204,10 @@ public class RoomObstacleDTO implements Serializable {
             ", heightMm=" + getHeightMm() +
             ", depthMm=" + getDepthMm() +
             ", notes='" + getNotes() + "'" +
+            ", wallCode='" + getWallCode() + "'" +
+            ", croquisCode='" + getCroquisCode() + "'" +
+            ", applianceType='" + getApplianceType() + "'" +
+            ", siteMeasurement=" + getSiteMeasurement() +
             ", session=" + getSession() +
             "}";
     }

@@ -66,6 +66,7 @@ public class CacheConfiguration {
             createCache(cm, com.kalitron.studio.domain.Quote.class.getName());
             createCache(cm, com.kalitron.studio.domain.Quote.class.getName() + ".itemses");
             createCache(cm, com.kalitron.studio.domain.QuoteItem.class.getName());
+            createCache(cm, com.kalitron.studio.domain.SiteMeasurement.class.getName());
             // jhipster-needle-caffeine-add-entry
         };
     }

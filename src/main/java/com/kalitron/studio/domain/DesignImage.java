@@ -8,6 +8,7 @@ import jakarta.validation.constraints.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.UUID;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -74,10 +75,36 @@ public class DesignImage implements Serializable {
     @Column(name = "description", length = 300)
     private String description;
 
+    @Size(max = 5)
+    @Column(name = "wall_code", length = 5)
+    private String wallCode;
+
+    @Column(name = "photo_uuid", unique = true)
+    private UUID photoUuid;
+
+    @Size(max = 64)
+    @Column(name = "sha_256", length = 64)
+    private String sha256;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = { "session", "measuredBy" }, allowSetters = true)
+    private SiteMeasurement siteMeasurement;
+
     @ManyToOne(optional = false)
     @NotNull
     @JsonIgnoreProperties(
-        value = { "spec", "messageses", "imageses", "artifactses", "jobses", "quoteses", "wallses", "obstacleses", "catalogStyle" },
+        value = {
+            "spec",
+            "messageses",
+            "imageses",
+            "artifactses",
+            "jobses",
+            "quoteses",
+            "wallses",
+            "obstacleses",
+            "catalogStyle",
+            "assignedMeasurer",
+        },
         allowSetters = true
     )
     private DesignSession session;
@@ -240,6 +267,58 @@ public class DesignImage implements Serializable {
         this.description = description;
     }
 
+    public String getWallCode() {
+        return this.wallCode;
+    }
+
+    public DesignImage wallCode(String wallCode) {
+        this.setWallCode(wallCode);
+        return this;
+    }
+
+    public void setWallCode(String wallCode) {
+        this.wallCode = wallCode;
+    }
+
+    public UUID getPhotoUuid() {
+        return this.photoUuid;
+    }
+
+    public DesignImage photoUuid(UUID photoUuid) {
+        this.setPhotoUuid(photoUuid);
+        return this;
+    }
+
+    public void setPhotoUuid(UUID photoUuid) {
+        this.photoUuid = photoUuid;
+    }
+
+    public String getSha256() {
+        return this.sha256;
+    }
+
+    public DesignImage sha256(String sha256) {
+        this.setSha256(sha256);
+        return this;
+    }
+
+    public void setSha256(String sha256) {
+        this.sha256 = sha256;
+    }
+
+    public SiteMeasurement getSiteMeasurement() {
+        return this.siteMeasurement;
+    }
+
+    public void setSiteMeasurement(SiteMeasurement siteMeasurement) {
+        this.siteMeasurement = siteMeasurement;
+    }
+
+    public DesignImage siteMeasurement(SiteMeasurement siteMeasurement) {
+        this.setSiteMeasurement(siteMeasurement);
+        return this;
+    }
+
     public DesignSession getSession() {
         return this.session;
     }
@@ -287,6 +366,9 @@ public class DesignImage implements Serializable {
             ", isActive='" + getIsActive() + "'" +
             ", uploadedAt='" + getUploadedAt() + "'" +
             ", description='" + getDescription() + "'" +
+            ", wallCode='" + getWallCode() + "'" +
+            ", photoUuid='" + getPhotoUuid() + "'" +
+            ", sha256='" + getSha256() + "'" +
             "}";
     }
 }

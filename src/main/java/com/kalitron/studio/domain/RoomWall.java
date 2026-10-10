@@ -50,10 +50,46 @@ public class RoomWall implements Serializable {
     @Column(name = "sort_order")
     private Integer sortOrder;
 
+    @Column(name = "length_floor_mm")
+    private Integer lengthFloorMm;
+
+    @Column(name = "length_900_mm")
+    private Integer length900Mm;
+
+    @Column(name = "length_ceiling_mm")
+    private Integer lengthCeilingMm;
+
+    @Column(name = "out_of_plumb_mm")
+    private Integer outOfPlumbMm;
+
+    @Column(name = "closing_mm")
+    private Integer closingMm;
+
+    @Column(name = "height_left_mm")
+    private Integer heightLeftMm;
+
+    @Column(name = "height_right_mm")
+    private Integer heightRightMm;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties(value = { "session", "measuredBy" }, allowSetters = true)
+    private SiteMeasurement siteMeasurement;
+
     @ManyToOne(optional = false)
     @NotNull
     @JsonIgnoreProperties(
-        value = { "spec", "messageses", "imageses", "artifactses", "jobses", "quoteses", "wallses", "obstacleses", "catalogStyle" },
+        value = {
+            "spec",
+            "messageses",
+            "imageses",
+            "artifactses",
+            "jobses",
+            "quoteses",
+            "wallses",
+            "obstacleses",
+            "catalogStyle",
+            "assignedMeasurer",
+        },
         allowSetters = true
     )
     private DesignSession session;
@@ -164,6 +200,110 @@ public class RoomWall implements Serializable {
         this.sortOrder = sortOrder;
     }
 
+    public Integer getLengthFloorMm() {
+        return this.lengthFloorMm;
+    }
+
+    public RoomWall lengthFloorMm(Integer lengthFloorMm) {
+        this.setLengthFloorMm(lengthFloorMm);
+        return this;
+    }
+
+    public void setLengthFloorMm(Integer lengthFloorMm) {
+        this.lengthFloorMm = lengthFloorMm;
+    }
+
+    public Integer getLength900Mm() {
+        return this.length900Mm;
+    }
+
+    public RoomWall length900Mm(Integer length900Mm) {
+        this.setLength900Mm(length900Mm);
+        return this;
+    }
+
+    public void setLength900Mm(Integer length900Mm) {
+        this.length900Mm = length900Mm;
+    }
+
+    public Integer getLengthCeilingMm() {
+        return this.lengthCeilingMm;
+    }
+
+    public RoomWall lengthCeilingMm(Integer lengthCeilingMm) {
+        this.setLengthCeilingMm(lengthCeilingMm);
+        return this;
+    }
+
+    public void setLengthCeilingMm(Integer lengthCeilingMm) {
+        this.lengthCeilingMm = lengthCeilingMm;
+    }
+
+    public Integer getOutOfPlumbMm() {
+        return this.outOfPlumbMm;
+    }
+
+    public RoomWall outOfPlumbMm(Integer outOfPlumbMm) {
+        this.setOutOfPlumbMm(outOfPlumbMm);
+        return this;
+    }
+
+    public void setOutOfPlumbMm(Integer outOfPlumbMm) {
+        this.outOfPlumbMm = outOfPlumbMm;
+    }
+
+    public Integer getClosingMm() {
+        return this.closingMm;
+    }
+
+    public RoomWall closingMm(Integer closingMm) {
+        this.setClosingMm(closingMm);
+        return this;
+    }
+
+    public void setClosingMm(Integer closingMm) {
+        this.closingMm = closingMm;
+    }
+
+    public Integer getHeightLeftMm() {
+        return this.heightLeftMm;
+    }
+
+    public RoomWall heightLeftMm(Integer heightLeftMm) {
+        this.setHeightLeftMm(heightLeftMm);
+        return this;
+    }
+
+    public void setHeightLeftMm(Integer heightLeftMm) {
+        this.heightLeftMm = heightLeftMm;
+    }
+
+    public Integer getHeightRightMm() {
+        return this.heightRightMm;
+    }
+
+    public RoomWall heightRightMm(Integer heightRightMm) {
+        this.setHeightRightMm(heightRightMm);
+        return this;
+    }
+
+    public void setHeightRightMm(Integer heightRightMm) {
+        this.heightRightMm = heightRightMm;
+    }
+
+    public SiteMeasurement getSiteMeasurement() {
+        return this.siteMeasurement;
+    }
+
+    public void setSiteMeasurement(SiteMeasurement siteMeasurement) {
+        this.siteMeasurement = siteMeasurement;
+    }
+
+    public RoomWall siteMeasurement(SiteMeasurement siteMeasurement) {
+        this.setSiteMeasurement(siteMeasurement);
+        return this;
+    }
+
     public DesignSession getSession() {
         return this.session;
     }
@@ -208,6 +348,13 @@ public class RoomWall implements Serializable {
             ", positionX=" + getPositionX() +
             ", positionY=" + getPositionY() +
             ", sortOrder=" + getSortOrder() +
+            ", lengthFloorMm=" + getLengthFloorMm() +
+            ", length900Mm=" + getLength900Mm() +
+            ", lengthCeilingMm=" + getLengthCeilingMm() +
+            ", outOfPlumbMm=" + getOutOfPlumbMm() +
+            ", closingMm=" + getClosingMm() +
+            ", heightLeftMm=" + getHeightLeftMm() +
+            ", heightRightMm=" + getHeightRightMm() +
             "}";
     }
 }

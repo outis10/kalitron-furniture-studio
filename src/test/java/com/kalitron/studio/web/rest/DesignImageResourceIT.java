@@ -22,6 +22,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +78,15 @@ class DesignImageResourceIT {
     private static final String DEFAULT_DESCRIPTION = "AAAAAAAAAA";
     private static final String UPDATED_DESCRIPTION = "BBBBBBBBBB";
 
+    private static final String DEFAULT_WALL_CODE = "AAAAA";
+    private static final String UPDATED_WALL_CODE = "BBBBB";
+
+    private static final UUID DEFAULT_PHOTO_UUID = UUID.randomUUID();
+    private static final UUID UPDATED_PHOTO_UUID = UUID.randomUUID();
+
+    private static final String DEFAULT_SHA_256 = "AAAAAAAAAA";
+    private static final String UPDATED_SHA_256 = "BBBBBBBBBB";
+
     private static final String ENTITY_API_URL = "/api/design-images";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -125,7 +135,10 @@ class DesignImageResourceIT {
             .heightPx(DEFAULT_HEIGHT_PX)
             .isActive(DEFAULT_IS_ACTIVE)
             .uploadedAt(DEFAULT_UPLOADED_AT)
-            .description(DEFAULT_DESCRIPTION);
+            .description(DEFAULT_DESCRIPTION)
+            .wallCode(DEFAULT_WALL_CODE)
+            .photoUuid(DEFAULT_PHOTO_UUID)
+            .sha256(DEFAULT_SHA_256);
         // Add required entity
         DesignSession designSession;
         if (TestUtil.findAll(em, DesignSession.class).isEmpty()) {
@@ -156,7 +169,10 @@ class DesignImageResourceIT {
             .heightPx(UPDATED_HEIGHT_PX)
             .isActive(UPDATED_IS_ACTIVE)
             .uploadedAt(UPDATED_UPLOADED_AT)
-            .description(UPDATED_DESCRIPTION);
+            .description(UPDATED_DESCRIPTION)
+            .wallCode(UPDATED_WALL_CODE)
+            .photoUuid(UPDATED_PHOTO_UUID)
+            .sha256(UPDATED_SHA_256);
         // Add required entity
         DesignSession designSession;
         if (TestUtil.findAll(em, DesignSession.class).isEmpty()) {
@@ -331,7 +347,10 @@ class DesignImageResourceIT {
             .andExpect(jsonPath("$.[*].heightPx").value(hasItem(DEFAULT_HEIGHT_PX)))
             .andExpect(jsonPath("$.[*].isActive").value(hasItem(DEFAULT_IS_ACTIVE)))
             .andExpect(jsonPath("$.[*].uploadedAt").value(hasItem(DEFAULT_UPLOADED_AT.toString())))
-            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)));
+            .andExpect(jsonPath("$.[*].description").value(hasItem(DEFAULT_DESCRIPTION)))
+            .andExpect(jsonPath("$.[*].wallCode").value(hasItem(DEFAULT_WALL_CODE)))
+            .andExpect(jsonPath("$.[*].photoUuid").value(hasItem(DEFAULT_PHOTO_UUID.toString())))
+            .andExpect(jsonPath("$.[*].sha256").value(hasItem(DEFAULT_SHA_256)));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -372,7 +391,10 @@ class DesignImageResourceIT {
             .andExpect(jsonPath("$.heightPx").value(DEFAULT_HEIGHT_PX))
             .andExpect(jsonPath("$.isActive").value(DEFAULT_IS_ACTIVE))
             .andExpect(jsonPath("$.uploadedAt").value(DEFAULT_UPLOADED_AT.toString()))
-            .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION));
+            .andExpect(jsonPath("$.description").value(DEFAULT_DESCRIPTION))
+            .andExpect(jsonPath("$.wallCode").value(DEFAULT_WALL_CODE))
+            .andExpect(jsonPath("$.photoUuid").value(DEFAULT_PHOTO_UUID.toString()))
+            .andExpect(jsonPath("$.sha256").value(DEFAULT_SHA_256));
     }
 
     @Test
@@ -404,7 +426,10 @@ class DesignImageResourceIT {
             .heightPx(UPDATED_HEIGHT_PX)
             .isActive(UPDATED_IS_ACTIVE)
             .uploadedAt(UPDATED_UPLOADED_AT)
-            .description(UPDATED_DESCRIPTION);
+            .description(UPDATED_DESCRIPTION)
+            .wallCode(UPDATED_WALL_CODE)
+            .photoUuid(UPDATED_PHOTO_UUID)
+            .sha256(UPDATED_SHA_256);
         DesignImageDTO designImageDTO = designImageMapper.toDto(updatedDesignImage);
 
         restDesignImageMockMvc
@@ -497,8 +522,9 @@ class DesignImageResourceIT {
         partialUpdatedDesignImage
             .imageType(UPDATED_IMAGE_TYPE)
             .filePath(UPDATED_FILE_PATH)
+            .isActive(UPDATED_IS_ACTIVE)
             .uploadedAt(UPDATED_UPLOADED_AT)
-            .description(UPDATED_DESCRIPTION);
+            .sha256(UPDATED_SHA_256);
 
         restDesignImageMockMvc
             .perform(
@@ -539,7 +565,10 @@ class DesignImageResourceIT {
             .heightPx(UPDATED_HEIGHT_PX)
             .isActive(UPDATED_IS_ACTIVE)
             .uploadedAt(UPDATED_UPLOADED_AT)
-            .description(UPDATED_DESCRIPTION);
+            .description(UPDATED_DESCRIPTION)
+            .wallCode(UPDATED_WALL_CODE)
+            .photoUuid(UPDATED_PHOTO_UUID)
+            .sha256(UPDATED_SHA_256);
 
         restDesignImageMockMvc
             .perform(
