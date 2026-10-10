@@ -1,6 +1,6 @@
 # [E12] Issue 113: Declarative Validation Rules Engine and Conformance Vectors
 
-Status: Reviewed
+Status: Implemented
 Issue: #113
 Epic: #104
 Related: #105 (rules in catalog), #112 (authoritative validation),
@@ -129,6 +129,28 @@ Closed set of `kind`s, implemented once per engine:
 ## Test Plan
 
 - Backend: parameterized JUnit over all vector files; unit tests per kind.
+
+## Implementation notes
+
+- Engine: `service/validation/MeasurementRuleEngine` (pure, no Spring/DB);
+  Spring wrapper `MeasurementValidationService` for the sync API (#112).
+- Input: `SiteMeasurementPayloadDTO` (#112 payload shape: per-wall ceiling
+  heights, `corners[].squareCheck`, `projectType`).
+- Effective params = catalog defaults + overrides map (admin overrides come
+  with E13 #127).
+- Supported (scope, kind) combinations for `MEASUREMENT` rules are declared
+  in the engine; the catalog validator rejects any other combination at
+  startup. No `MEASUREMENT`-scope kinds exist yet.
+- Element prerequisites on a `WALL`-scoped rule mean "at least one element of
+  the wall meets it".
+- `NO_OVERLAP` uses strict overlap (touching edges don't overlap) and reports
+  each pair once, on the later element (by X, then uuid).
+- Order: `MEASUREMENT`-scope issues, then `SITE`, then walls in input order;
+  wall-level before element-level; elements by X (missing X last), uuid; then
+  rule code, corner code, field.
+- Vectors: `src/test/resources/site-measurement/validation-vectors/` (9
+  cases, incl. per-wall ceiling heights and corner square checks); packaged by `scripts/package-validation-vectors.sh` and published by
+  `.github/workflows/validation-vectors.yml` on tag `vectors-<catalogVersion>`.
 
 ## Open Questions
 

@@ -1,0 +1,242 @@
+{
+  "name": "05-element-rules",
+  "description": "Unknown code, missing Y, appliance without depth, overlap (services excluded) and element out of wall; issues ordered by X.",
+  "ruleSet": "MEASUREMENT",
+  "catalogVersion": "2026-09-30.1",
+  "params": {
+    "measure.lengthSpreadMm": 5,
+    "measure.closureToleranceMm": 5,
+    "measure.floorOutOfLevelMm": 5
+  },
+  "input": {
+    "schemaVersion": 1,
+    "projectType": "KITCHEN",
+    "catalogVersion": "2026-09-30.1",
+    "corners": [],
+    "walls": [
+      {
+        "wallCode": "A",
+        "lengthFloorMm": {
+          "value": 4000,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 4000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 4000,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": null,
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "elements": [
+          {
+            "elementUuid": "e4",
+            "code": "V",
+            "xMm": {
+              "value": 3500,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 1050,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 900,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          },
+          {
+            "elementUuid": "e1",
+            "code": "ZZ",
+            "xMm": {
+              "value": 100,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 0,
+              "source": "LASER"
+            },
+            "widthMm": null,
+            "heightMm": null,
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          },
+          {
+            "elementUuid": "e3",
+            "code": "RF",
+            "xMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 0,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 900,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1800,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          },
+          {
+            "elementUuid": "e5",
+            "code": "CL",
+            "xMm": {
+              "value": 1500,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 0,
+              "source": "LASER"
+            },
+            "widthMm": {
+              "value": 300,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 2400,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          },
+          {
+            "elementUuid": "e2",
+            "code": "CT",
+            "xMm": {
+              "value": 500,
+              "source": "LASER"
+            },
+            "yMm": null,
+            "widthMm": null,
+            "heightMm": null,
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          },
+          {
+            "elementUuid": "e6",
+            "code": "TA",
+            "xMm": {
+              "value": 1200,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 450,
+              "source": "LASER"
+            },
+            "widthMm": null,
+            "heightMm": null,
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      }
+    ],
+    "site": {
+      "floorOutOfLevelMm": null,
+      "floorOutOfLevelNote": null
+    }
+  },
+  "expectedIssues": [
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "WALL_CLOSURE_MISSING",
+      "severity": "WARNING",
+      "scope": "WALL",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": null,
+      "itemUuid": null,
+      "field": "closingMm"
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "UNKNOWN_CODE",
+      "severity": "ERROR",
+      "scope": "ELEMENT",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": "e1",
+      "itemUuid": null,
+      "field": "code"
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "ELEMENT_MISSING_XY",
+      "severity": "ERROR",
+      "scope": "ELEMENT",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": "e2",
+      "itemUuid": null,
+      "field": "yMm"
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "APPLIANCE_MISSING_DIMS",
+      "severity": "ERROR",
+      "scope": "ELEMENT",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": "e3",
+      "itemUuid": null,
+      "field": "depthMm"
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "ELEMENTS_OVERLAP",
+      "severity": "WARNING",
+      "scope": "ELEMENT",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": "e5",
+      "itemUuid": null,
+      "field": null
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "ELEMENT_OUT_OF_WALL",
+      "severity": "ERROR",
+      "scope": "ELEMENT",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": "e4",
+      "itemUuid": null,
+      "field": "xMm"
+    }
+  ]
+}

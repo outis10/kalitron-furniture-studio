@@ -138,6 +138,11 @@ class CroquisCatalogServiceImplTest {
     }
 
     @Test
+    void rejectsKindNotSupportedAtScope() {
+        assertInvalid(root -> rule(root, "FLOOR_OUT_OF_LEVEL").put("kind", "NO_OVERLAP"), "kind NO_OVERLAP not supported at scope SITE");
+    }
+
+    @Test
     void rejectsUnknownParamRef() {
         assertInvalid(
             root -> ((ObjectNode) rule(root, "WALL_LENGTH_SPREAD").get("paramRefs")).put("toleranceMm", "measure.nope"),

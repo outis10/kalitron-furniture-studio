@@ -1,0 +1,142 @@
+{
+  "name": "08-manual-values-and-photos",
+  "description": "Manual values are INFO (wall and element level); wall without photo is a WARNING.",
+  "ruleSet": "MEASUREMENT",
+  "catalogVersion": "2026-09-30.1",
+  "params": {
+    "measure.lengthSpreadMm": 5,
+    "measure.closureToleranceMm": 5,
+    "measure.floorOutOfLevelMm": 5
+  },
+  "input": {
+    "schemaVersion": 1,
+    "projectType": "KITCHEN",
+    "catalogVersion": "2026-09-30.1",
+    "corners": [],
+    "walls": [
+      {
+        "wallCode": "A",
+        "lengthFloorMm": {
+          "value": 3000,
+          "source": "MANUAL"
+        },
+        "length900Mm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": null,
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "elements": [],
+        "photoUuids": []
+      },
+      {
+        "wallCode": "B",
+        "lengthFloorMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "length900Mm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "lengthCeilingMm": {
+          "value": 3000,
+          "source": "LASER"
+        },
+        "outOfPlumbMm": null,
+        "closingMm": {
+          "value": 1100,
+          "source": "LASER"
+        },
+        "ceilingHeightLeftMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "ceilingHeightRightMm": {
+          "value": 2440,
+          "source": "LASER"
+        },
+        "elements": [
+          {
+            "elementUuid": "b-v",
+            "code": "V",
+            "xMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "yMm": {
+              "value": 1050,
+              "source": "MANUAL"
+            },
+            "widthMm": {
+              "value": 900,
+              "source": "LASER"
+            },
+            "heightMm": {
+              "value": 1000,
+              "source": "LASER"
+            },
+            "depthMm": null,
+            "swing": null,
+            "notes": null
+          }
+        ],
+        "photoUuids": ["p-x"]
+      }
+    ],
+    "site": {
+      "floorOutOfLevelMm": null,
+      "floorOutOfLevelNote": null
+    }
+  },
+  "expectedIssues": [
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "MANUAL_VALUE",
+      "severity": "INFO",
+      "scope": "WALL",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": null,
+      "itemUuid": null,
+      "field": "lengthFloorMm"
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "WALL_WITHOUT_PHOTO",
+      "severity": "WARNING",
+      "scope": "WALL",
+      "wallCode": "A",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": null,
+      "itemUuid": null,
+      "field": null
+    },
+    {
+      "ruleSet": "MEASUREMENT",
+      "code": "MANUAL_VALUE",
+      "severity": "INFO",
+      "scope": "WALL",
+      "wallCode": "B",
+      "runCode": null,
+      "cornerCode": null,
+      "elementUuid": "b-v",
+      "itemUuid": null,
+      "field": "yMm"
+    }
+  ]
+}
