@@ -18,4 +18,14 @@ export enum RoomObstacleType {
   APPLIANCE = 'Electrodoméstico',
 
   OTHER = 'Otro',
+
+  SWITCH = 'Apagador',
+
+  EXHAUST = 'Salida de extracción',
+
+  BEAM = 'Viga',
+
+  PIPE = 'Tubería',
+
+  ACCESS_PANEL = 'Registro',
 }

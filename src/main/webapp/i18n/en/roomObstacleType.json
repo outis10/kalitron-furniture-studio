@@ -11,7 +11,12 @@
       "DRAIN": "Drenaje",
       "RANGE_HOOD": "Campana",
       "APPLIANCE": "Electrodoméstico",
-      "OTHER": "Otro"
+      "OTHER": "Otro",
+      "SWITCH": "Switch",
+      "EXHAUST": "Exhaust outlet",
+      "BEAM": "Beam",
+      "PIPE": "Pipe",
+      "ACCESS_PANEL": "Access panel"
     }
   }
 }
