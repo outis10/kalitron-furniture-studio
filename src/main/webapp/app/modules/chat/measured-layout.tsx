@@ -4,6 +4,11 @@ import React, { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Form, Spinner } from 'react-bootstrap';
 import { Link, useParams } from 'react-router';
 
+import { useAppSelector } from 'app/config/store';
+import MeasurerAssignment from 'app/modules/measurement/measurer-assignment';
+import { hasAnyAuthority } from 'app/shared/auth/private-route';
+import { Authority } from 'app/shared/jhipster/constants';
+
 import {
   CabinetCategory,
   CabinetPlan,
@@ -153,6 +158,7 @@ const reflowCabinetPositions = (cabinets: CabinetPlanItem[]) => {
 const MeasuredLayoutPage = () => {
   const { sessionId: sessionIdParam = '' } = useParams();
   const sessionId = Number(sessionIdParam);
+  const isAdmin = useAppSelector(state => hasAnyAuthority(state.authentication.account.authorities, [Authority.ADMIN]));
   const [layout, setLayout] = useState<MeasuredLayout | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -417,6 +423,7 @@ const MeasuredLayoutPage = () => {
           <p className="design-chat__meta mb-1">Layout medido</p>
           <h1 className="h3 mb-0">Captura de espacio</h1>
         </div>
+        {isAdmin ? <MeasurerAssignment sessionId={sessionId} /> : null}
         <Button as={Link as any} to="/design-sessions" variant="outline-secondary">
           Sesiones
         </Button>

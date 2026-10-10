@@ -72,7 +72,14 @@ public class SecurityConfiguration {
                     .requestMatchers("/api/account/reset-password/init").permitAll()
                     .requestMatchers("/api/account/reset-password/finish").permitAll()
                     .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers("/api/**").authenticated()
+                    // E12 #116: measurer-only accounts (ROLE_MEASURER without ROLE_USER) reach only these.
+                    // Public mobile endpoints (#114 app config, #115 auth) must be added above this block.
+                    .requestMatchers("/api/mobile/**").hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.MEASURER)
+                    .requestMatchers("/api/design-sessions/*/site-measurements/**").hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.MEASURER)
+                    .requestMatchers(HttpMethod.GET, "/api/design-sessions/*/backup-sheet.pdf").hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.MEASURER)
+                    .requestMatchers(HttpMethod.GET, "/api/croquis/catalog").hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER, AuthoritiesConstants.MEASURER)
+                    .requestMatchers("/api/account", "/api/account/**").authenticated()
+                    .requestMatchers("/api/**").hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.USER)
                     .requestMatchers("/websocket/**").authenticated()
                     .requestMatchers("/v3/api-docs/**").hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers("/management/health").permitAll()

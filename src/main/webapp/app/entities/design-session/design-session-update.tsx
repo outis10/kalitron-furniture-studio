@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getEntities as getCatalogStyles } from 'app/entities/catalog-style/catalog-style.reducer';
 import { getEntities as getKitchenSpecs } from 'app/entities/kitchen-spec/kitchen-spec.reducer';
+import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import { ProjectType } from 'app/shared/model/enumerations/project-type.model';
 import { SessionStatus } from 'app/shared/model/enumerations/session-status.model';
 import { convertDateTimeFromServer, convertDateTimeToServer, displayDefaultDateTime } from 'app/shared/util/date-utils';
@@ -24,6 +25,7 @@ export const DesignSessionUpdate = () => {
 
   const kitchenSpecs = useAppSelector(state => state.kitchenSpec.entities);
   const catalogStyles = useAppSelector(state => state.catalogStyle.entities);
+  const users = useAppSelector(state => state.userManagement.users);
   const designSessionEntity = useAppSelector(state => state.designSession.entity);
   const loading = useAppSelector(state => state.designSession.loading);
   const updating = useAppSelector(state => state.designSession.updating);
@@ -44,6 +46,7 @@ export const DesignSessionUpdate = () => {
 
     dispatch(getKitchenSpecs({}));
     dispatch(getCatalogStyles({}));
+    dispatch(getUsers({}));
   }, []);
 
   useEffect(() => {
@@ -58,12 +61,14 @@ export const DesignSessionUpdate = () => {
     }
     values.createdAt = convertDateTimeToServer(values.createdAt);
     values.updatedAt = convertDateTimeToServer(values.updatedAt);
+    values.measurerAssignedAt = convertDateTimeToServer(values.measurerAssignedAt);
 
     const entity = {
       ...designSessionEntity,
       ...values,
       spec: kitchenSpecs.find(it => it.id.toString() === values.spec?.toString()),
       catalogStyle: catalogStyles.find(it => it.id.toString() === values.catalogStyle?.toString()),
+      assignedMeasurer: users.find(it => it.id.toString() === values.assignedMeasurer?.toString()),
     };
 
     if (isNew) {
@@ -78,6 +83,7 @@ export const DesignSessionUpdate = () => {
       ? {
           createdAt: displayDefaultDateTime(),
           updatedAt: displayDefaultDateTime(),
+          measurerAssignedAt: displayDefaultDateTime(),
         }
       : {
           projectType: 'KITCHEN',
@@ -85,8 +91,10 @@ export const DesignSessionUpdate = () => {
           ...designSessionEntity,
           createdAt: convertDateTimeFromServer(designSessionEntity.createdAt),
           updatedAt: convertDateTimeFromServer(designSessionEntity.updatedAt),
+          measurerAssignedAt: convertDateTimeFromServer(designSessionEntity.measurerAssignedAt),
           spec: designSessionEntity?.spec?.id,
           catalogStyle: designSessionEntity?.catalogStyle?.id,
+          assignedMeasurer: designSessionEntity?.assignedMeasurer?.id,
         };
 
   return (
@@ -227,6 +235,14 @@ export const DesignSessionUpdate = () => {
                 }}
               />
               <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.designSession.measurerAssignedAt')}
+                id="design-session-measurerAssignedAt"
+                name="measurerAssignedAt"
+                data-cy="measurerAssignedAt"
+                type="datetime-local"
+                placeholder="YYYY-MM-DD HH:mm"
+              />
+              <ValidatedField
                 id="design-session-spec"
                 name="spec"
                 data-cy="spec"
@@ -254,6 +270,22 @@ export const DesignSessionUpdate = () => {
                   ? catalogStyles.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
                         {otherEntity.name}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+              <ValidatedField
+                id="design-session-assignedMeasurer"
+                name="assignedMeasurer"
+                data-cy="assignedMeasurer"
+                label={translate('kalitronFurnitureStudioApp.designSession.assignedMeasurer')}
+                type="select"
+              >
+                <option value="" key="0" />
+                {users
+                  ? users.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.login}
                       </option>
                     ))
                   : null}

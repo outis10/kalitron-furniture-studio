@@ -1,6 +1,8 @@
 package com.kalitron.studio.repository;
 
 import com.kalitron.studio.domain.DesignSession;
+import com.kalitron.studio.domain.enumeration.SessionStatus;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,19 @@ public interface DesignSessionRepository extends JpaRepository<DesignSession, Lo
 
     List<DesignSession> findAllByOrderByUpdatedAtDesc();
 
+    List<DesignSession> findByAssignedMeasurerLoginAndStatusNotInOrderByMeasurerAssignedAtDesc(
+        String login,
+        Collection<SessionStatus> excludedStatuses
+    );
+
+    Page<DesignSession> findByStatusNotIn(Collection<SessionStatus> excludedStatuses, Pageable pageable);
+
+    Page<DesignSession> findByAssignedMeasurerLoginAndStatusNotIn(
+        String login,
+        Collection<SessionStatus> excludedStatuses,
+        Pageable pageable
+    );
+
     default Optional<DesignSession> findOneWithEagerRelationships(Long id) {
         return this.findOneWithToOneRelationships(id);
     }
@@ -35,18 +50,18 @@ public interface DesignSessionRepository extends JpaRepository<DesignSession, Lo
     }
 
     @Query(
-        value = "select designSession from DesignSession designSession left join fetch designSession.spec left join fetch designSession.catalogStyle",
+        value = "select designSession from DesignSession designSession left join fetch designSession.spec left join fetch designSession.catalogStyle left join fetch designSession.assignedMeasurer",
         countQuery = "select count(designSession) from DesignSession designSession"
     )
     Page<DesignSession> findAllWithToOneRelationships(Pageable pageable);
 
     @Query(
-        "select designSession from DesignSession designSession left join fetch designSession.spec left join fetch designSession.catalogStyle"
+        "select designSession from DesignSession designSession left join fetch designSession.spec left join fetch designSession.catalogStyle left join fetch designSession.assignedMeasurer"
     )
     List<DesignSession> findAllWithToOneRelationships();
 
     @Query(
-        "select designSession from DesignSession designSession left join fetch designSession.spec left join fetch designSession.catalogStyle where designSession.id =:id"
+        "select designSession from DesignSession designSession left join fetch designSession.spec left join fetch designSession.catalogStyle left join fetch designSession.assignedMeasurer where designSession.id =:id"
     )
     Optional<DesignSession> findOneWithToOneRelationships(@Param("id") Long id);
 }

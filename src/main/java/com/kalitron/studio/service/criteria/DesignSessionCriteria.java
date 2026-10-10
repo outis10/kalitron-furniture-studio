@@ -82,6 +82,8 @@ public class DesignSessionCriteria implements Serializable, Criteria {
 
     private InstantFilter updatedAt;
 
+    private InstantFilter measurerAssignedAt;
+
     private LongFilter specId;
 
     private LongFilter messagesId;
@@ -100,6 +102,8 @@ public class DesignSessionCriteria implements Serializable, Criteria {
 
     private LongFilter catalogStyleId;
 
+    private LongFilter assignedMeasurerId;
+
     private Boolean distinct;
 
     public DesignSessionCriteria() {}
@@ -116,6 +120,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
         this.notes = other.optionalNotes().map(StringFilter::copy).orElse(null);
         this.createdAt = other.optionalCreatedAt().map(InstantFilter::copy).orElse(null);
         this.updatedAt = other.optionalUpdatedAt().map(InstantFilter::copy).orElse(null);
+        this.measurerAssignedAt = other.optionalMeasurerAssignedAt().map(InstantFilter::copy).orElse(null);
         this.specId = other.optionalSpecId().map(LongFilter::copy).orElse(null);
         this.messagesId = other.optionalMessagesId().map(LongFilter::copy).orElse(null);
         this.imagesId = other.optionalImagesId().map(LongFilter::copy).orElse(null);
@@ -125,6 +130,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
         this.wallsId = other.optionalWallsId().map(LongFilter::copy).orElse(null);
         this.obstaclesId = other.optionalObstaclesId().map(LongFilter::copy).orElse(null);
         this.catalogStyleId = other.optionalCatalogStyleId().map(LongFilter::copy).orElse(null);
+        this.assignedMeasurerId = other.optionalAssignedMeasurerId().map(LongFilter::copy).orElse(null);
         this.distinct = other.distinct;
     }
 
@@ -342,6 +348,25 @@ public class DesignSessionCriteria implements Serializable, Criteria {
         this.updatedAt = updatedAt;
     }
 
+    public InstantFilter getMeasurerAssignedAt() {
+        return measurerAssignedAt;
+    }
+
+    public Optional<InstantFilter> optionalMeasurerAssignedAt() {
+        return Optional.ofNullable(measurerAssignedAt);
+    }
+
+    public InstantFilter measurerAssignedAt() {
+        if (measurerAssignedAt == null) {
+            setMeasurerAssignedAt(new InstantFilter());
+        }
+        return measurerAssignedAt;
+    }
+
+    public void setMeasurerAssignedAt(InstantFilter measurerAssignedAt) {
+        this.measurerAssignedAt = measurerAssignedAt;
+    }
+
     public LongFilter getSpecId() {
         return specId;
     }
@@ -513,6 +538,25 @@ public class DesignSessionCriteria implements Serializable, Criteria {
         this.catalogStyleId = catalogStyleId;
     }
 
+    public LongFilter getAssignedMeasurerId() {
+        return assignedMeasurerId;
+    }
+
+    public Optional<LongFilter> optionalAssignedMeasurerId() {
+        return Optional.ofNullable(assignedMeasurerId);
+    }
+
+    public LongFilter assignedMeasurerId() {
+        if (assignedMeasurerId == null) {
+            setAssignedMeasurerId(new LongFilter());
+        }
+        return assignedMeasurerId;
+    }
+
+    public void setAssignedMeasurerId(LongFilter assignedMeasurerId) {
+        this.assignedMeasurerId = assignedMeasurerId;
+    }
+
     public Boolean getDistinct() {
         return distinct;
     }
@@ -553,6 +597,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
             Objects.equals(notes, that.notes) &&
             Objects.equals(createdAt, that.createdAt) &&
             Objects.equals(updatedAt, that.updatedAt) &&
+            Objects.equals(measurerAssignedAt, that.measurerAssignedAt) &&
             Objects.equals(specId, that.specId) &&
             Objects.equals(messagesId, that.messagesId) &&
             Objects.equals(imagesId, that.imagesId) &&
@@ -562,6 +607,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
             Objects.equals(wallsId, that.wallsId) &&
             Objects.equals(obstaclesId, that.obstaclesId) &&
             Objects.equals(catalogStyleId, that.catalogStyleId) &&
+            Objects.equals(assignedMeasurerId, that.assignedMeasurerId) &&
             Objects.equals(distinct, that.distinct)
         );
     }
@@ -580,6 +626,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
             notes,
             createdAt,
             updatedAt,
+            measurerAssignedAt,
             specId,
             messagesId,
             imagesId,
@@ -589,6 +636,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
             wallsId,
             obstaclesId,
             catalogStyleId,
+            assignedMeasurerId,
             distinct
         );
     }
@@ -608,6 +656,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
             optionalNotes().map(f -> "notes=" + f + ", ").orElse("") +
             optionalCreatedAt().map(f -> "createdAt=" + f + ", ").orElse("") +
             optionalUpdatedAt().map(f -> "updatedAt=" + f + ", ").orElse("") +
+            optionalMeasurerAssignedAt().map(f -> "measurerAssignedAt=" + f + ", ").orElse("") +
             optionalSpecId().map(f -> "specId=" + f + ", ").orElse("") +
             optionalMessagesId().map(f -> "messagesId=" + f + ", ").orElse("") +
             optionalImagesId().map(f -> "imagesId=" + f + ", ").orElse("") +
@@ -617,6 +666,7 @@ public class DesignSessionCriteria implements Serializable, Criteria {
             optionalWallsId().map(f -> "wallsId=" + f + ", ").orElse("") +
             optionalObstaclesId().map(f -> "obstaclesId=" + f + ", ").orElse("") +
             optionalCatalogStyleId().map(f -> "catalogStyleId=" + f + ", ").orElse("") +
+            optionalAssignedMeasurerId().map(f -> "assignedMeasurerId=" + f + ", ").orElse("") +
             optionalDistinct().map(f -> "distinct=" + f + ", ").orElse("") +
         "}";
     }

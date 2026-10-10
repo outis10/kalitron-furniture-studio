@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- E12 #116: ROLE_MEASURER authority and DesignSession.assignedMeasurer -->
+
+    <changeSet id="20261009120000-1-add-role-measurer" author="kalitron">
+        <insert tableName="jhi_authority">
+            <column name="name" value="ROLE_MEASURER"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20261009120000-2-add-design-session-assigned-measurer" author="kalitron">
+        <addColumn tableName="design_session">
+            <column name="measurer_assigned_at" type="${datetimeType}">
+                <constraints nullable="true"/>
+            </column>
+            <column name="assigned_measurer_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="assigned_measurer_id"
+                                 baseTableName="design_session"
+                                 constraintName="fk_design_session__assigned_measurer_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
+        <createIndex indexName="idx_design_session__assigned_measurer_id" tableName="design_session">
+            <column name="assigned_measurer_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

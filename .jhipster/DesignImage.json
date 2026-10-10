@@ -24,6 +24,10 @@
       "fieldValidateRulesMaxlength": "500"
     },
     {
+      "fieldName": "imageDataBase64",
+      "fieldType": "TextBlob"
+    },
+    {
       "fieldName": "mimeType",
       "fieldType": "String",
       "fieldValidateRules": ["maxlength"],

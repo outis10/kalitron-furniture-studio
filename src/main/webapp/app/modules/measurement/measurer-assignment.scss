@@ -1,0 +1,10 @@
+.measurer-assignment {
+  min-width: 220px;
+  max-width: 320px;
+}
+
+@media (max-width: 720px) {
+  .measurer-assignment {
+    max-width: none;
+  }
+}

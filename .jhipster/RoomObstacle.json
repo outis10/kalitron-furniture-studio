@@ -9,7 +9,7 @@
       "fieldName": "obstacleType",
       "fieldType": "RoomObstacleType",
       "fieldValidateRules": ["required"],
-      "fieldValues": "WINDOW (Ventana),DOOR (Puerta),COLUMN (Columna),OUTLET (Contacto eléctrico),WATER (Toma de agua),GAS (Toma de gas),DRAIN (Drenaje),RANGE_HOOD (Campana),APPLIANCE (Electrodoméstico),OTHER (Otro)"
+      "fieldValues": "WINDOW (Ventana),DOOR (Puerta),COLUMN (Columna),OUTLET (Contacto eléctrico),WATER (Toma de agua),GAS (Toma de gas),DRAIN (Drenaje),RANGE_HOOD (Campana),APPLIANCE (Electrodoméstico),OTHER (Otro),SWITCH (Apagador),EXHAUST (Salida de extracción),BEAM (Viga),PIPE (Tubería),ACCESS_PANEL (Registro)"
     },
     {
       "fieldName": "label",

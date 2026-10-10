@@ -84,6 +84,7 @@ public class DesignSessionQueryService extends QueryService<DesignSession> {
                 buildStringSpecification(criteria.getNotes(), DesignSession_.notes),
                 buildRangeSpecification(criteria.getCreatedAt(), DesignSession_.createdAt),
                 buildRangeSpecification(criteria.getUpdatedAt(), DesignSession_.updatedAt),
+                buildRangeSpecification(criteria.getMeasurerAssignedAt(), DesignSession_.measurerAssignedAt),
                 buildSpecification(criteria.getSpecId(), root -> root.join(DesignSession_.spec, JoinType.LEFT).get(KitchenSpec_.id)),
                 buildSpecification(criteria.getMessagesId(), root ->
                     root.join(DesignSession_.messageses, JoinType.LEFT).get(ChatMessage_.id)
@@ -100,6 +101,9 @@ public class DesignSessionQueryService extends QueryService<DesignSession> {
                 ),
                 buildSpecification(criteria.getCatalogStyleId(), root ->
                     root.join(DesignSession_.catalogStyle, JoinType.LEFT).get(CatalogStyle_.id)
+                ),
+                buildSpecification(criteria.getAssignedMeasurerId(), root ->
+                    root.join(DesignSession_.assignedMeasurer, JoinType.LEFT).get(User_.id)
                 )
             );
         }

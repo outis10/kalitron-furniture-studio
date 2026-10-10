@@ -3,9 +3,11 @@ package com.kalitron.studio.service.mapper;
 import com.kalitron.studio.domain.CatalogStyle;
 import com.kalitron.studio.domain.DesignSession;
 import com.kalitron.studio.domain.KitchenSpec;
+import com.kalitron.studio.domain.User;
 import com.kalitron.studio.service.dto.CatalogStyleDTO;
 import com.kalitron.studio.service.dto.DesignSessionDTO;
 import com.kalitron.studio.service.dto.KitchenSpecDTO;
+import com.kalitron.studio.service.dto.UserDTO;
 import org.mapstruct.*;
 
 /**
@@ -15,6 +17,7 @@ import org.mapstruct.*;
 public interface DesignSessionMapper extends EntityMapper<DesignSessionDTO, DesignSession> {
     @Mapping(target = "spec", source = "spec", qualifiedByName = "kitchenSpecStyle")
     @Mapping(target = "catalogStyle", source = "catalogStyle", qualifiedByName = "catalogStyleName")
+    @Mapping(target = "assignedMeasurer", source = "assignedMeasurer", qualifiedByName = "userLogin")
     DesignSessionDTO toDto(DesignSession s);
 
     @Named("kitchenSpecStyle")
@@ -28,4 +31,10 @@ public interface DesignSessionMapper extends EntityMapper<DesignSessionDTO, Desi
     @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "name")
     CatalogStyleDTO toDtoCatalogStyleName(CatalogStyle catalogStyle);
+
+    @Named("userLogin")
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "login", source = "login")
+    UserDTO toDtoUserLogin(User user);
 }

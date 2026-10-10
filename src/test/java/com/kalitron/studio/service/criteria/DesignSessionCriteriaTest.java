@@ -86,6 +86,7 @@ class DesignSessionCriteriaTest {
         designSessionCriteria.notes();
         designSessionCriteria.createdAt();
         designSessionCriteria.updatedAt();
+        designSessionCriteria.measurerAssignedAt();
         designSessionCriteria.specId();
         designSessionCriteria.messagesId();
         designSessionCriteria.imagesId();
@@ -95,6 +96,7 @@ class DesignSessionCriteriaTest {
         designSessionCriteria.wallsId();
         designSessionCriteria.obstaclesId();
         designSessionCriteria.catalogStyleId();
+        designSessionCriteria.assignedMeasurerId();
         designSessionCriteria.distinct();
     }
 
@@ -112,6 +114,7 @@ class DesignSessionCriteriaTest {
                 condition.apply(criteria.getNotes()) &&
                 condition.apply(criteria.getCreatedAt()) &&
                 condition.apply(criteria.getUpdatedAt()) &&
+                condition.apply(criteria.getMeasurerAssignedAt()) &&
                 condition.apply(criteria.getSpecId()) &&
                 condition.apply(criteria.getMessagesId()) &&
                 condition.apply(criteria.getImagesId()) &&
@@ -121,6 +124,7 @@ class DesignSessionCriteriaTest {
                 condition.apply(criteria.getWallsId()) &&
                 condition.apply(criteria.getObstaclesId()) &&
                 condition.apply(criteria.getCatalogStyleId()) &&
+                condition.apply(criteria.getAssignedMeasurerId()) &&
                 condition.apply(criteria.getDistinct()),
             "every filter matches"
         );
@@ -143,6 +147,7 @@ class DesignSessionCriteriaTest {
                 condition.apply(criteria.getNotes(), copy.getNotes()) &&
                 condition.apply(criteria.getCreatedAt(), copy.getCreatedAt()) &&
                 condition.apply(criteria.getUpdatedAt(), copy.getUpdatedAt()) &&
+                condition.apply(criteria.getMeasurerAssignedAt(), copy.getMeasurerAssignedAt()) &&
                 condition.apply(criteria.getSpecId(), copy.getSpecId()) &&
                 condition.apply(criteria.getMessagesId(), copy.getMessagesId()) &&
                 condition.apply(criteria.getImagesId(), copy.getImagesId()) &&
@@ -152,6 +157,7 @@ class DesignSessionCriteriaTest {
                 condition.apply(criteria.getWallsId(), copy.getWallsId()) &&
                 condition.apply(criteria.getObstaclesId(), copy.getObstaclesId()) &&
                 condition.apply(criteria.getCatalogStyleId(), copy.getCatalogStyleId()) &&
+                condition.apply(criteria.getAssignedMeasurerId(), copy.getAssignedMeasurerId()) &&
                 condition.apply(criteria.getDistinct(), copy.getDistinct()),
             "every filter matches"
         );
