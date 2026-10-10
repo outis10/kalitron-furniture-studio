@@ -13,9 +13,11 @@ import com.kalitron.studio.IntegrationTest;
 import com.kalitron.studio.domain.CatalogStyle;
 import com.kalitron.studio.domain.DesignSession;
 import com.kalitron.studio.domain.KitchenSpec;
+import com.kalitron.studio.domain.User;
 import com.kalitron.studio.domain.enumeration.ProjectType;
 import com.kalitron.studio.domain.enumeration.SessionStatus;
 import com.kalitron.studio.repository.DesignSessionRepository;
+import com.kalitron.studio.repository.UserRepository;
 import com.kalitron.studio.service.DesignSessionService;
 import com.kalitron.studio.service.dto.DesignSessionDTO;
 import com.kalitron.studio.service.mapper.DesignSessionMapper;
@@ -79,6 +81,9 @@ class DesignSessionResourceIT {
     private static final Instant DEFAULT_UPDATED_AT = Instant.ofEpochMilli(0L);
     private static final Instant UPDATED_UPDATED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
+    private static final Instant DEFAULT_MEASURER_ASSIGNED_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_MEASURER_ASSIGNED_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
     private static final String ENTITY_API_URL = "/api/design-sessions";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
 
@@ -90,6 +95,9 @@ class DesignSessionResourceIT {
 
     @Autowired
     private DesignSessionRepository designSessionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Mock
     private DesignSessionRepository designSessionRepositoryMock;
@@ -127,7 +135,8 @@ class DesignSessionResourceIT {
             .selectedStyle(DEFAULT_SELECTED_STYLE)
             .notes(DEFAULT_NOTES)
             .createdAt(DEFAULT_CREATED_AT)
-            .updatedAt(DEFAULT_UPDATED_AT);
+            .updatedAt(DEFAULT_UPDATED_AT)
+            .measurerAssignedAt(DEFAULT_MEASURER_ASSIGNED_AT);
     }
 
     /**
@@ -147,7 +156,8 @@ class DesignSessionResourceIT {
             .selectedStyle(UPDATED_SELECTED_STYLE)
             .notes(UPDATED_NOTES)
             .createdAt(UPDATED_CREATED_AT)
-            .updatedAt(UPDATED_UPDATED_AT);
+            .updatedAt(UPDATED_UPDATED_AT)
+            .measurerAssignedAt(UPDATED_MEASURER_ASSIGNED_AT);
     }
 
     @BeforeEach
@@ -328,7 +338,8 @@ class DesignSessionResourceIT {
             .andExpect(jsonPath("$.[*].selectedStyle").value(hasItem(DEFAULT_SELECTED_STYLE)))
             .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
             .andExpect(jsonPath("$.[*].createdAt").value(hasItem(DEFAULT_CREATED_AT.toString())))
-            .andExpect(jsonPath("$.[*].updatedAt").value(hasItem(DEFAULT_UPDATED_AT.toString())));
+            .andExpect(jsonPath("$.[*].updatedAt").value(hasItem(DEFAULT_UPDATED_AT.toString())))
+            .andExpect(jsonPath("$.[*].measurerAssignedAt").value(hasItem(DEFAULT_MEASURER_ASSIGNED_AT.toString())));
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -369,7 +380,8 @@ class DesignSessionResourceIT {
             .andExpect(jsonPath("$.selectedStyle").value(DEFAULT_SELECTED_STYLE))
             .andExpect(jsonPath("$.notes").value(DEFAULT_NOTES))
             .andExpect(jsonPath("$.createdAt").value(DEFAULT_CREATED_AT.toString()))
-            .andExpect(jsonPath("$.updatedAt").value(DEFAULT_UPDATED_AT.toString()));
+            .andExpect(jsonPath("$.updatedAt").value(DEFAULT_UPDATED_AT.toString()))
+            .andExpect(jsonPath("$.measurerAssignedAt").value(DEFAULT_MEASURER_ASSIGNED_AT.toString()));
     }
 
     @Test
@@ -851,6 +863,42 @@ class DesignSessionResourceIT {
 
     @Test
     @Transactional
+    void getAllDesignSessionsByMeasurerAssignedAtIsEqualToSomething() throws Exception {
+        // Initialize the database
+        insertedDesignSession = designSessionRepository.saveAndFlush(designSession);
+
+        // Get all the designSessionList where measurerAssignedAt equals to
+        defaultDesignSessionFiltering(
+            "measurerAssignedAt.equals=" + DEFAULT_MEASURER_ASSIGNED_AT,
+            "measurerAssignedAt.equals=" + UPDATED_MEASURER_ASSIGNED_AT
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllDesignSessionsByMeasurerAssignedAtIsInShouldWork() throws Exception {
+        // Initialize the database
+        insertedDesignSession = designSessionRepository.saveAndFlush(designSession);
+
+        // Get all the designSessionList where measurerAssignedAt in
+        defaultDesignSessionFiltering(
+            "measurerAssignedAt.in=" + DEFAULT_MEASURER_ASSIGNED_AT + "," + UPDATED_MEASURER_ASSIGNED_AT,
+            "measurerAssignedAt.in=" + UPDATED_MEASURER_ASSIGNED_AT
+        );
+    }
+
+    @Test
+    @Transactional
+    void getAllDesignSessionsByMeasurerAssignedAtIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        insertedDesignSession = designSessionRepository.saveAndFlush(designSession);
+
+        // Get all the designSessionList where measurerAssignedAt is not null
+        defaultDesignSessionFiltering("measurerAssignedAt.specified=true", "measurerAssignedAt.specified=false");
+    }
+
+    @Test
+    @Transactional
     void getAllDesignSessionsBySpecIsEqualToSomething() throws Exception {
         KitchenSpec spec;
         if (TestUtil.findAll(em, KitchenSpec.class).isEmpty()) {
@@ -893,6 +941,28 @@ class DesignSessionResourceIT {
         defaultDesignSessionShouldNotBeFound("catalogStyleId.equals=" + (catalogStyleId + 1));
     }
 
+    @Test
+    @Transactional
+    void getAllDesignSessionsByAssignedMeasurerIsEqualToSomething() throws Exception {
+        User assignedMeasurer;
+        if (TestUtil.findAll(em, User.class).isEmpty()) {
+            designSessionRepository.saveAndFlush(designSession);
+            assignedMeasurer = UserResourceIT.createEntity();
+        } else {
+            assignedMeasurer = TestUtil.findAll(em, User.class).get(0);
+        }
+        em.persist(assignedMeasurer);
+        em.flush();
+        designSession.setAssignedMeasurer(assignedMeasurer);
+        designSessionRepository.saveAndFlush(designSession);
+        Long assignedMeasurerId = assignedMeasurer.getId();
+        // Get all the designSessionList where assignedMeasurer equals to assignedMeasurerId
+        defaultDesignSessionShouldBeFound("assignedMeasurerId.equals=" + assignedMeasurerId);
+
+        // Get all the designSessionList where assignedMeasurer equals to (assignedMeasurerId + 1)
+        defaultDesignSessionShouldNotBeFound("assignedMeasurerId.equals=" + (assignedMeasurerId + 1));
+    }
+
     private void defaultDesignSessionFiltering(String shouldBeFound, String shouldNotBeFound) throws Exception {
         defaultDesignSessionShouldBeFound(shouldBeFound);
         defaultDesignSessionShouldNotBeFound(shouldNotBeFound);
@@ -916,7 +986,8 @@ class DesignSessionResourceIT {
             .andExpect(jsonPath("$.[*].selectedStyle").value(hasItem(DEFAULT_SELECTED_STYLE)))
             .andExpect(jsonPath("$.[*].notes").value(hasItem(DEFAULT_NOTES)))
             .andExpect(jsonPath("$.[*].createdAt").value(hasItem(DEFAULT_CREATED_AT.toString())))
-            .andExpect(jsonPath("$.[*].updatedAt").value(hasItem(DEFAULT_UPDATED_AT.toString())));
+            .andExpect(jsonPath("$.[*].updatedAt").value(hasItem(DEFAULT_UPDATED_AT.toString())))
+            .andExpect(jsonPath("$.[*].measurerAssignedAt").value(hasItem(DEFAULT_MEASURER_ASSIGNED_AT.toString())));
 
         // Check, that the count call also returns 1
         restDesignSessionMockMvc
@@ -974,7 +1045,8 @@ class DesignSessionResourceIT {
             .selectedStyle(UPDATED_SELECTED_STYLE)
             .notes(UPDATED_NOTES)
             .createdAt(UPDATED_CREATED_AT)
-            .updatedAt(UPDATED_UPDATED_AT);
+            .updatedAt(UPDATED_UPDATED_AT)
+            .measurerAssignedAt(UPDATED_MEASURER_ASSIGNED_AT);
         DesignSessionDTO designSessionDTO = designSessionMapper.toDto(updatedDesignSession);
 
         restDesignSessionMockMvc
@@ -1110,7 +1182,8 @@ class DesignSessionResourceIT {
             .selectedStyle(UPDATED_SELECTED_STYLE)
             .notes(UPDATED_NOTES)
             .createdAt(UPDATED_CREATED_AT)
-            .updatedAt(UPDATED_UPDATED_AT);
+            .updatedAt(UPDATED_UPDATED_AT)
+            .measurerAssignedAt(UPDATED_MEASURER_ASSIGNED_AT);
 
         restDesignSessionMockMvc
             .perform(

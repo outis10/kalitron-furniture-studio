@@ -28,6 +28,7 @@
       "notes": "Notes",
       "createdAt": "Created At",
       "updatedAt": "Updated At",
+      "measurerAssignedAt": "Measurer Assigned At",
       "spec": "Spec",
       "messages": "Messages",
       "images": "Images",
@@ -36,7 +37,8 @@
       "quotes": "Quotes",
       "walls": "Walls",
       "obstacles": "Obstacles",
-      "catalogStyle": "Catalog Style"
+      "catalogStyle": "Catalog Style",
+      "assignedMeasurer": "Assigned Measurer"
     }
   }
 }

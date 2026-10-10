@@ -56,7 +56,10 @@ public class DesignSessionAsserts {
             .satisfies(a -> assertThat(a.getSelectedStyle()).as("check selectedStyle").isEqualTo(expected.getSelectedStyle()))
             .satisfies(a -> assertThat(a.getNotes()).as("check notes").isEqualTo(expected.getNotes()))
             .satisfies(a -> assertThat(a.getCreatedAt()).as("check createdAt").isEqualTo(expected.getCreatedAt()))
-            .satisfies(a -> assertThat(a.getUpdatedAt()).as("check updatedAt").isEqualTo(expected.getUpdatedAt()));
+            .satisfies(a -> assertThat(a.getUpdatedAt()).as("check updatedAt").isEqualTo(expected.getUpdatedAt()))
+            .satisfies(a ->
+                assertThat(a.getMeasurerAssignedAt()).as("check measurerAssignedAt").isEqualTo(expected.getMeasurerAssignedAt())
+            );
     }
 
     /**

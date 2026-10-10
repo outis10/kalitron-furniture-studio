@@ -156,11 +156,19 @@ export const DesignSession = () => {
                   <Translate contentKey="kalitronFurnitureStudioApp.designSession.updatedAt">Updated At</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('updatedAt')} />
                 </th>
+                <th className="hand" onClick={sort('measurerAssignedAt')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.designSession.measurerAssignedAt">Measurer Assigned At</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('measurerAssignedAt')} />
+                </th>
                 <th>
                   <Translate contentKey="kalitronFurnitureStudioApp.designSession.spec">Spec</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th>
                   <Translate contentKey="kalitronFurnitureStudioApp.designSession.catalogStyle">Catalog Style</Translate>{' '}
+                  <FontAwesomeIcon icon="sort" />
+                </th>
+                <th>
+                  <Translate contentKey="kalitronFurnitureStudioApp.designSession.assignedMeasurer">Assigned Measurer</Translate>{' '}
                   <FontAwesomeIcon icon="sort" />
                 </th>
                 <th />
@@ -192,6 +200,11 @@ export const DesignSession = () => {
                   <td>
                     {designSession.updatedAt ? <TextFormat type="date" value={designSession.updatedAt} format={APP_DATE_FORMAT} /> : null}
                   </td>
+                  <td>
+                    {designSession.measurerAssignedAt ? (
+                      <TextFormat type="date" value={designSession.measurerAssignedAt} format={APP_DATE_FORMAT} />
+                    ) : null}
+                  </td>
                   <td>{designSession.spec ? <Link to={`/kitchen-spec/${designSession.spec.id}`}>{designSession.spec.style}</Link> : ''}</td>
                   <td>
                     {designSession.catalogStyle ? (
@@ -200,6 +213,7 @@ export const DesignSession = () => {
                       ''
                     )}
                   </td>
+                  <td>{designSession.assignedMeasurer ? designSession.assignedMeasurer.login : ''}</td>
                   <td className="text-end">
                     <div className="btn-group flex-btn-group-container">
                       <Button

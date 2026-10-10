@@ -195,6 +195,7 @@ entity DesignSession {
   notes String maxlength(2000)
   createdAt Instant required
   updatedAt Instant required
+  measurerAssignedAt Instant
 }
 
 entity ChatMessage {
@@ -424,6 +425,7 @@ relationship OneToMany {
 
 relationship ManyToOne {
   DesignSession{catalogStyle(name)} to CatalogStyle
+  DesignSession{assignedMeasurer(login)} to User with builtInEntity
   KitchenSpec{primaryMaterial(name) required} to Material
   Cabinet{template(code)} to CabinetTemplate
   Cabinet{material(name) required} to Material

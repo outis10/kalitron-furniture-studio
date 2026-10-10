@@ -75,6 +75,9 @@ public class DesignSession implements Serializable {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "measurer_assigned_at")
+    private Instant measurerAssignedAt;
+
     @JsonIgnoreProperties(value = { "cabinetses", "primaryMaterial", "session" }, allowSetters = true)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(unique = true)
@@ -117,6 +120,9 @@ public class DesignSession implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private CatalogStyle catalogStyle;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User assignedMeasurer;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -261,6 +267,19 @@ public class DesignSession implements Serializable {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Instant getMeasurerAssignedAt() {
+        return this.measurerAssignedAt;
+    }
+
+    public DesignSession measurerAssignedAt(Instant measurerAssignedAt) {
+        this.setMeasurerAssignedAt(measurerAssignedAt);
+        return this;
+    }
+
+    public void setMeasurerAssignedAt(Instant measurerAssignedAt) {
+        this.measurerAssignedAt = measurerAssignedAt;
     }
 
     public KitchenSpec getSpec() {
@@ -506,6 +525,19 @@ public class DesignSession implements Serializable {
         return this;
     }
 
+    public User getAssignedMeasurer() {
+        return this.assignedMeasurer;
+    }
+
+    public void setAssignedMeasurer(User user) {
+        this.assignedMeasurer = user;
+    }
+
+    public DesignSession assignedMeasurer(User user) {
+        this.setAssignedMeasurer(user);
+        return this;
+    }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here
 
     @Override
@@ -540,6 +572,7 @@ public class DesignSession implements Serializable {
             ", notes='" + getNotes() + "'" +
             ", createdAt='" + getCreatedAt() + "'" +
             ", updatedAt='" + getUpdatedAt() + "'" +
+            ", measurerAssignedAt='" + getMeasurerAssignedAt() + "'" +
             "}";
     }
 }

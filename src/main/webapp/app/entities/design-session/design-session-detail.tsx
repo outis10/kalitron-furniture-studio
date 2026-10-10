@@ -102,6 +102,16 @@ export const DesignSessionDetail = () => {
             ) : null}
           </dd>
           <dt>
+            <span id="measurerAssignedAt">
+              <Translate contentKey="kalitronFurnitureStudioApp.designSession.measurerAssignedAt">Measurer Assigned At</Translate>
+            </span>
+          </dt>
+          <dd>
+            {designSessionEntity.measurerAssignedAt ? (
+              <TextFormat value={designSessionEntity.measurerAssignedAt} type="date" format={APP_DATE_FORMAT} />
+            ) : null}
+          </dd>
+          <dt>
             <Translate contentKey="kalitronFurnitureStudioApp.designSession.spec">Spec</Translate>
           </dt>
           <dd>{designSessionEntity.spec ? designSessionEntity.spec.style : ''}</dd>
@@ -109,6 +119,10 @@ export const DesignSessionDetail = () => {
             <Translate contentKey="kalitronFurnitureStudioApp.designSession.catalogStyle">Catalog Style</Translate>
           </dt>
           <dd>{designSessionEntity.catalogStyle ? designSessionEntity.catalogStyle.name : ''}</dd>
+          <dt>
+            <Translate contentKey="kalitronFurnitureStudioApp.designSession.assignedMeasurer">Assigned Measurer</Translate>
+          </dt>
+          <dd>{designSessionEntity.assignedMeasurer ? designSessionEntity.assignedMeasurer.login : ''}</dd>
         </dl>
         <Button as={Link as any} to="/design-session" replace variant="info" data-cy="entityDetailsBackButton">
           <FontAwesomeIcon icon="arrow-left" />{' '}

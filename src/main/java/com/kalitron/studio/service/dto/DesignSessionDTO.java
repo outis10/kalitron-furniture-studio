@@ -47,9 +47,13 @@ public class DesignSessionDTO implements Serializable {
     @NotNull
     private Instant updatedAt;
 
+    private Instant measurerAssignedAt;
+
     private KitchenSpecDTO spec;
 
     private CatalogStyleDTO catalogStyle;
+
+    private UserDTO assignedMeasurer;
 
     public Long getId() {
         return id;
@@ -139,6 +143,14 @@ public class DesignSessionDTO implements Serializable {
         this.updatedAt = updatedAt;
     }
 
+    public Instant getMeasurerAssignedAt() {
+        return measurerAssignedAt;
+    }
+
+    public void setMeasurerAssignedAt(Instant measurerAssignedAt) {
+        this.measurerAssignedAt = measurerAssignedAt;
+    }
+
     public KitchenSpecDTO getSpec() {
         return spec;
     }
@@ -153,6 +165,14 @@ public class DesignSessionDTO implements Serializable {
 
     public void setCatalogStyle(CatalogStyleDTO catalogStyle) {
         this.catalogStyle = catalogStyle;
+    }
+
+    public UserDTO getAssignedMeasurer() {
+        return assignedMeasurer;
+    }
+
+    public void setAssignedMeasurer(UserDTO assignedMeasurer) {
+        this.assignedMeasurer = assignedMeasurer;
     }
 
     @Override
@@ -191,8 +211,10 @@ public class DesignSessionDTO implements Serializable {
             ", notes='" + getNotes() + "'" +
             ", createdAt='" + getCreatedAt() + "'" +
             ", updatedAt='" + getUpdatedAt() + "'" +
+            ", measurerAssignedAt='" + getMeasurerAssignedAt() + "'" +
             ", spec=" + getSpec() +
             ", catalogStyle=" + getCatalogStyle() +
+            ", assignedMeasurer=" + getAssignedMeasurer() +
             "}";
     }
 }
