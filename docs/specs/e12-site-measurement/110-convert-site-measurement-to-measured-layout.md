@@ -25,7 +25,7 @@ measured layout and set `SessionStatus.MEASURED`.
 | non-appliance element | `RoomObstacle` with `obstacleType` from catalog + `croquisCode` |
 | appliance element | `RoomObstacle` `APPLIANCE` + `applianceType` |
 | wall ceiling heights (left/right) | `RoomWall.heightLeftMm`, `heightRightMm`; `heightMm` = min |
-| floor out of level | `KitchenSpec.floorOutOfLevelMm` + note |
+| floor out of level | stays on `SiteMeasurement.floorOutOfLevelMm` + note (#107: no `KitchenSpec` change) |
 | wall photos | already `DesignImage` `SITE_PHOTO` (#112) |
 
 ## Backend Behavior
@@ -33,7 +33,10 @@ measured layout and set `SessionStatus.MEASURED`.
 - Service `SiteMeasurementConversionService`, reusing the #62 conversion
   internals; v1 extraction mapping untouched.
 - Called inside the confirm transaction of #112: replace the session's
-  walls/obstacles, update spec, set `MEASURED`, set measurement `CONFIRMED`.
+  walls/obstacles (projection rows reference the `SiteMeasurement`; obstacles
+  get `wallCode`), mark the previous `CONFIRMED` measurement of the same
+  project type `SUPERSEDED`, set measurement `CONFIRMED`, and set `MEASURED`
+  following the #107 progression rule. v1 projects only `KITCHEN` measurements.
   Rollback on any failure.
 - Idempotent: confirming the same `measurementUuid` + `revision` twice returns
   the same layout without duplicates.
@@ -42,7 +45,7 @@ measured layout and set `SessionStatus.MEASURED`.
 
 - [ ] Confirm with 0 errors creates walls/obstacles with extended fields.
 - [ ] Any `ERROR` after server re-validation → `422`, nothing changes.
-- [ ] Session status becomes `MEASURED`.
+- [ ] Session status becomes `MEASURED` from early statuses and is kept otherwise (#107 rule).
 - [ ] v1 conversion tests pass unchanged.
 
 ## Test Plan
