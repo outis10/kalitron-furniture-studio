@@ -28,7 +28,12 @@
       "isActive": "Is Active",
       "uploadedAt": "Uploaded At",
       "description": "Description",
-      "session": "Session"
+      "session": "Session",
+      "imageDataBase64": "Image Data Base 64",
+      "wallCode": "Wall Code",
+      "photoUuid": "Photo Uuid",
+      "sha256": "Sha 256",
+      "siteMeasurement": "Site Measurement"
     }
   }
 }

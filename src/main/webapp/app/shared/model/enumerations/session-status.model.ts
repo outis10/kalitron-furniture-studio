@@ -18,4 +18,6 @@ export enum SessionStatus {
   COMPLETED = 'Completado',
 
   ARCHIVED = 'Archivado',
+
+  MEASURED = 'Medido',
 }

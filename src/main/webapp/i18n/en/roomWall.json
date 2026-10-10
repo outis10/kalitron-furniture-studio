@@ -25,7 +25,15 @@
       "positionX": "Position X",
       "positionY": "Position Y",
       "sortOrder": "Sort Order",
-      "session": "Session"
+      "session": "Session",
+      "lengthFloorMm": "Length Floor Mm",
+      "length900Mm": "Length 900 Mm",
+      "lengthCeilingMm": "Length Ceiling Mm",
+      "outOfPlumbMm": "Out Of Plumb Mm",
+      "closingMm": "Closing Mm",
+      "heightLeftMm": "Height Left Mm",
+      "heightRightMm": "Height Right Mm",
+      "siteMeasurement": "Site Measurement"
     }
   }
 }

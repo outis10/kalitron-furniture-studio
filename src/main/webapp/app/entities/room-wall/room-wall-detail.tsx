@@ -75,6 +75,52 @@ export const RoomWallDetail = () => {
           </dt>
           <dd>{roomWallEntity.sortOrder}</dd>
           <dt>
+            <span id="lengthFloorMm">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomWall.lengthFloorMm">Length Floor Mm</Translate>
+            </span>
+          </dt>
+          <dd>{roomWallEntity.lengthFloorMm}</dd>
+          <dt>
+            <span id="length900Mm">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomWall.length900Mm">Length 900 Mm</Translate>
+            </span>
+          </dt>
+          <dd>{roomWallEntity.length900Mm}</dd>
+          <dt>
+            <span id="lengthCeilingMm">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomWall.lengthCeilingMm">Length Ceiling Mm</Translate>
+            </span>
+          </dt>
+          <dd>{roomWallEntity.lengthCeilingMm}</dd>
+          <dt>
+            <span id="outOfPlumbMm">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomWall.outOfPlumbMm">Out Of Plumb Mm</Translate>
+            </span>
+          </dt>
+          <dd>{roomWallEntity.outOfPlumbMm}</dd>
+          <dt>
+            <span id="closingMm">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomWall.closingMm">Closing Mm</Translate>
+            </span>
+          </dt>
+          <dd>{roomWallEntity.closingMm}</dd>
+          <dt>
+            <span id="heightLeftMm">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomWall.heightLeftMm">Height Left Mm</Translate>
+            </span>
+          </dt>
+          <dd>{roomWallEntity.heightLeftMm}</dd>
+          <dt>
+            <span id="heightRightMm">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomWall.heightRightMm">Height Right Mm</Translate>
+            </span>
+          </dt>
+          <dd>{roomWallEntity.heightRightMm}</dd>
+          <dt>
+            <Translate contentKey="kalitronFurnitureStudioApp.roomWall.siteMeasurement">Site Measurement</Translate>
+          </dt>
+          <dd>{roomWallEntity.siteMeasurement ? roomWallEntity.siteMeasurement.measurementUuid : ''}</dd>
+          <dt>
             <Translate contentKey="kalitronFurnitureStudioApp.roomWall.session">Session</Translate>
           </dt>
           <dd>{roomWallEntity.session ? roomWallEntity.session.sessionCode : ''}</dd>

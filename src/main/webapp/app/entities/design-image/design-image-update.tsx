@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { useAppDispatch, useAppSelector } from 'app/config/store';
 import { getEntities as getDesignSessions } from 'app/entities/design-session/design-session.reducer';
+import { getEntities as getSiteMeasurements } from 'app/entities/site-measurement/site-measurement.reducer';
 import { ImageType } from 'app/shared/model/enumerations/image-type.model';
 import { convertDateTimeFromServer, convertDateTimeToServer, displayDefaultDateTime } from 'app/shared/util/date-utils';
 
@@ -20,6 +21,7 @@ export const DesignImageUpdate = () => {
   const { id } = useParams<'id'>();
   const isNew = id === undefined;
 
+  const siteMeasurements = useAppSelector(state => state.siteMeasurement.entities);
   const designSessions = useAppSelector(state => state.designSession.entities);
   const designImageEntity = useAppSelector(state => state.designImage.entity);
   const loading = useAppSelector(state => state.designImage.loading);
@@ -38,6 +40,7 @@ export const DesignImageUpdate = () => {
       dispatch(getEntity(id));
     }
 
+    dispatch(getSiteMeasurements({}));
     dispatch(getDesignSessions({}));
   }, []);
 
@@ -65,6 +68,7 @@ export const DesignImageUpdate = () => {
     const entity = {
       ...designImageEntity,
       ...values,
+      siteMeasurement: siteMeasurements.find(it => it.id.toString() === values.siteMeasurement?.toString()),
       session: designSessions.find(it => it.id.toString() === values.session?.toString()),
     };
 
@@ -84,6 +88,7 @@ export const DesignImageUpdate = () => {
           imageType: 'REFERENCE',
           ...designImageEntity,
           uploadedAt: convertDateTimeFromServer(designImageEntity.uploadedAt),
+          siteMeasurement: designImageEntity?.siteMeasurement?.id,
           session: designImageEntity?.session?.id,
         };
 
@@ -148,6 +153,13 @@ export const DesignImageUpdate = () => {
                 }}
               />
               <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.designImage.imageDataBase64')}
+                id="design-image-imageDataBase64"
+                name="imageDataBase64"
+                data-cy="imageDataBase64"
+                type="textarea"
+              />
+              <ValidatedField
                 label={translate('kalitronFurnitureStudioApp.designImage.mimeType')}
                 id="design-image-mimeType"
                 name="mimeType"
@@ -207,6 +219,50 @@ export const DesignImageUpdate = () => {
                   maxLength: { value: 300, message: translate('entity.validation.maxlength', { max: 300 }) },
                 }}
               />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.designImage.wallCode')}
+                id="design-image-wallCode"
+                name="wallCode"
+                data-cy="wallCode"
+                type="text"
+                validate={{
+                  maxLength: { value: 5, message: translate('entity.validation.maxlength', { max: 5 }) },
+                }}
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.designImage.photoUuid')}
+                id="design-image-photoUuid"
+                name="photoUuid"
+                data-cy="photoUuid"
+                type="text"
+                validate={{}}
+              />
+              <ValidatedField
+                label={translate('kalitronFurnitureStudioApp.designImage.sha256')}
+                id="design-image-sha256"
+                name="sha256"
+                data-cy="sha256"
+                type="text"
+                validate={{
+                  maxLength: { value: 64, message: translate('entity.validation.maxlength', { max: 64 }) },
+                }}
+              />
+              <ValidatedField
+                id="design-image-siteMeasurement"
+                name="siteMeasurement"
+                data-cy="siteMeasurement"
+                label={translate('kalitronFurnitureStudioApp.designImage.siteMeasurement')}
+                type="select"
+              >
+                <option value="" key="0" />
+                {siteMeasurements
+                  ? siteMeasurements.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.measurementUuid}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
               <ValidatedField
                 id="design-image-session"
                 name="session"

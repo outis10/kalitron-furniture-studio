@@ -117,6 +117,38 @@ export const RoomWall = () => {
                   <Translate contentKey="kalitronFurnitureStudioApp.roomWall.sortOrder">Sort Order</Translate>{' '}
                   <FontAwesomeIcon icon={getSortIconByFieldName('sortOrder')} />
                 </th>
+                <th className="hand" onClick={sort('lengthFloorMm')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.lengthFloorMm">Length Floor Mm</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('lengthFloorMm')} />
+                </th>
+                <th className="hand" onClick={sort('length900Mm')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.length900Mm">Length 900 Mm</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('length900Mm')} />
+                </th>
+                <th className="hand" onClick={sort('lengthCeilingMm')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.lengthCeilingMm">Length Ceiling Mm</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('lengthCeilingMm')} />
+                </th>
+                <th className="hand" onClick={sort('outOfPlumbMm')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.outOfPlumbMm">Out Of Plumb Mm</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('outOfPlumbMm')} />
+                </th>
+                <th className="hand" onClick={sort('closingMm')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.closingMm">Closing Mm</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('closingMm')} />
+                </th>
+                <th className="hand" onClick={sort('heightLeftMm')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.heightLeftMm">Height Left Mm</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('heightLeftMm')} />
+                </th>
+                <th className="hand" onClick={sort('heightRightMm')}>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.heightRightMm">Height Right Mm</Translate>{' '}
+                  <FontAwesomeIcon icon={getSortIconByFieldName('heightRightMm')} />
+                </th>
+                <th>
+                  <Translate contentKey="kalitronFurnitureStudioApp.roomWall.siteMeasurement">Site Measurement</Translate>{' '}
+                  <FontAwesomeIcon icon="sort" />
+                </th>
                 <th>
                   <Translate contentKey="kalitronFurnitureStudioApp.roomWall.session">Session</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
@@ -138,6 +170,20 @@ export const RoomWall = () => {
                   <td>{roomWall.positionX}</td>
                   <td>{roomWall.positionY}</td>
                   <td>{roomWall.sortOrder}</td>
+                  <td>{roomWall.lengthFloorMm}</td>
+                  <td>{roomWall.length900Mm}</td>
+                  <td>{roomWall.lengthCeilingMm}</td>
+                  <td>{roomWall.outOfPlumbMm}</td>
+                  <td>{roomWall.closingMm}</td>
+                  <td>{roomWall.heightLeftMm}</td>
+                  <td>{roomWall.heightRightMm}</td>
+                  <td>
+                    {roomWall.siteMeasurement ? (
+                      <Link to={`/site-measurement/${roomWall.siteMeasurement.id}`}>{roomWall.siteMeasurement.measurementUuid}</Link>
+                    ) : (
+                      ''
+                    )}
+                  </td>
                   <td>
                     {roomWall.session ? <Link to={`/design-session/${roomWall.session.id}`}>{roomWall.session.sessionCode}</Link> : ''}
                   </td>

@@ -87,6 +87,28 @@ export const RoomObstacleDetail = () => {
           </dt>
           <dd>{roomObstacleEntity.notes}</dd>
           <dt>
+            <span id="wallCode">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.wallCode">Wall Code</Translate>
+            </span>
+          </dt>
+          <dd>{roomObstacleEntity.wallCode}</dd>
+          <dt>
+            <span id="croquisCode">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.croquisCode">Croquis Code</Translate>
+            </span>
+          </dt>
+          <dd>{roomObstacleEntity.croquisCode}</dd>
+          <dt>
+            <span id="applianceType">
+              <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.applianceType">Appliance Type</Translate>
+            </span>
+          </dt>
+          <dd>{roomObstacleEntity.applianceType}</dd>
+          <dt>
+            <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.siteMeasurement">Site Measurement</Translate>
+          </dt>
+          <dd>{roomObstacleEntity.siteMeasurement ? roomObstacleEntity.siteMeasurement.measurementUuid : ''}</dd>
+          <dt>
             <Translate contentKey="kalitronFurnitureStudioApp.roomObstacle.session">Session</Translate>
           </dt>
           <dd>{roomObstacleEntity.session ? roomObstacleEntity.session.sessionCode : ''}</dd>

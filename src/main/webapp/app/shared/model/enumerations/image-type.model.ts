@@ -8,4 +8,6 @@ export enum ImageType {
   FUSION_RENDER = 'Render Fusion 360',
 
   SKETCH = 'Boceto',
+
+  SITE_PHOTO = 'Foto de obra',
 }

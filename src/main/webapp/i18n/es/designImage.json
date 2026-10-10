@@ -21,6 +21,7 @@
       "imageType": "Image Type",
       "fileName": "File Name",
       "filePath": "File Path",
+      "imageDataBase64": "Image Data Base 64",
       "mimeType": "Mime Type",
       "fileSizeKb": "File Size Kb",
       "widthPx": "Width Px",
@@ -28,6 +29,10 @@
       "isActive": "Is Active",
       "uploadedAt": "Uploaded At",
       "description": "Description",
+      "wallCode": "Wall Code",
+      "photoUuid": "Photo Uuid",
+      "sha256": "Sha 256",
+      "siteMeasurement": "Site Measurement",
       "session": "Session"
     }
   }
