@@ -1,10 +1,11 @@
 # [E12] Issue 112: Site Measurement Sync API (Idempotent, Versioned) and Wall Photos
 
-Status: Draft
+Status: Reviewed
 Issue: #112
 Epic: #104
-Related: #107 (model), #113 (validation), #110 (conversion),
-outis10/KFS-APP#17 (sync engine), outis10/KFS-APP#15 (confirm)
+Related: #107 (model), #113 (validation, implemented), #110 (conversion),
+#116 (access, implemented), #115 (mobile tokens), E15 #133 (door `swing` values),
+outis10/KFS-APP#17 (sync engine), outis10/KFS-APP#15 (confirm), outis10/KFS-APP#14 (photos)
 Owner: TBD
 
 ## Problem
@@ -15,22 +16,46 @@ return Studio's authoritative validation.
 
 ## Goal
 
-Endpoints to upsert a full measurement snapshot, upload wall photos and confirm,
-all idempotent by client-generated UUIDs and versioned by schema and revision.
+Endpoints to upsert a full measurement snapshot, read it back, upload wall
+photos and confirm, all idempotent by client-generated UUIDs and versioned by
+schema and revision.
 
 ## Non-Goals
 
 - Partial/patch updates (the app always sends the full snapshot).
-- Real-time multi-user editing.
+- Real-time multi-user editing (one assigned measurer per session, #116).
+- Web review UI for measurements (later).
+- Object storage (R2) — local disk behind an abstraction for now (ADR-004).
+
+## Current state (verified 2026-10-10)
+
+- `SiteMeasurementPayloadDTO` and the `measurement` DTOs exist (#113);
+  `MeasurementWallDTO` has no `layers`.
+- `MeasurementValidationService.validate(payload)` returns the authoritative issues (#113).
+- `SessionAccessService.requireMeasurementAccess(sessionId)` and the URL rule
+  `/api/design-sessions/*/site-measurements/**` → `ROLE_ADMIN`/`ROLE_MEASURER` exist (#116).
+- No `spring.servlet.multipart` limits are configured (Spring default: 1 MB per
+  file, 10 MB per request) → an 8 MB photo would be rejected today.
+- Files are written straight to `app.output.dir` (e.g. `reference-images/…`);
+  there is no storage abstraction yet.
 
 ## API Contract
+
+Common to all endpoints:
+
+- Auth: mobile access JWT (#115) or web JWT; `ROLE_ADMIN`, or `ROLE_MEASURER`
+  assigned to the session **at the time of the call** (#116,
+  `SessionAccessService`). Reassigned measurer → `403`.
+- `404` unknown session; `404` measurement that does not belong to the path session.
+- Error body: JHipster problem JSON with `message: "error.<CODE>"` plus the
+  extra fields listed per error.
 
 ### Upsert measurement
 
 `PUT /api/design-sessions/{sessionId}/site-measurements/{measurementUuid}`
 
-- Auth: mobile access JWT (#115); `ROLE_ADMIN`, or `ROLE_MEASURER` assigned to the session (#116).
-- Request:
+- Max body 1 MB (`413` above).
+- Request (envelope + #113 payload):
 
 ```json
 {
@@ -66,89 +91,159 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 }
 ```
 
-- Guided survey fields (KFS-APP#27):
-  - `walls[].ceilingHeightLeftMm` / `ceilingHeightRightMm` (required):
-    floor-to-ceiling height near each end of the wall. Different values mean
-    a sloped ceiling. There is no global ceiling height.
-  - `corners[].squareCheck` (optional): `status` (`VERIFIED`,
-    `ASSUMED_SQUARE`, `NOT_VERIFIABLE` — legs < 300 mm), legs and measured
-    diagonal of the diagonal method. When present, Studio **recomputes** `angleDeg =
-    round(acos((a² + b² − d²) / 2ab))` and stores the recomputed value
-    (authoritative); a mismatch with the app value is logged, not rejected.
+- Field notes:
+  - `walls[].ceilingHeightLeftMm` / `ceilingHeightRightMm`: floor-to-ceiling
+    height near each end; different values mean a sloped ceiling. No global height.
+  - `corners[].squareCheck` (optional): `status` (`VERIFIED`, `ASSUMED_SQUARE`,
+    `NOT_VERIFIABLE` — legs < 300 mm), legs and measured diagonal. Studio
+    **recomputes** `angleDeg = round(acos((a² + b² − d²) / 2ab))` and uses the
+    recomputed value for validation and projection (#110); the payload is stored
+    as received; a mismatch with the app value is logged, not rejected.
   - `walls[].layers`: per catalog group `OPENING`, `OBSTRUCTION`, `SERVICE`,
-    `APPLIANCE` → `DONE` (elements captured) or `NONE` (explicitly confirmed
-    empty). Missing keys mean unanswered.
-- Semantics:
-  - New `measurementUuid` → create (`201`).
-  - `revision` ≤ stored revision and same payload hash → replay: `200` with stored result.
-  - `baseRevision` = stored revision → update (`200`).
-  - `baseRevision` ≠ stored revision → `409` with `{ serverRevision, serverPayload }`.
-  - Measurement already `CONFIRMED` → `409` `ALREADY_CONFIRMED`.
+    `APPLIANCE` → `DONE` or `NONE`. Missing keys mean unanswered (checked on confirm).
+  - `elements[].swing` (doors): `LEFT_IN`, `RIGHT_IN`, `LEFT_OUT`, `RIGHT_OUT`,
+    `SLIDING`, `NONE` (E15 decision; hinge side seen from inside facing the wall).
+  - Unknown JSON properties are ignored (forward compatibility); the raw body
+    is stored in `payload` unchanged.
+- Request validation (`400`, before any state change):
+  - `schemaVersion` not supported → `400 UNSUPPORTED_SCHEMA_VERSION` with
+    `supportedSchemaVersions: [1]`;
+  - `projectType` must be `KITCHEN` or `CLOSET` and compatible with the session
+    (`KITCHEN` session → `KITCHEN`; `CLOSET` → `CLOSET`; `BOTH` → either) →
+    `400 PROJECT_TYPE_MISMATCH`;
+  - `revision` ≥ 1; `baseRevision` null/0 on create, ≥ 1 on update;
+  - malformed JSON, negative or zero mm values, unknown `swing` → `400`.
+- Semantics (`payloadSha256` = SHA-256 of the raw request body; row locked by `measurementUuid`):
+
+| Stored state | Request | Result |
+| --- | --- | --- |
+| none | `baseRevision` null/0 | create `DRAFT`, `201` |
+| none | `baseRevision` ≥ 1 | `409 REVISION_CONFLICT` (`serverRevision: null`) |
+| exists in another session | any | `409 MEASUREMENT_SESSION_MISMATCH` |
+| `DRAFT`, revision R | same `revision` and same hash | replay → `200`, stored state |
+| `DRAFT`, revision R | `revision` ≤ R, different hash | `409 REVISION_CONFLICT` |
+| `DRAFT`, revision R | `baseRevision` = R, `revision` > R | update, `200` |
+| `DRAFT`, revision R | `baseRevision` ≠ R | `409 REVISION_CONFLICT` |
+| `CONFIRMED`/`SUPERSEDED` | same `revision` and hash as stored | replay → `200` |
+| `CONFIRMED`/`SUPERSEDED` | anything else | `409 ALREADY_CONFIRMED` |
+
+- `409 REVISION_CONFLICT` body: `{ serverRevision, serverPayload }` (the app
+  shows its conflict screen; nothing is overwritten).
+- On create/update Studio stores: payload, hash, revision, schema/catalog
+  versions, device fields, `capturedAt`, `receivedAt`, `floorOutOfLevel*` from
+  `site`, `measuredBy` = current user.
 - Response `200/201`:
 
 ```json
-{ "measurementUuid": "uuid", "revision": 4, "status": "DRAFT", "catalogVersion": "2026-10-01.1", "catalogOutdated": false, "validationIssues": [ { "code": "WALL_WITHOUT_PHOTO", "severity": "WARNING", "wallCode": "B", "elementUuid": null, "message": "…" } ] }
+{ "measurementUuid": "uuid", "revision": 4, "status": "DRAFT", "catalogVersion": "2026-10-01.1", "catalogOutdated": false, "validationIssues": [ { "ruleSet": "MEASUREMENT", "code": "WALL_WITHOUT_PHOTO", "severity": "WARNING", "scope": "WALL", "wallCode": "B", "cornerCode": null, "elementUuid": null, "field": null, "message": "Muro B: sin foto de evidencia.", "acknowledgeable": false, "acknowledged": false } ] }
 ```
+
+- `validationIssues` = Studio's current catalog run on the stored payload
+  (recomputed on every call, including replays), serialized as #113
+  `ValidationIssueDTO` (`runCode`/`itemUuid` are null for `MEASUREMENT` rules). `catalogOutdated` = payload
+  `catalogVersion` ≠ Studio's current catalog version.
+
+### Read measurement
+
+`GET /api/design-sessions/{sessionId}/site-measurements/{measurementUuid}`
+
+- `200`: the upsert response plus `payload` (stored snapshot), `uploadedPhotoUuids`,
+  `confirmedAt`. Used by the app to recover after reinstall and by the conflict screen.
 
 ### Upload photo
 
 `PUT /api/design-sessions/{sessionId}/site-measurements/{measurementUuid}/photos/{photoUuid}`
 
-- Multipart: `file` (jpeg/heic, ≤ 8 MB), `wallCode`, `sha256`.
-- Idempotent by `photoUuid`; same sha256 → `200` no-op; different sha256 → `409`.
-- Response: `{ photoUuid, designImageId }`.
+- The measurement must exist (`404` otherwise) and be `DRAFT` (`409 ALREADY_CONFIRMED`).
+- Multipart: `file` (**`image/jpeg` only**, ≤ 8 MB — the app converts HEIC and
+  compresses, KFS-APP#14), `wallCode`, `sha256` (hex).
+- Studio computes the SHA-256 of the received bytes: ≠ `sha256` → `400 SHA256_MISMATCH`.
+- Idempotent by `photoUuid`: same hash → `200` no-op; different hash → `409 PHOTO_HASH_CONFLICT`.
+- `201` on create: `{ "photoUuid": "uuid", "designImageId": 123 }`.
+- Stored as `DesignImage` (`SITE_PHOTO`, `wallCode`, `photoUuid`, `sha256`,
+  `siteMeasurement`, session) with the file at
+  `site-photos/{sessionCode}/{measurementUuid}/{photoUuid}.jpg` (relative to
+  the storage root). Errors: `413` above 8 MB, `415` not JPEG.
 
 ### Confirm
 
 `POST /api/design-sessions/{sessionId}/site-measurements/{measurementUuid}/confirm`
 
-- Body: `{ "revision": 4 }` (must equal stored revision, else `409`).
-- Studio re-validates (#113); any `ERROR` → `422` with `validationIssues[]`.
-- Missing referenced photos → `422` `PHOTOS_PENDING`.
-- Any wall with an unanswered layer → `422` `LAYERS_UNANSWERED` (list of
-  `wallCode` + layer).
-- Success → conversion (#110), `200` with `{ status: "CONFIRMED", sessionStatus: "MEASURED", validationIssues }`.
-- Repeating confirm for the same revision returns the same `200`.
+- Body: `{ "revision": 4 }`.
+- Already `CONFIRMED` at that revision → replay `200` (same body). Confirmed at
+  another revision or `SUPERSEDED` → `409 ALREADY_CONFIRMED`. `revision` ≠
+  stored → `409 REVISION_CONFLICT`.
+- Otherwise Studio checks, and reports **all** failures in one `422 MEASUREMENT_NOT_CONFIRMABLE`:
 
-### Validation / errors
+```json
+{ "message": "error.MEASUREMENT_NOT_CONFIRMABLE", "reasons": ["VALIDATION_ERRORS", "LAYERS_UNANSWERED", "PHOTOS_PENDING"], "validationIssues": [ … ], "unansweredLayers": [ { "wallCode": "B", "layer": "SERVICE" } ], "pendingPhotoUuids": ["uuid"] }
+```
 
-| Status | Cause |
+  - `VALIDATION_ERRORS`: any `ERROR` from the current catalog (WARNING/INFO do not block);
+  - `LAYERS_UNANSWERED`: a wall missing a key in `layers`;
+  - `PHOTOS_PENDING`: a `photoUuid` referenced by a wall that was not uploaded.
+- Success → #110 conversion in the same transaction → `200`:
+  `{ "status": "CONFIRMED", "sessionStatus": "MEASURED", "validationIssues": [ … ] }`
+  (`sessionStatus` follows the #107 progression rule and may stay unchanged).
+
+### Errors summary
+
+| Status | Codes / cause |
 | --- | --- |
-| 400 | Unsupported `schemaVersion` (body lists supported versions), malformed payload, negative/zero mm |
-| 401 | Missing/expired JWT |
-| 403 | Not admin and not the assigned measurer |
-| 404 | Session not found |
-| 409 | Revision conflict, already confirmed, photo hash mismatch |
-| 413 | Photo too large |
-| 422 | Validation `ERROR`s or pending photos on confirm |
+| 400 | `UNSUPPORTED_SCHEMA_VERSION`, `PROJECT_TYPE_MISMATCH`, `SHA256_MISMATCH`, malformed payload, invalid values |
+| 401 | missing/expired JWT |
+| 403 | not admin and not the assigned measurer |
+| 404 | session, measurement (or not in that session) |
+| 409 | `REVISION_CONFLICT`, `ALREADY_CONFIRMED`, `MEASUREMENT_SESSION_MISMATCH`, `PHOTO_HASH_CONFLICT` |
+| 413 | body > 1 MB, photo > 8 MB |
+| 415 | photo not JPEG |
+| 422 | `MEASUREMENT_NOT_CONFIRMABLE` |
 
 ## Backend Behavior
 
 - Resource: `web/rest/custom/SiteMeasurementResource`.
-- Payload DTOs come from #113 (`service/dto/measurement`). `MeasurementWallDTO`
-  does not have `layers` yet: add it (map of group → `DONE`/`NONE`) for the
-  `LAYERS_UNANSWERED` check on confirm. The rules engine does not use it.
-- Service: `SiteMeasurementService` (+ Impl); repository by `measurementUuid`
-  with pessimistic lock on update.
-- Transactions: upsert and confirm each in one transaction; photo file write
-  before DB row, cleaned up on rollback.
-- Logs include `measurementUuid`, `revision`, `deviceId` (no client PII).
-- Security: `/api/design-sessions/*/site-measurements/**` authenticated.
+- Service `SiteMeasurementService` (+ Impl); repository by `measurementUuid`
+  with pessimistic write lock. Concurrent creates with the same UUID: the
+  unique constraint rejects the second insert, which is retried as an update/replay.
+- Payload DTOs from #113; **add `layers`** (`Map<String, LayerStatus>`, enum
+  `DONE`/`NONE`) to `MeasurementWallDTO`. The rules engine ignores it.
+- Envelope DTO `SiteMeasurementSyncRequestDTO` (revision, baseRevision, device,
+  capturedAt) + the payload; the raw body is kept for `payload`/`payloadSha256`.
+- **Storage abstraction (ADR-004):** `FileStorageService` (`write`, `read`,
+  `delete` by relative key) with a local-disk implementation on
+  `app.output.dir`; R2 later without touching callers.
+- Photo upload: write the file first, then the DB row; delete the file if the
+  transaction rolls back.
+- Config: `spring.servlet.multipart.max-file-size: 8MB`,
+  `max-request-size: 9MB`; JSON body limit 1 MB for the upsert.
+- Logs: `measurementUuid`, `revision`, `deviceId`, outcome — no client PII, no payload.
 
 ## Acceptance Criteria
 
 - [ ] Replaying the same upsert/photo/confirm returns the same result, no duplicates.
+- [ ] Every row of the upsert semantics table behaves as specified.
 - [ ] Stale `baseRevision` returns `409` with the server revision and payload.
-- [ ] Every upsert/confirm response includes authoritative `validationIssues[]`.
-- [ ] `catalogOutdated: true` when the device catalog is older than Studio's.
+- [ ] Every upsert/read/confirm response includes authoritative `validationIssues[]` from the current catalog.
+- [ ] `catalogOutdated: true` when the device catalog differs from Studio's.
 - [ ] Unsupported `schemaVersion` returns `400` listing supported versions.
+- [ ] Confirm returns one `422` listing every blocking reason; success runs #110 and is idempotent.
+- [ ] Photo hash is verified server-side; an 8 MB JPEG uploads; a 9 MB one gets `413`.
+- [ ] A measurer not (or no longer) assigned gets `403` on every endpoint.
 
 ## Test Plan
 
-- Backend: resource ITs for create/replay/update/conflict/confirm/422/403;
-  concurrency test for two simultaneous updates.
-- Contract fixtures shared with KFS-APP (`src/test/resources/site-measurement/fixtures/`).
+- Resource ITs: every row of the semantics table; read; photo 201/200/400/409/413/415;
+  confirm 200/replay/409/422 (each reason and combined); 403/404 per endpoint.
+- Concurrency ITs: two simultaneous updates with the same `baseRevision` (one
+  `200`, one `409`); two simultaneous creates with the same UUID.
+- Contract fixtures shared with KFS-APP: reuse the #113 vectors as payloads
+  (`src/test/resources/site-measurement/validation-vectors/`).
 
 ## Open Questions
 
-- [ ] Photo storage location (local disk `app.output.dir` vs object storage).
+Resolved at review (2026-10-10):
+
+- [x] Photo storage — local disk under `app.output.dir` behind `FileStorageService` (ADR-004); R2 later.
+- [x] HEIC — not accepted; the app sends JPEG.
+- [x] Read endpoint — added (recovery and conflict screen).
+- [x] Several confirm failures — one `422` with all reasons.
