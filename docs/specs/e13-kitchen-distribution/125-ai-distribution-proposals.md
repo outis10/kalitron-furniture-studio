@@ -16,7 +16,8 @@ as `PROPOSED` versions the designer can compare and copy.
 ## Inputs Studio sends (contract gw#40)
 
 - Measurement: walls (design length, corners, out-of-plumb), elements with
-  positions (services, windows, doors, beams, hood), ceiling height.
+  positions (services, windows, doors, beams, hood), ceiling height at both
+  ends of each wall (sloped ceilings).
 - Interview: `KitchenSpec` fields, selected style, chat summary (E2), v0
   `clientNotes`, optional designer instructions ("isla no", "más cajones").
 - Library: active modules and appliance slots (#120).

@@ -35,13 +35,16 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 ```json
 {
   "schemaVersion": 1,
+  "projectType": "KITCHEN",
   "revision": 4,
   "baseRevision": 3,
   "catalogVersion": "2026-10-01.1",
   "device": { "deviceId": "uuid", "platform": "android", "appVersion": "1.0.0", "laserModel": "GLM 50-27 C", "laserId": "decoded-id" },
   "capturedAt": "2026-10-05T16:20:00Z",
-  "ceilingHeightMm": { "value": 2440, "source": "LASER" },
-  "corners": [ { "cornerCode": "E-AB", "angleDeg": 90 } ],
+  "corners": [
+    { "cornerCode": "E-AB", "angleDeg": 90, "squareCheck": null },
+    { "cornerCode": "E-BC", "angleDeg": 91, "squareCheck": { "status": "VERIFIED", "legAMm": 1000, "legBMm": 1000, "diagonalMm": { "value": 1426, "source": "LASER" } } }
+  ],
   "walls": [
     {
       "wallCode": "A",
@@ -50,9 +53,12 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
       "lengthCeilingMm": { "value": 3452, "source": "MANUAL" },
       "outOfPlumbMm":    { "value": 4, "source": "MANUAL" },
       "closingMm":       { "value": 1348, "source": "LASER" },
+      "ceilingHeightLeftMm":  { "value": 2440, "source": "LASER" },
+      "ceilingHeightRightMm": { "value": 2385, "source": "LASER" },
       "elements": [
         { "elementUuid": "uuid", "code": "V", "xMm": {"value":1200,"source":"LASER"}, "yMm": {"value":1050,"source":"MANUAL"}, "widthMm": {"value":900,"source":"LASER"}, "heightMm": {"value":1000,"source":"LASER"}, "depthMm": null, "swing": null, "notes": null }
       ],
+      "layers": { "OPENING": "DONE", "OBSTRUCTION": "NONE", "SERVICE": "DONE", "APPLIANCE": "NONE" },
       "photoUuids": ["uuid"]
     }
   ],
@@ -60,6 +66,18 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 }
 ```
 
+- Guided survey fields (KFS-APP#27):
+  - `walls[].ceilingHeightLeftMm` / `ceilingHeightRightMm` (required):
+    floor-to-ceiling height near each end of the wall. Different values mean
+    a sloped ceiling. There is no global ceiling height.
+  - `corners[].squareCheck` (optional): `status` (`VERIFIED`,
+    `ASSUMED_SQUARE`, `NOT_VERIFIABLE` — legs < 300 mm), legs and measured
+    diagonal of the diagonal method. When present, Studio **recomputes** `angleDeg =
+    round(acos((a² + b² − d²) / 2ab))` and stores the recomputed value
+    (authoritative); a mismatch with the app value is logged, not rejected.
+  - `walls[].layers`: per catalog group `OPENING`, `OBSTRUCTION`, `SERVICE`,
+    `APPLIANCE` → `DONE` (elements captured) or `NONE` (explicitly confirmed
+    empty). Missing keys mean unanswered.
 - Semantics:
   - New `measurementUuid` → create (`201`).
   - `revision` ≤ stored revision and same payload hash → replay: `200` with stored result.
@@ -87,6 +105,8 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 - Body: `{ "revision": 4 }` (must equal stored revision, else `409`).
 - Studio re-validates (#113); any `ERROR` → `422` with `validationIssues[]`.
 - Missing referenced photos → `422` `PHOTOS_PENDING`.
+- Any wall with an unanswered layer → `422` `LAYERS_UNANSWERED` (list of
+  `wallCode` + layer).
 - Success → conversion (#110), `200` with `{ status: "CONFIRMED", sessionStatus: "MEASURED", validationIssues }`.
 - Repeating confirm for the same revision returns the same `200`.
 
@@ -105,6 +125,9 @@ all idempotent by client-generated UUIDs and versioned by schema and revision.
 ## Backend Behavior
 
 - Resource: `web/rest/custom/SiteMeasurementResource`.
+- Payload DTOs come from #113 (`service/dto/measurement`). `MeasurementWallDTO`
+  does not have `layers` yet: add it (map of group → `DONE`/`NONE`) for the
+  `LAYERS_UNANSWERED` check on confirm. The rules engine does not use it.
 - Service: `SiteMeasurementService` (+ Impl); repository by `measurementUuid`
   with pessimistic lock on update.
 - Transactions: upsert and confirm each in one transaction; photo file write

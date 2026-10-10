@@ -30,7 +30,7 @@ Extend the JDL and add incremental Liquibase changesets for a versioned
 | Entity / enum | Change |
 | --- | --- |
 | `SiteMeasurement` (new) | `projectType` (`KITCHEN`/`CLOSET`), `spaceLabel` (e.g. "Cocina", "Vestidor recámara"; a `BOTH` session can hold several), `measurementUuid` (UUID, unique, client-generated), `revision` (int), `status` (`SiteMeasurementStatus`), `schemaVersion` (int), `catalogVersion`, `payload` (JSON text, full snapshot), `deviceId`, `appVersion`, `laserModel`, `measuredBy` (User), `capturedAt`, `receivedAt`, `confirmedAt`; many-to-one `DesignSession` |
-| `RoomWall` | + `wallCode`, `lengthFloorMm`, `length900Mm`, `lengthCeilingMm`, `outOfPlumbMm`, `closingMm`; `lengthMm` = min of the three (service) |
+| `RoomWall` | + `wallCode`, `lengthFloorMm`, `length900Mm`, `lengthCeilingMm`, `outOfPlumbMm`, `closingMm`, `heightLeftMm`, `heightRightMm`; `lengthMm` = min of the three lengths, existing `heightMm` = min of the two heights (service) |
 | `RoomObstacleType` | + 5 values (see *Enums* below) |
 | `ApplianceType` (new enum) | see *Enums* below (no `HOOD`: `CA` uses existing `RANGE_HOOD`) |
 | `SiteMeasurementStatus` (new enum) | see *Enums* below |

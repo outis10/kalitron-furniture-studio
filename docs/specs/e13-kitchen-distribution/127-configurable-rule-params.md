@@ -46,6 +46,7 @@ manufacturing practice.
 | `upper.defaultMountHeightMm` | 1450 | — | Geometry | Bottom of uppers (900 counter + 550) when template has none |
 | `upper.windowClearanceMm` | 50 | ERROR | `DIST_UPPER_COLLISION` | Side clearance to window frame |
 | `upper.beamClearanceMm` | 10 | ERROR | `DIST_UPPER_COLLISION` | Top of uppers below beam |
+| `upper.ceilingClearanceMm` | 10 | ERROR | `DIST_EXCEEDS_CEILING` | Top of tall/upper below the (possibly sloped) ceiling — added 2026-10-02 |
 | `hood.minHeightAboveCookingMm` | 650 | WARNING | `DIST_HOOD_HEIGHT` | Typical for gas (600 electric) |
 | `aisle.workMinMm` | 1067 | WARNING | `DIST_WORK_AISLE_NARROW` | Work aisle between facing wall runs, one cook (42 in) |
 | `aisle.workMultiCookMinMm` | 1219 | WARNING | `DIST_WORK_AISLE_NARROW` | Same, when `multiCook = true` (48 in) |
